@@ -421,10 +421,9 @@ app.patch("/passwordReset", authGard, async (req, res) => {
 // ======Balance Transfer Route =======
 app.post("/balance_transfer", authGard, async (req, res) => {
     try {
-        console.log("click")
         const id = req.id
         const { amount, selectUser } = req.body;
-        console.log(req.body)
+
         if (id && amount && selectUser) {
             const receiverUser = await user_collection.findOne({ _id: selectUser });
             const provideUser = await user_collection.findOne({ _id: id });
@@ -484,6 +483,45 @@ app.post("/balance_transfer", authGard, async (req, res) => {
 });
 
 
+// ======Balance Request Route =======
+app.post("/balance_request", authGard, async (req, res) => {
+    try {
+        const id = req.id
+        const { provider, amount, number } = req.body;
+        if (provider && amount && number) {
+            const requestID = await Math.floor(Math.random() * 10) + Date.now();
+            const reqestObj = await {
+                requestID: requestID,
+                number: number,
+                amount: amount,
+                provider: provider,
+                apporoval: false,
+                date: new Date().toLocaleString()
+            }
+
+            const user = await user_collection.findOneAndUpdate({ _id: id },
+                {
+                    $push: { balanceRequestInfo: { $each: [reqestObj], $position: 0 } }
+                },
+                {
+                    new: true
+                });
+            if (user._id) {
+                res.status(200).json({
+                    sucess: "Your balance request are sucessfull.",
+                    data: user
+                })
+            } else {
+                res.status(500).json({ failed: "Failed to create balance request, please try again." })
+            }
+
+        } else {
+            res.status(500).json({ failed: "Please fill all the fild and try again." })
+        }
+    } catch (error) {
+        res.status(500).json({ failed: "Failed to create balance request, please try again." })
+    }
+});
 
 
 // ====== Error Handling Middleware =======
@@ -502,5 +540,11 @@ app.use((error, req, res, next) => {
 app.listen(port, () => {
     console.log(`listening to port ${port}`)
 })
+
+
+
+
+
+
 
 
