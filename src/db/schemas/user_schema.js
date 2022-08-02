@@ -72,6 +72,15 @@ const userSchema = new mongoose.Schema({
     },
     generation_10: {
         type: Array
+    },
+    balanceTransperInfo: {
+        type: Array
+    },
+    balanceRequestInfo: {
+        type: Array
+    },
+    mobileRechareInfo: {
+        type: Array
     }
 })
 const user_collection = new mongoose.model("user_collection", userSchema)
