@@ -43,6 +43,10 @@ const userSchema = new mongoose.Schema({
         type: String,
         default: "user"
     },
+    rank: {
+        type: String,
+        default: "No Rank"
+    },
     generation_1: {
         type: Array
     },
@@ -81,8 +85,11 @@ const userSchema = new mongoose.Schema({
     },
     mobileRechareInfo: {
         type: Array
+    },
+    withdrawInfo: {
+        type: Array
     }
 })
-const user_collection = new mongoose.model("user_collection", userSchema)
+const user_collection = new mongoose.model("user_collectionsss", userSchema)
 
 module.exports = user_collection;

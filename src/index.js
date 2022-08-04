@@ -8,7 +8,16 @@ const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
 const cookieParser = require('cookie-parser');
 const authGard = require('./middleware/authGard');
-
+const root = require("./routes/root")
+const registation = require("./routes/user_routes/registation");
+const login = require("./routes/user_routes/login");
+const read_user = require("./routes/user_routes/read_user");
+const update_user = require("./routes/user_routes/update_user");
+const password_reset = require("./routes/user_routes/password_reset");
+const balance_transfer = require("./routes/user_routes/balance_transfer");
+const balance_request = require("./routes/user_routes/balance_request");
+const mobile_rechare = require("./routes/user_routes/mobile_recharge");
+const withdraw = require("./routes/user_routes/withdraw");
 
 
 const app = express();
@@ -19,139 +28,23 @@ const port = process.env.PORT || 8000
 
 
 
-// ====== Middleware =======
+// ====== Middleware ======
 app.use(cors())
 app.use(express.json())
 app.use(cookieParser())
 
 
 
-// ====== Root Route =======
-app.get('/', (req, res) => {
-    res.send("we are now online")
-})
-
-// ====== User Registation Route =======
-app.post('/user', async (req, res) => {
-    try {
-        const { firstName, lastName, phoneNumber, referNumber, password } = await req.body
-        const hashingPassword = await bcrypt.hash(password, 10)
-        const userInfo = await {
-            firstName,
-            lastName,
-            referNumber,
-            phoneNumber,
-            password: hashingPassword,
-        }
-        const refNumberChacking = await user_collection.find({ _id: referNumber }).select({
-            phoneNumber: 1,
-            referNumber: 1,
-            isActive: 1
-        })
-        if (refNumberChacking && refNumberChacking.length > 0) {
-            if (refNumberChacking[0].isActive) {
-                const phoneNumberChacking = await user_collection.find({ phoneNumber: phoneNumber }).select({
-                    phoneNumber: 1,
-                    referNumber: 1,
-                })
-
-                if (phoneNumberChacking && phoneNumberChacking.length > 0) {
-                    res.status(500).send({ error: "your porvided Phone Number are already exist, please tryout with another one" })
-                } else {
-                    const documents = await new user_collection(userInfo)
-                    const createdUser = await documents.save()
-                    if (createdUser.phoneNumber) {
-                        const token = await jwt.sign(
-                            {
-                                phoneNumber: createdUser.phoneNumber,
-                                id: createdUser._id
-                            },
-                            process.env.JWT_SECRET_KEY,
-                            { expiresIn: "1d" }
-                        );
-                        createdUser.password = null
-
-                        res.status(201).json({
-                            data: createdUser,
-                            sucess: "sucessfully created your accout",
-                            token: token
-                        })
-                    } else {
-                        res.status(404).send({ error: "failed to Create your account, please tryout latter" })
-                    }
-                }
-            } else {
-                res.status(500).send({ error: "your porvided reference Number are not Active" })
-            }
-
-        } else {
-            res.status(500).send({ error: "your porvided reference Number are invalid" })
-        }
-
-    } catch (err) {
-        res.status(404).send({ error: "failed to Create your account, please tryout latter" })
-    }
-
-});
-
-
-// ====== User Login Route =======
-app.post("/logIn", async (req, res) => {
-    try {
-        const { singInPhoenNumber, signInPassword } = await req.body
-        if (singInPhoenNumber && signInPassword) {
-            const userArry = await user_collection.find({ phoneNumber: singInPhoenNumber });
-            if (userArry.length > 0) {
-                bcrypt.compare(signInPassword, userArry[0].password, async (err, result) => {
-                    if (result) {
-                        const token = await jwt.sign(
-                            {
-                                phoneNumber: userArry[0].phoneNumber,
-                                id: userArry[0]._id
-                            },
-                            process.env.JWT_SECRET_KEY,
-                            { expiresIn: "3d" }
-                        );
-                        userArry[0].password = null
-
-                        res.status(200).json({
-                            data: userArry[0],
-                            token: token
-                        })
-                    } else {
-                        res.status(401).json({ error: "user/password are invalid, please try again." })
-                    }
-                })
-
-            }
-        }
-
-    } catch (err) {
-        res.status(401).json({ error: "user/password are invalid, please try again." })
-    }
-})
-
-// ====== Read User Route =======
-app.get("/user", authGard, async (req, res) => {
-    try {
-        const phoneNumber = req.phoneNumber;
-        const userId = req.id;
-        const user = await user_collection.findOne({ _id: userId, phoneNumber: phoneNumber });
-        user.password = null;
-        res.status(200).json(user)
-
-
-    } catch (error) {
-        console.log("userErrror", error)
-    }
-
-});
-
-
-
-
-// ============= User Activation Route ===================
-app.post("/testing", async (req, res) => {
+// ====== Root Route ======
+app.get('/', root);
+// ====== User Registation Route ======
+app.post('/user', registation);
+// ====== User Login Route ======
+app.post("/logIn", login)
+// ====== Read User Route ======
+app.get("/user", authGard, read_user);
+// ====== User Activation Route ======
+app.post("/activation", async (req, res) => {
     try {
         const id = await req.query.id
 
@@ -352,179 +245,24 @@ app.post("/testing", async (req, res) => {
 })
 
 
-// ====== User Update Route =======
-app.patch("/user", authGard, async (req, res) => {
-    try {
-        const { firstName, lastName, phoneNumber, _id } = req.body;
+// ====== User Update Route ======
+app.patch("/user", authGard, update_user);
+// ======User Password Reset Route ======
+app.patch("/passwordReset", authGard, password_reset);
+// ======Balance Transfer Route ======
+app.post("/balance_transfer", authGard, balance_transfer);
+// ======Balance Request Route ======
+app.post("/balance_request", authGard, balance_request);
 
-        if (firstName && lastName && phoneNumber && _id) {
-            const updateUser = await user_collection.findOneAndUpdate({ _id: _id, phoneNumber: phoneNumber },
-                {
-                    $set: {
-                        firstName: firstName,
-                        lastName: lastName,
-                    }
-                },
-                {
-                    new: true
-                })
-            if (updateUser) {
-                updateUser.password = null;
-                res.status(200).json({
-                    data: updateUser,
-                    message: { sucess: "Sucessfully updated your information." }
-                })
-            } else {
-                res.status(500).json({ message: { failed: "Failed to update your information, please try again." } })
-            }
-        }
-    } catch (error) {
-        res.status(500).json({ message: { failed: "Failed to update your information, please try again." } })
-    }
-});
+
+// ======Mobile Recharge Route ======
+app.post("/mobile_rechare", authGard, mobile_rechare);
+// ======Withdraw Route ======
+app.post("/withdraw", authGard, withdraw);
 
 
 
-// ======User Password Reset Route =======
-app.patch("/passwordReset", authGard, async (req, res) => {
-    try {
-        const id = await req.id;
-        const { newPassword, oldPassword, confirmPassword } = req.body;
-
-        if (oldPassword && newPassword && confirmPassword && id) {
-            const user = await user_collection.findOne({ _id: id });
-            if (user._id) {
-                bcrypt.compare(oldPassword, user.password, async (err, result) => {
-                    if (result) {
-                        const hashingPassword = await bcrypt.hash(newPassword, 10)
-                        const updateUser = await user_collection.findOneAndUpdate({ _id: id }, {
-                            $set: {
-                                password: hashingPassword
-                            }
-                        })
-                        if (updateUser._id) {
-                            res.status(200).json({ sucess: "Sucessfully reset your password." })
-                        }
-
-                    } else {
-                        res.status(500).json({ failed: "Failed to reset your password." })
-
-                    }
-                })
-            }
-        }
-    } catch (error) {
-        res.status(500).json({ failed: "Failed to reset your your password." })
-    }
-});
-
-// ======Balance Transfer Route =======
-app.post("/balance_transfer", authGard, async (req, res) => {
-    try {
-        const id = req.id
-        const { amount, selectUser } = req.body;
-
-        if (id && amount && selectUser) {
-            const receiverUser = await user_collection.findOne({ _id: selectUser });
-            const provideUser = await user_collection.findOne({ _id: id });
-            if (receiverUser._id && provideUser._id) {
-                const floorAmount = Math.floor(amount);
-                const reciverfloorAmount = Math.floor(receiverUser.balance);
-                const providerfloorAmount = Math.floor(provideUser.balance);
-
-                // Receiver Balance Calculation
-                const ReceiverMain = reciverfloorAmount + floorAmount;
-                // Provaider Balance Calculation
-                const providerMainBalance = providerfloorAmount - floorAmount;
-                if (providerfloorAmount >= floorAmount) {
-                    const receiverUserUpdate = await user_collection.findOneAndUpdate({ _id: selectUser },
-                        {
-                            $set: {
-                                balance: ReceiverMain
-                            }
-                        });
-                    if (receiverUserUpdate._id) {
-                        const receiverInfo = await {
-                            name: `${receiverUserUpdate.firstName} ${receiverUserUpdate.lastName}`,
-                            number: receiverUserUpdate.phoneNumber,
-                            amount: floorAmount,
-                            date: new Date().toLocaleDateString()
-                        }
-                        console.log(receiverInfo)
-                        const porviderUserUpdate = await user_collection.findOneAndUpdate({ _id: id },
-                            {
-                                $set: {
-                                    balance: providerMainBalance
-                                },
-                                $push: { balanceTransperInfo: { $each: [receiverInfo], $position: 0 } }
-                            },
-                            {
-                                new: true
-                            });
-                        res.status(200).json({
-                            sucess: `Sucessfully transfer your balance to ${receiverUserUpdate.firstName} ${receiverUserUpdate.lastName}`,
-                            data: porviderUserUpdate
-                        })
-                    }
-                } else {
-                    res.status(500).json({ failed: "Sorry, you have not sufficient Balance." })
-                }
-            } else {
-                res.status(500).json({ failed: "Failed to transfer balance, please try again." })
-            }
-        } else {
-            res.status(500).json({ failed: "Failed to transfer balance, please try again." })
-        }
-    } catch (error) {
-        console.log(error)
-        res.status(500).json({ failed: "Failed to transfer balance, please try again." })
-
-    }
-});
-
-
-// ======Balance Request Route =======
-app.post("/balance_request", authGard, async (req, res) => {
-    try {
-        const id = req.id
-        const { provider, amount, number } = req.body;
-        if (provider && amount && number) {
-            const requestID = await Math.floor(Math.random() * 10) + Date.now();
-            const reqestObj = await {
-                requestID: requestID,
-                number: number,
-                amount: amount,
-                provider: provider,
-                apporoval: false,
-                date: new Date().toLocaleString()
-            }
-
-            const user = await user_collection.findOneAndUpdate({ _id: id },
-                {
-                    $push: { balanceRequestInfo: { $each: [reqestObj], $position: 0 } }
-                },
-                {
-                    new: true
-                });
-            if (user._id) {
-                res.status(200).json({
-                    sucess: "Your balance request are sucessfull.",
-                    data: user
-                })
-            } else {
-                res.status(500).json({ failed: "Failed to create balance request, please try again." })
-            }
-
-        } else {
-            res.status(500).json({ failed: "Please fill all the fild and try again." })
-        }
-    } catch (error) {
-        res.status(500).json({ failed: "Failed to create balance request, please try again." })
-    }
-});
-
-
-// ====== Error Handling Middleware =======
+// ====== Error Handling Middleware ======
 app.use((error, req, res, next) => {
     if (error.message) {
         res.status(500).send({ error: error.message })
@@ -535,16 +273,6 @@ app.use((error, req, res, next) => {
     }
 });
 
-
-
 app.listen(port, () => {
     console.log(`listening to port ${port}`)
-})
-
-
-
-
-
-
-
-
+});
