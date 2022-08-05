@@ -18,6 +18,8 @@ const balance_transfer = require("./routes/user_routes/balance_transfer");
 const balance_request = require("./routes/user_routes/balance_request");
 const mobile_rechare = require("./routes/user_routes/mobile_recharge");
 const withdraw = require("./routes/user_routes/withdraw");
+const generation_list = require("./routes/user_routes/generation_list");
+const adminAuthGard = require("./middleware/adminAuthGard");
 
 
 const app = express();
@@ -260,6 +262,15 @@ app.post("/mobile_rechare", authGard, mobile_rechare);
 // ======Withdraw Route ======
 app.post("/withdraw", authGard, withdraw);
 
+// ======Generation User list Route ======
+app.get("/generation", authGard, generation_list)
+
+
+
+// ======Admin All User Read Route ======
+app.get("/admin/users", adminAuthGard, read_user)
+
+
 
 
 // ====== Error Handling Middleware ======
@@ -276,3 +287,4 @@ app.use((error, req, res, next) => {
 app.listen(port, () => {
     console.log(`listening to port ${port}`)
 });
+

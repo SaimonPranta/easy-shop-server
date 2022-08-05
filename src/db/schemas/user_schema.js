@@ -33,7 +33,7 @@ const userSchema = new mongoose.Schema({
     },
     joinDate: {
         type: Date,
-        default: Date.now
+        default: new Date()
     },
     isActive: {
         type: Boolean,
