@@ -20,7 +20,8 @@ const mobile_rechare = require("./routes/user_routes/mobile_recharge");
 const withdraw = require("./routes/user_routes/withdraw");
 const generation_list = require("./routes/user_routes/generation_list");
 const adminAuthGard = require("./middleware/adminAuthGard");
-
+const all_user = require("./routes/admin_routes/all_user");
+const user_dtails = require("./routes/admin_routes/user_dtails");
 
 const app = express();
 dotenv.config()
@@ -263,13 +264,14 @@ app.post("/mobile_rechare", authGard, mobile_rechare);
 app.post("/withdraw", authGard, withdraw);
 
 // ======Generation User list Route ======
-app.get("/generation", authGard, generation_list)
+app.get("/generation", authGard, generation_list);
 
 
 
 // ======Admin All User Read Route ======
-app.get("/admin/users", adminAuthGard, read_user)
-
+app.get("/admin/users", adminAuthGard, all_user);
+// ======Admin User Details Read Route ======
+app.get("/user/userDetails", user_dtails)
 
 
 
