@@ -11,7 +11,7 @@ const userSchema = new mongoose.Schema({
         required: true
     },
     referNumber: {
-        type: String,
+        type: Number,
         require: true
     },
     balance: {
@@ -19,6 +19,10 @@ const userSchema = new mongoose.Schema({
         default: 0
     },
     shoppingBalance:{
+        type: Number,
+        default: 0
+    },
+    totalIncome: {
         type: Number,
         default: 0
     },

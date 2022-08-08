@@ -6,57 +6,64 @@ const jwt = require("jsonwebtoken");
 const registation = async (req, res) => {
     try {
         const { firstName, lastName, phoneNumber, referNumber, password } = await req.body
-        const hashingPassword = await bcrypt.hash(password, 10)
-        const userInfo = await {
-            firstName,
-            lastName,
-            referNumber,
-            phoneNumber,
-            password: hashingPassword,
-        }
-        const refNumberChacking = await user_collection.find({ _id: referNumber }).select({
-            phoneNumber: 1,
-            referNumber: 1,
-            isActive: 1
-        })
-        if (refNumberChacking && refNumberChacking.length > 0) {
-            if (refNumberChacking[0].isActive) {
-                const phoneNumberChacking = await user_collection.find({ phoneNumber: phoneNumber }).select({
-                    phoneNumber: 1,
-                    referNumber: 1,
-                })
+        const referInputChecker = Math.floor(referNumber)
+        const phoneInputChecker = Math.floor(phoneNumber)
 
-                if (phoneNumberChacking && phoneNumberChacking.length > 0) {
-                    res.status(500).send({ failed: "your porvided Phone Number are already exist, please tryout with another one" })
-                } else {
-                    const documents = await new user_collection(userInfo)
-                    const createdUser = await documents.save()
-                    if (createdUser.phoneNumber) {
-                        const token = await jwt.sign(
-                            {
-                                phoneNumber: createdUser.phoneNumber,
-                                id: createdUser._id
-                            },
-                            process.env.JWT_SECRET_KEY,
-                            { expiresIn: "1d" }
-                        );
-                        createdUser.password = null
-
-                        res.status(201).json({
-                            data: createdUser,
-                            sucess: "sucessfully created your accout",
-                            token: token
-                        })
-                    } else {
-                        res.status(404).send({ failed: "failed to Create your account, please tryout latter" })
-                    }
-                }
-            } else {
-                res.status(500).send({ failed: "your porvided reference Number are not Active" })
+        if (referInputChecker && phoneInputChecker) {
+            const hashingPassword = await bcrypt.hash(password, 10)
+            const userInfo = await {
+                firstName,
+                lastName,
+                referNumber: referInputChecker,
+                phoneNumber: phoneInputChecker,
+                password: hashingPassword,
             }
+            const refNumberChacking = await user_collection.find({ phoneNumber: referInputChecker }).select({
+                phoneNumber: 1,
+                referNumber: 1,
+                isActive: 1
+            })
+            if (refNumberChacking && refNumberChacking.length > 0) {
+                if (refNumberChacking[0].isActive) {
+                    const phoneNumberChacking = await user_collection.find({ phoneNumber: phoneInputChecker }).select({
+                        phoneNumber: 1,
+                        referNumber: 1,
+                    })
 
+                    if (phoneNumberChacking && phoneNumberChacking.length > 0) {
+                        res.status(500).send({ failed: "your porvided Phone Number are already exist, please tryout with another one" })
+                    } else {
+                        const documents = await new user_collection(userInfo)
+                        const createdUser = await documents.save()
+                        if (createdUser.phoneNumber) {
+                            const token = await jwt.sign(
+                                {
+                                    phoneNumber: createdUser.phoneNumber,
+                                    id: createdUser._id
+                                },
+                                process.env.JWT_SECRET_KEY,
+                                { expiresIn: "1d" }
+                            );
+                            createdUser.password = null
+
+                            res.status(201).json({
+                                data: createdUser,
+                                sucess: "sucessfully created your accout",
+                                token: token
+                            })
+                        } else {
+                            res.status(404).send({ failed: "failed to Create your account, please tryout latter" })
+                        }
+                    }
+                } else {
+                    res.status(500).send({ failed: "your porvided reference Number are not Active" })
+                }
+
+            } else {
+                res.status(500).send({ failed: "your porvided reference Number are invalid" })
+            }
         } else {
-            res.status(500).send({ failed: "your porvided reference Number are invalid" })
+            res.status(500).send({ failed: "your porvided Reference number & Phone Nmuber must be number" })
         }
 
     } catch (err) {
