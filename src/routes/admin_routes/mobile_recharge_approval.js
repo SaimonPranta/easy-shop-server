@@ -1,6 +1,6 @@
 const user_collection = require("../../db/schemas/user_schema");
 
-const balance_approval = async (req, res) => {
+const mobile_recharge_approval = async (req, res) => {
     try {
         const { id, requestID, amount } = req.body
         const amountFloor = await Math.floor(amount);
@@ -8,17 +8,18 @@ const balance_approval = async (req, res) => {
         if (id && requestID && amountFloor) {
             const userVarifing = await user_collection.findOne({ _id: id })
             if (userVarifing._id) {
-                const balanceCount = await Math.floor(userVarifing.balance) + amountFloor
-
+                const userBalanceFloor = await Math.floor(userVarifing.balance)
+                if (userBalanceFloor >= amountFloor) {
+                    const balanceCount = await userBalanceFloor - amountFloor
                 const user = await user_collection.updateOne(
                     {
                         _id: id,
-                        "balanceRequestInfo.requestID": requestID
+                        "mobileRechareInfo.requestID": requestID
                     },
                     {
                         $set: {
-                            balance: balanceCount,
-                            "balanceRequestInfo.$.apporoval": true
+                            amount: balanceCount,
+                            "mobileRechareInfo.$.apporoval": true
                         }
                     }
                 )
@@ -26,6 +27,10 @@ const balance_approval = async (req, res) => {
                     res.status(200).json({ sucess: "sucessfuly approved" })
                 } else {
                     res.status(500).json({ failed: "Faild to approved" })
+                }
+                } else {
+                res.status(500).json({ failed: "This user Balance is lower then his request." })
+                    
                 }
             } else {
                 res.status(500).json({ failed: "Faild to approved" })
@@ -40,4 +45,4 @@ const balance_approval = async (req, res) => {
 }
 
 
-module.exports = balance_approval;
+module.exports = mobile_recharge_approval;

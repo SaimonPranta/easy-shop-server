@@ -23,23 +23,40 @@ const adminAuthGard = require("./middleware/adminAuthGard");
 const all_user = require("./routes/admin_routes/all_user");
 const user_dtails = require("./routes/admin_routes/user_dtails");
 const balance_approval = require("./routes/admin_routes/blanace_approval");
+const mobile_recharge_approval = require('./routes/admin_routes/mobile_recharge_approval');
+const mobile_recharge_decline = require('./routes/admin_routes/mobile_recharge_decline');
+const balance_request_decline = require('./routes/admin_routes/balance_request_decline');
+const withdraw_request_approval = require('./routes/admin_routes/withdraw_request_approval');
+const withdraw_request_decline = require('./routes/admin_routes/withdraw_request_decline');
+const add_slider_img = require('./routes/admin_routes/add_slider_img');
+const user_activation = require('./routes/user_routes/user_activation');
+const slider_provider = require('./routes/user_routes/slider_provider');
+const fileUpload = require('express-fileupload');
+const path = require('path');
+
+const fs = require('fs-extra');
+const slider_img_delete = require('./routes/admin_routes/slider_img_delete');
 const app = express();
 dotenv.config()
 
 const port = process.env.PORT || 8000
 
 
-
-
 // ====== Middleware ======
 app.use(cors())
 app.use(express.json())
 app.use(cookieParser())
+app.use(fileUpload());
+app.use(express.static(path.join(__dirname, "images/slider_img")))
 
+// ============Multer Start===========
 
+// ===============Multer End===========
 
 // ====== Root Route ======
 app.get('/', root);
+// ====== Slider Provider Route ======
+app.get('/slider_provider', slider_provider);
 // ====== User Registation Route ======
 app.post('/user', registation);
 // ====== User Login Route ======
@@ -47,380 +64,7 @@ app.post("/logIn", login)
 // ====== Read User Route ======
 app.get("/user", authGard, read_user);
 // ====== User Activation Route ======
-app.post("/activation", async (req, res) => {
-    try {
-        const id = await req.query.id
-
-        const user = await user_collection.find({ _id: id })
-        let hostUser = await user[0]
-        let refUser = {}
-        const floorBalance = await Math.floor(hostUser.balance)
-        const floorShoppingBalance = await Math.floor(hostUser.shoppingBalance)
-
-
-        if (hostUser && hostUser.referNumber && !hostUser.isActive) {
-            if (floorBalance >= 50) {
-                const countBalance = floorBalance - 50 
-                const countShoppingBalance = floorShoppingBalance + 50
-
-                const activeHostUser = await user_collection.findOneAndUpdate(
-                    { _id: hostUser._id.toString() },
-                    {
-                        $set: { 
-                            balance: countBalance,
-                            shoppingBalance: countShoppingBalance,
-                            isActive: true
-                         }
-                    },
-                    { new: true }
-                )
-
-                for (let i = 1; i <= 10; i++) {
-                    if (hostUser && hostUser._id && hostUser.referNumber && i == 1) {
-                        const document = await user_collection.find({ generation_1: Math.floor(hostUser.phoneNumber) })
-                        if (document.length == 0) {
-                            const currentUserForBalance = await user_collection.findOne({ phoneNumber: Math.floor(hostUser.referNumber) })
-                            if (currentUserForBalance._id) {
-                                let balanceCount = await Math.floor(currentUserForBalance.balance) + 15
-                                let incomeBalanceCount = await Math.floor(currentUserForBalance.totalIncome) + 15
-
-                                const currentUser = await user_collection.findOneAndUpdate(
-                                    { phoneNumber: Math.floor(hostUser.referNumber) },
-                                    {
-                                        $set: {
-                                            balance: balanceCount,
-                                            totalIncome: incomeBalanceCount
-                                        },
-                                        $push: { generation_1: { $each: [Math.floor(hostUser.phoneNumber)], $position: 0 } }
-                                    },
-                                    {
-                                        new: true,
-                                        upsert: true
-                                    }
-                                )
-
-                                if (currentUser && currentUser.referNumber) {
-                                    refUser = currentUser
-                                } else {
-                                    refUser = {}
-                                }
-                            } else {
-
-                            }
-                        }
-                    } else if (refUser && refUser._id && refUser.referNumber != 0 && i == 2) {
-
-                        const document = await user_collection.find({ generation_2: Math.floor(hostUser.phoneNumber) })
-                        if (document.length == 0) {
-                            const currentUserForBalance = await user_collection.findOne({ phoneNumber: Math.floor(refUser.referNumber) })
-                            if (currentUserForBalance._id) {
-                                let balanceCount = await Math.floor(currentUserForBalance.balance) + 5
-                                let incomeBalanceCount = await Math.floor(currentUserForBalance.totalIncome) + 5
-
-                                const currentUser = await user_collection.findOneAndUpdate(
-                                    { phoneNumber: Math.floor(refUser.referNumber) },
-                                    {
-                                        $set: {
-                                            balance: balanceCount,
-                                            totalIncome: incomeBalanceCount
-                                        },
-                                        $push: { generation_2: { $each: [Math.floor(hostUser.phoneNumber)], $position: 0 } }
-                                    },
-                                    {
-                                        new: true,
-                                        upsert: true
-                                    }
-                                )
-                                if (currentUser && currentUser.referNumber) {
-                                    refUser = currentUser
-                                } else {
-                                    refUser = {}
-                                }
-                            } else {
-
-                            }
-                        }
-                    } else if (refUser && refUser._id && refUser.referNumber != 0 && i == 3) {
-
-                        const document = await user_collection.find({ generation_3: Math.floor(hostUser.phoneNumber) })
-                        if (document.length == 0) {
-                            const currentUserForBalance = await user_collection.findOne({ phoneNumber: Math.floor(refUser.referNumber) })
-                            if (currentUserForBalance._id) {
-                                let balanceCount = await Math.floor(currentUserForBalance.balance) + 3
-                                let incomeBalanceCount = await Math.floor(currentUserForBalance.totalIncome) + 3
-
-                                const currentUser = await user_collection.findOneAndUpdate(
-                                    { phoneNumber: Math.floor(refUser.referNumber) },
-                                    {
-                                        $set: {
-                                            balance: balanceCount,
-                                            totalIncome: incomeBalanceCount
-                                        },
-                                        $push: { generation_3: { $each: [Math.floor(hostUser.phoneNumber)], $position: 0 } }
-                                    },
-                                    {
-                                        new: true,
-                                        upsert: true
-                                    }
-                                )
-
-                                if (currentUser && currentUser.referNumber) {
-                                    refUser = currentUser
-                                } else {
-                                    refUser = {}
-                                }
-
-                            } else {
-
-                            }
-                        }
-                    } else if (refUser && refUser._id && refUser.referNumber != 0 && i == 4) {
-
-                        const document = await user_collection.find({ generation_4: Math.floor(hostUser.phoneNumber) })
-                        if (document.length == 0) {
-                            const currentUserForBalance = await user_collection.findOne({ phoneNumber: Math.floor(refUser.referNumber) })
-                            if (currentUserForBalance._id) {
-                                let balanceCount = await Math.floor(currentUserForBalance.balance) + 2
-                                let incomeBalanceCount = await Math.floor(currentUserForBalance.totalIncome) + 2
-
-                                const currentUser = await user_collection.findOneAndUpdate(
-                                    { phoneNumber: Math.floor(refUser.referNumber) },
-                                    {
-                                        $set: {
-                                            balance: balanceCount,
-                                            totalIncome: incomeBalanceCount
-                                        },
-                                        $push: { generation_4: { $each: [Math.floor(hostUser.phoneNumber)], $position: 0 } }
-                                    },
-                                    {
-                                        new: true,
-                                        upsert: true
-                                    }
-                                )
-
-                                if (currentUser && currentUser.referNumber) {
-                                    refUser = currentUser
-                                } else {
-                                    refUser = {}
-                                }
-
-                            } else {
-
-                            }
-                        }
-                    } else if (refUser && refUser._id && refUser.referNumber != 0 && i == 5) {
-
-                        const document = await user_collection.find({ generation_5: Math.floor(hostUser.phoneNumber) })
-                        if (document.length == 0) {
-                            const currentUserForBalance = await user_collection.findOne({ phoneNumber: Math.floor(refUser.referNumber) })
-                            if (currentUserForBalance._id) {
-                                let balanceCount = await Math.floor(currentUserForBalance.balance) + 1
-                                let incomeBalanceCount = await Math.floor(currentUserForBalance.totalIncome) + 1
-
-                                const currentUser = await user_collection.findOneAndUpdate(
-                                    { phoneNumber: Math.floor(refUser.referNumber) },
-                                    {
-                                        $set: {
-                                            balance: balanceCount,
-                                            totalIncome: incomeBalanceCount
-                                        },
-                                        $push: { generation_5: { $each: [Math.floor(hostUser.phoneNumber)], $position: 0 } }
-                                    },
-                                    {
-                                        new: true,
-                                        upsert: true
-                                    }
-                                )
-
-                                if (currentUser && currentUser.referNumber) {
-                                    refUser = currentUser
-                                } else {
-                                    refUser = {}
-                                }
-                            } else {
-
-                            }
-                        }
-                    } else if (refUser && refUser._id && refUser.referNumber != 0 && i == 6) {
-
-                        const document = await user_collection.find({ generation_6: Math.floor(hostUser.phoneNumber) })
-                        if (document.length == 0) {
-                            const currentUserForBalance = await user_collection.findOne({ phoneNumber: Math.floor(refUser.referNumber) })
-                            if (currentUserForBalance._id) {
-                                let balanceCount = await Math.floor(currentUserForBalance.balance) + 1
-                                let incomeBalanceCount = await Math.floor(currentUserForBalance.totalIncome) + 1
-
-                                const currentUser = await user_collection.findOneAndUpdate(
-                                    { phoneNumber: Math.floor(refUser.referNumber) },
-                                    {
-                                        $set: {
-                                            balance: balanceCount,
-                                            totalIncome: incomeBalanceCount
-                                        },
-                                        $push: { generation_6: { $each: [Math.floor(hostUser.phoneNumber)], $position: 0 } }
-                                    },
-                                    {
-                                        new: true,
-                                        upsert: true
-                                    }
-                                )
-
-                                if (currentUser && currentUser.referNumber) {
-                                    refUser = currentUser
-                                } else {
-                                    refUser = {}
-                                }
-
-                            } else {
-
-                            }
-                        }
-                    } else if (refUser && refUser._id && refUser.referNumber != 0 && i == 7) {
-
-                        const document = await user_collection.find({ generation_7: Math.floor(hostUser.phoneNumber) })
-                        if (document.length == 0) {
-                            const currentUserForBalance = await user_collection.findOne({ phoneNumber: Math.floor(refUser.referNumber) })
-                            if (currentUserForBalance._id) {
-                                let balanceCount = await Math.floor(currentUserForBalance.balance) + 1
-                                let incomeBalanceCount = await Math.floor(currentUserForBalance.totalIncome) + 1
-
-                                const currentUser = await user_collection.findOneAndUpdate(
-                                    { phoneNumber: Math.floor(refUser.referNumber) },
-                                    {
-                                        $set: {
-                                            balance: balanceCount,
-                                            totalIncome: incomeBalanceCount
-                                        },
-                                        $push: { generation_7: { $each: [Math.floor(hostUser.phoneNumber)], $position: 0 } }
-                                    },
-                                    {
-                                        new: true,
-                                        upsert: true
-                                    }
-                                )
-
-                                if (currentUser && currentUser.referNumber) {
-                                    refUser = currentUser
-                                } else {
-                                    refUser = {}
-                                }
-
-                            } else {
-
-                            }
-                        }
-                    } else if (refUser && refUser._id && refUser.referNumber != 0 && i == 8) {
-
-                        const document = await user_collection.find({ generation_8: Math.floor(hostUser.phoneNumber) })
-                        if (document.length == 0) {
-                            const currentUserForBalance = await user_collection.findOne({ phoneNumber: Math.floor(refUser.referNumber) })
-                            if (currentUserForBalance._id) {
-                                let balanceCount = await Math.floor(currentUserForBalance.balance) + 1
-                                let incomeBalanceCount = await Math.floor(currentUserForBalance.totalIncome) + 1
-
-                                const currentUser = await user_collection.findOneAndUpdate(
-                                    { phoneNumber: Math.floor(refUser.referNumber) },
-                                    {
-                                        $set: {
-                                            balance: balanceCount,
-                                            totalIncome: incomeBalanceCount
-                                        },
-                                        $push: { generation_8: { $each: [Math.floor(hostUser.phoneNumber)], $position: 0 } }
-                                    },
-                                    {
-                                        new: true,
-                                        upsert: true
-                                    }
-                                )
-
-                                if (currentUser && currentUser.referNumber) {
-                                    refUser = currentUser
-                                } else {
-                                    refUser = {}
-                                }
-
-                            } else {
-
-                            }
-                        }
-                    } else if (refUser && refUser._id && refUser.referNumber != 0 && i == 9) {
-
-                        const document = await user_collection.find({ generation_9: Math.floor(hostUser.phoneNumber) })
-                        if (document.length == 0) {
-                            const currentUserForBalance = await user_collection.findOne({ phoneNumber: Math.floor(refUser.referNumber) })
-                            if (currentUserForBalance._id) {
-                                let balanceCount = await Math.floor(currentUserForBalance.balance) + 1
-                                let incomeBalanceCount = await Math.floor(currentUserForBalance.totalIncome) + 1
-
-                                const currentUser = await user_collection.findOneAndUpdate(
-                                    { phoneNumber: Math.floor(refUser.referNumber) },
-                                    {
-                                        $set: {
-                                            balance: balanceCount,
-                                            totalIncome: incomeBalanceCount
-                                        },
-                                        $push: { generation_9: { $each: [Math.floor(hostUser.phoneNumber)], $position: 0 } }
-                                    },
-                                    {
-                                        new: true,
-                                        upsert: true
-                                    }
-                                )
-
-                                if (currentUser && currentUser.referNumber) {
-                                    refUser = currentUser
-                                } else {
-                                    refUser = {}
-                                }
-                            } else {
-
-                            }
-                        }
-                    } else if (refUser && refUser._id && refUser.referNumber != 0 && i == 10) {
-
-                        const document = await user_collection.find({ generation_10: Math.floor(hostUser.phoneNumber) })
-                        if (document.length == 0) {
-                            const currentUserForBalance = await user_collection.findOne({ phoneNumber: Math.floor(refUser.referNumber) })
-                            if (currentUserForBalance._id) {
-                                let balanceCount = await Math.floor(currentUserForBalance.balance) + 1
-                                let incomeBalanceCount = await Math.floor(currentUserForBalance.totalIncome) + 1
-
-                                const currentUser = await user_collection.findOneAndUpdate(
-                                    { phoneNumber: Math.floor(refUser.referNumber) },
-                                    {
-                                        $set: {
-                                            balance: balanceCount,
-                                            totalIncome: incomeBalanceCount
-                                        },
-                                        $push: { generation_10: { $each: [Math.floor(hostUser.phoneNumber)], $position: 0 } }
-                                    },
-                                    {
-                                        new: true,
-                                        upsert: true
-                                    }
-                                )
-
-                                if (currentUser && currentUser.referNumber) {
-                                    refUser = currentUser
-                                } else {
-                                    refUser = {}
-                                }
-                            } else {
-
-                            }
-                        }
-                    }
-                }
-            } else {
-                res.status(500).json({ failed: "You have not enough balance to active your account, please increase your balance and try again" })
-            }
-        } else {
-            res.status(500).json({ failed: "Something is wrong, please try again" })
-        }
-    } catch (error) {
-        res.status(500).json({ failed: "Something is wrong, please try again" })
-    }
-})
+app.post("/activation", authGard, user_activation)
 
 
 // ====== User Update Route ======
@@ -429,7 +73,7 @@ app.patch("/user", authGard, update_user);
 app.patch("/passwordReset", authGard, password_reset);
 // ======Balance Transfer Route ======
 app.post("/balance_transfer", authGard, balance_transfer);
-// ======Balance Request Route ======
+// ======Balance Request Approval Route ======
 app.post("/balance_request", authGard, balance_request);
 
 
@@ -447,11 +91,24 @@ app.get("/generation", authGard, generation_list);
 app.get("/admin/users", adminAuthGard, all_user);
 // ======Admin User Details Read Route ======
 app.get("/user/userDetails", user_dtails)
-
 // ======Admin Balance Requesst Approval Route ======
 app.post("/blanace_approval", adminAuthGard, balance_approval)
+// ======Mobile Recharge Approval Route ======
+app.post("/mobile_recharge_approval", adminAuthGard, mobile_recharge_approval);
+// ======Withdraw Requesst Approval Route ======
+app.post("/withdraw_request_approval", adminAuthGard, withdraw_request_approval)
 
+// ======Mobile Recharge Decline Route  ======
+app.post("/mobile_recharge_decline", adminAuthGard, mobile_recharge_decline)
+// ======Balance Request Decline Route  ======
+app.post("/balance_request_decline", adminAuthGard, balance_request_decline)
+// ======Withdraw Request Decline Route  ======
+app.post("/withdraw_request_decline", adminAuthGard, withdraw_request_decline)
 
+// ======Slider Image Add Route  ======
+app.post("/addSlider", adminAuthGard, add_slider_img)
+// ======Slider Image Delete Route  ======
+app.delete("/slider_img_delete", adminAuthGard, slider_img_delete)
 
 
 
@@ -460,19 +117,16 @@ app.post("/blanace_approval", adminAuthGard, balance_approval)
 app.use((error, req, res, next) => {
     if (error.message) {
         res.status(500).send({ error: error.message })
-        console.log(error.message)
+        console.log("From Error Hansler", error)
     } else if (error) {
         res.status(500).send({ error: "Something is wrong, please try out letter" })
-        console.log(error)
+        console.log("From Error Hansler",error)
     }
 });
 
 app.listen(port, () => {
     console.log(`listening to port ${port}`)
 });
-
-
-
 
 
 
