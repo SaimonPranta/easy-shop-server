@@ -35,7 +35,8 @@ const fileUpload = require('express-fileupload');
 const path = require('path');
 
 const fs = require('fs-extra');
-const slider_img_delete = require('./routes/admin_routes/slider_img_delete');
+// const slider_img_delete = require('./routes/admin_routes/slider_img_delete');
+const generation_user = require('./routes/user_routes/generation_user');
 const app = express();
 dotenv.config()
 
@@ -64,7 +65,7 @@ app.post("/logIn", login)
 // ====== Read User Route ======
 app.get("/user", authGard, read_user);
 // ====== User Activation Route ======
-app.post("/activation", authGard, user_activation)
+app.post("/activation", authGard, user_activation);
 
 
 // ====== User Update Route ======
@@ -87,12 +88,20 @@ app.get("/generation", authGard, generation_list);
 
 
 
+
+// ======All Generation User Route ======
+app.get("/generation_user", authGard, generation_user);
+
+
 // ======Admin All User Read Route ======
 app.get("/admin/users", adminAuthGard, all_user);
 // ======Admin User Details Read Route ======
 app.get("/user/userDetails", user_dtails)
 // ======Admin Balance Requesst Approval Route ======
 app.post("/blanace_approval", adminAuthGard, balance_approval)
+
+
+
 // ======Mobile Recharge Approval Route ======
 app.post("/mobile_recharge_approval", adminAuthGard, mobile_recharge_approval);
 // ======Withdraw Requesst Approval Route ======
@@ -105,10 +114,13 @@ app.post("/balance_request_decline", adminAuthGard, balance_request_decline)
 // ======Withdraw Request Decline Route  ======
 app.post("/withdraw_request_decline", adminAuthGard, withdraw_request_decline)
 
+
+
+
 // ======Slider Image Add Route  ======
 app.post("/addSlider", adminAuthGard, add_slider_img)
 // ======Slider Image Delete Route  ======
-app.delete("/slider_img_delete", adminAuthGard, slider_img_delete)
+// app.delete("/slider_img_delete", adminAuthGard, slider_img_delete)
 
 
 

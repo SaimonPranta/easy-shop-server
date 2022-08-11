@@ -36,5 +36,4 @@ const add_slider_img = async (req, res) => {
 }
 
 
-
 module.exports = add_slider_img;

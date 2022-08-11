@@ -1,6 +1,9 @@
+const user_collection = require("../../db/schemas/user_schema")
+
 const user_activation = async (req, res) => {
     try {
         const id = await req.query.id
+        console.log(id)
 
         const user = await user_collection.find({ _id: id })
         let hostUser = await user[0]
@@ -379,9 +382,11 @@ const user_activation = async (req, res) => {
             res.status(500).json({ failed: "Something is wrong, please try again" })
         }
     } catch (error) {
+        console.log(error)
         res.status(500).json({ failed: "Something is wrong, please try again" })
     }
 }
+
 
 
 
