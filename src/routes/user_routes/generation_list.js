@@ -21,6 +21,7 @@ const generation_list = async (req, res) => {
             })
         } else if (generation == 2) {
             user.generation_2.map(async (phoneNum) => {
+                const floorNumber = await Math.floor(phoneNum)
                 const currentUser = await user_collection.findOne({ phoneNumber: floorNumber })
                 currentUser.password = null;
                 userArray.push(currentUser)
@@ -30,6 +31,7 @@ const generation_list = async (req, res) => {
             })
         } else if (generation == 3) {
             user.generation_3.map(async (phoneNum) => {
+                const floorNumber = await Math.floor(phoneNum)
                 const currentUser = await user_collection.findOne({ phoneNumber: floorNumber })
                 currentUser.password = null;
                 userArray.push(currentUser)
@@ -39,6 +41,7 @@ const generation_list = async (req, res) => {
             })
         } else if (generation == 4) {
             user.generation_4.map(async (phoneNum) => {
+                const floorNumber = await Math.floor(phoneNum)
                 const currentUser = await user_collection.findOne({ phoneNumber: floorNumber })
                 currentUser.password = null;
                 userArray.push(currentUser)
@@ -48,6 +51,7 @@ const generation_list = async (req, res) => {
             })
         } else if (generation == 5) {
             user.generation_5.map(async (phoneNum) => {
+                const floorNumber = await Math.floor(phoneNum)
                 const currentUser = await user_collection.findOne({ phoneNumber: floorNumber })
                 currentUser.password = null;
                 userArray.push(currentUser)
@@ -57,6 +61,7 @@ const generation_list = async (req, res) => {
             })
         } else if (generation == 6) {
             user.generation_6.map(async (phoneNum) => {
+                const floorNumber = await Math.floor(phoneNum)
                 const currentUser = await user_collection.findOne({ phoneNumber: floorNumber })
                 currentUser.password = null;
                 userArray.push(currentUser)
@@ -66,6 +71,7 @@ const generation_list = async (req, res) => {
             })
         } else if (generation == 7) {
             user.generation_7.map(async (phoneNum) => {
+                const floorNumber = await Math.floor(phoneNum)
                 const currentUser = await user_collection.findOne({ phoneNumber: floorNumber })
                 currentUser.password = null;
                 userArray.push(currentUser)
@@ -75,6 +81,7 @@ const generation_list = async (req, res) => {
             })
         } else if (generation == 8) {
             user.generation_8.map(async (phoneNum) => {
+                const floorNumber = await Math.floor(phoneNum)
                 const currentUser = await user_collection.findOne({ phoneNumber: floorNumber })
                 currentUser.password = null;
                 userArray.push(currentUser)
@@ -84,6 +91,7 @@ const generation_list = async (req, res) => {
             })
         } else if (generation == 9) {
             user.generation_9.map(async (phoneNum) => {
+                const floorNumber = await Math.floor(phoneNum)
                 const currentUser = await user_collection.findOne({ phoneNumber: floorNumber })
                 currentUser.password = null;
                 userArray.push(currentUser)
@@ -93,6 +101,7 @@ const generation_list = async (req, res) => {
             })
         } else if (generation == 10) {
             user.generation_10.map(async (phoneNum) => {
+                const floorNumber = await Math.floor(phoneNum)
                 const currentUser = await user_collection.findOne({ phoneNumber: floorNumber })
                 currentUser.password = null;
                 userArray.push(currentUser)

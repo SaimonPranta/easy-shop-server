@@ -3,6 +3,7 @@ const user_collection = require("../../db/schemas/user_schema");
 
 const balance_request = async (req, res) => {
     try {
+        console.log("hit")
         const id = req.id
         const { provider, amount, number } = req.body;
         if (provider && amount && number) {
@@ -16,7 +17,7 @@ const balance_request = async (req, res) => {
                 date: new Date().toLocaleString()
             }
 
-            const user = await user_collection.findOneAndUpdate({ _id: id },
+            const user = await user_collection.findOneAndUpdate({ _id: id.toString()},
                 {
                     $push: { balanceRequestInfo: { $each: [reqestObj], $position: 0 } }
                 },
@@ -36,6 +37,7 @@ const balance_request = async (req, res) => {
             res.status(500).json({ failed: "Please fill all the fild and try again." })
         }
     } catch (error) {
+        console.log("39", error)
         res.status(500).json({ failed: "Failed to create balance request, please try again." })
     }
 }
