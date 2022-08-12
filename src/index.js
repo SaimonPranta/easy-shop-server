@@ -35,8 +35,9 @@ const fileUpload = require('express-fileupload');
 const path = require('path');
 
 const fs = require('fs-extra');
-// const slider_img_delete = require('./routes/admin_routes/slider_img_delete');
+const slider_img_delete = require('./routes/admin_routes/slider_img_delete');
 const generation_user = require('./routes/user_routes/generation_user');
+const admin_update_user = require('./routes/admin_routes/admin_update_user');
 const app = express();
 dotenv.config()
 
@@ -50,12 +51,12 @@ app.use(cookieParser())
 app.use(fileUpload());
 app.use(express.static(path.join(__dirname, "images/slider_img")))
 
-// ============Multer Start===========
 
-// ===============Multer End===========
 
 // ====== Root Route ======
+// app.get('/', root);
 app.get('/', root);
+
 // ====== Slider Provider Route ======
 app.get('/slider_provider', slider_provider);
 // ====== User Registation Route ======
@@ -86,17 +87,16 @@ app.post("/withdraw", authGard, withdraw);
 // ======Generation User list Route ======
 app.get("/generation", authGard, generation_list);
 
-
-
-
 // ======All Generation User Route ======
 app.get("/generation_user", authGard, generation_user);
+// ======Admin User Details Read Route ======
+app.get("/user/userDetails", authGard, user_dtails)
 
 
 // ======Admin All User Read Route ======
-app.get("/admin/users", adminAuthGard, all_user);
-// ======Admin User Details Read Route ======
-app.get("/user/userDetails", user_dtails)
+app.get("/admin/users", adminAuthGard, adminAuthGard, all_user);
+// ======Admin User Update Read Route ======
+app.post("/admin/update_user", adminAuthGard, admin_update_user);
 // ======Admin Balance Requesst Approval Route ======
 app.post("/blanace_approval", adminAuthGard, balance_approval)
 
@@ -120,7 +120,7 @@ app.post("/withdraw_request_decline", adminAuthGard, withdraw_request_decline)
 // ======Slider Image Add Route  ======
 app.post("/addSlider", adminAuthGard, add_slider_img)
 // ======Slider Image Delete Route  ======
-// app.delete("/slider_img_delete", adminAuthGard, slider_img_delete)
+app.delete("/slider_img_delete", adminAuthGard, slider_img_delete)
 
 
 
@@ -138,7 +138,14 @@ app.use((error, req, res, next) => {
 
 app.listen(port, () => {
     console.log(`listening to port ${port}`)
-});
+})
+
+
+const obj = {}
+obj["id"] = 2323
+
+console.log(obj)
+
 
 
 

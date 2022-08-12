@@ -24,6 +24,7 @@ const add_slider_img = async (req, res) => {
             const imgOutPut = await slider_collection(imgInfo)
             const createdUser = await imgOutPut.save()
             if (createdUser._id) {
+                const allIamge = await slider_collection.find({})
                 res.status(200).json({ sucess: "Iamge upload sucessfull" })
             } else {
                 res.status(200).json({ failed: "Failed to upload image, please try again" })
