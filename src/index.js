@@ -38,6 +38,7 @@ const fs = require('fs-extra');
 const slider_img_delete = require('./routes/admin_routes/slider_img_delete');
 const generation_user = require('./routes/user_routes/generation_user');
 const admin_update_user = require('./routes/admin_routes/admin_update_user');
+const add_notice = require('./routes/admin_routes/add_notice');
 const app = express();
 dotenv.config()
 
@@ -121,7 +122,8 @@ app.post("/withdraw_request_decline", adminAuthGard, withdraw_request_decline)
 app.post("/addSlider", adminAuthGard, add_slider_img)
 // ======Slider Image Delete Route  ======
 app.delete("/slider_img_delete", adminAuthGard, slider_img_delete)
-
+// ======Notice Add Route  ======
+app.delete("/slider_img_delete", adminAuthGard, add_notice)
 
 
 
@@ -139,13 +141,6 @@ app.use((error, req, res, next) => {
 app.listen(port, () => {
     console.log(`listening to port ${port}`)
 })
-
-
-const obj = {}
-obj["id"] = 2323
-
-console.log(obj)
-
 
 
 

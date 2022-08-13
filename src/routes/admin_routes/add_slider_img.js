@@ -1,4 +1,3 @@
-const { JSONCookie } = require("cookie-parser")
 const fs = require('fs-extra')
 const slider_collection = require("../../db/schemas/slider_schema");
 
