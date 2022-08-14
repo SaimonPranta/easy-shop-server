@@ -6,7 +6,6 @@ const slider_provider = async (req, res) => {
         const sliders = await slider_collection.find()
         res.status(200).json(sliders)
     } catch (error) {
-        console.log(error)
         const sliders = await slider_collection.find()
         res.status(200).json(sliders)
     }

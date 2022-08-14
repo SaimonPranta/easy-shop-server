@@ -1,17 +1,34 @@
 const fs = require('fs-extra')
+const path = require('path');
 
 
 const add_notice = async (req, res) => {
     try {
-        const text = req.body.text
+        const noticeData = await req.body.notice ? req.body.notice : "  "
+        const filePath = await path.join(`${__dirname}/../../../src/notice/notice.txt`)
 
-        // const imageUpload = await image.mv(`${__dirname}/../../../src/images/slider_img/${image.name}`)
+        fs.writeFile(filePath, noticeData, err => {
+            if (err) {
+                res.status(200).json({ failed: "failed to write data, please try again." })
+            } else {
+                fs.readFile(filePath, 'utf8', (err, data) => {
+                    if (data) {
+                        res.status(200).json({ data: data })
+                        return;
+                    } else {
+                        res.status(200).json({ failed: "failed to read data, please try again." })
+                        return;
+                    }
 
+                });
+            }
+
+        })
 
 
     } catch (error) {
-        res.status(200).json({ failed: "Failed to upload image, please try again" })
-
+        res.status(200).json({ failed: "failed to write data, please try again." })
     }
 }
+
 module.exports = add_notice;

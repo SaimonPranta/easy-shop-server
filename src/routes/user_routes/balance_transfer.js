@@ -32,7 +32,6 @@ const balance_transfer = async (req, res) => {
                             amount: floorAmount,
                             date: new Date().toLocaleDateString()
                         }
-                        console.log(receiverInfo)
                         const porviderUserUpdate = await user_collection.findOneAndUpdate({ _id: id },
                             {
                                 $set: {
@@ -58,7 +57,6 @@ const balance_transfer = async (req, res) => {
             res.status(500).json({ failed: "Failed to transfer balance, please try again." })
         }
     } catch (error) {
-        console.log(error)
         res.status(500).json({ failed: "Failed to transfer balance, please try again." })
     }
 }

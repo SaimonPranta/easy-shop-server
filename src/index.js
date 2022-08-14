@@ -38,6 +38,7 @@ const fs = require('fs-extra');
 const slider_img_delete = require('./routes/admin_routes/slider_img_delete');
 const generation_user = require('./routes/user_routes/generation_user');
 const admin_update_user = require('./routes/admin_routes/admin_update_user');
+const read_notice = require('./routes/user_routes/read_notice');
 const add_notice = require('./routes/admin_routes/add_notice');
 const app = express();
 dotenv.config()
@@ -123,7 +124,9 @@ app.post("/addSlider", adminAuthGard, add_slider_img)
 // ======Slider Image Delete Route  ======
 app.delete("/slider_img_delete", adminAuthGard, slider_img_delete)
 // ======Notice Add Route  ======
-app.delete("/slider_img_delete", adminAuthGard, add_notice)
+app.post("/notice",adminAuthGard, add_notice)
+// ======Notice Read Route  ======
+app.get("/notice", read_notice)
 
 
 
@@ -131,10 +134,8 @@ app.delete("/slider_img_delete", adminAuthGard, add_notice)
 app.use((error, req, res, next) => {
     if (error.message) {
         res.status(500).send({ error: error.message })
-        console.log("From Error Hansler", error)
     } else if (error) {
         res.status(500).send({ error: "Something is wrong, please try out letter" })
-        console.log("From Error Hansler",error)
     }
 });
 

@@ -19,7 +19,6 @@ const adminAuthGard = async (req, res, next) => {
             res.status(401).json({ error: "Unauthorized  attempt, please try out latter." })
         }
     } catch (error) {
-        console.log(error)
         res.status(401).json({ error: "Unauthorized  attempt, please try out latter." })
     }
 }

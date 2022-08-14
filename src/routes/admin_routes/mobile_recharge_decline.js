@@ -28,7 +28,6 @@ const mobile_recharge_decline = async (req, res) => {
 
 
     } catch (error) {
-        console.log(error)
         res.status(500).json({ failed: "Faild to approved" })
     }
 }
