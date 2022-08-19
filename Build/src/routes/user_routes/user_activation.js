@@ -52,18 +52,17 @@ const user_activation = async (req, res) => {
                                     }
                                 )
 
-                                if (currentUser && currentUser.referNumber) {
+                                if (currentUser && currentUser.referNumber != "0") {
                                     refUser = currentUser
                                 } else {
                                     refUser = {}
-                                    res.status(200).json({ data: activeHostUser})
+                                    res.status(200).json({ data: activeHostUser })
                                 }
                             } else {
                                 res.status(500).json({ failed: "Failed to active your account, please try again" })
                             }
                         }
                     } else if (refUser && refUser._id && refUser.referNumber != 0 && i == 2) {
-
                         const document = await user_collection.find({ generation_2: hostUser.phoneNumber.toString() })
                         if (document.length == 0) {
                             const currentUserForBalance = await user_collection.findOne({ phoneNumber: refUser.referNumber.toString() })
@@ -85,18 +84,17 @@ const user_activation = async (req, res) => {
                                         upsert: true
                                     }
                                 )
-                                if (currentUser && currentUser.referNumber) {
+                                if (currentUser && currentUser.referNumber != "0") {
                                     refUser = currentUser
                                 } else {
                                     refUser = {}
-                                    res.status(200).json({ data: activeHostUser})
+                                    res.status(200).json({ data: activeHostUser })
                                 }
                             } else {
                                 res.status(500).json({ failed: "Failed to active your account, please try again" })
                             }
                         }
                     } else if (refUser && refUser._id && refUser.referNumber != 0 && i == 3) {
-
                         const document = await user_collection.find({ generation_3: hostUser.phoneNumber.toString() })
                         if (document.length == 0) {
                             const currentUserForBalance = await user_collection.findOne({ phoneNumber: refUser.referNumber.toString() })
@@ -119,13 +117,12 @@ const user_activation = async (req, res) => {
                                     }
                                 )
 
-                                if (currentUser && currentUser.referNumber) {
+                                if (currentUser && currentUser.referNumber != "0") {
                                     refUser = currentUser
                                 } else {
                                     refUser = {}
-                                    res.status(200).json({ data: activeHostUser})
+                                    res.status(200).json({ data: activeHostUser })
                                 }
-
                             } else {
                                 res.status(500).json({ failed: "Failed to active your account, please try again" })
                             }
@@ -154,11 +151,11 @@ const user_activation = async (req, res) => {
                                     }
                                 )
 
-                                if (currentUser && currentUser.referNumber) {
+                                if (currentUser && currentUser.referNumber != "0") {
                                     refUser = currentUser
                                 } else {
                                     refUser = {}
-                                    res.status(200).json({ data: activeHostUser})
+                                    res.status(200).json({ data: activeHostUser })
                                 }
 
                             } else {
@@ -189,11 +186,11 @@ const user_activation = async (req, res) => {
                                     }
                                 )
 
-                                if (currentUser && currentUser.referNumber) {
+                                if (currentUser && currentUser.referNumber != "0") {
                                     refUser = currentUser
                                 } else {
                                     refUser = {}
-                                    res.status(200).json({ data: activeHostUser})
+                                    res.status(200).json({ data: activeHostUser })
                                 }
                             } else {
                                 res.status(500).json({ failed: "Failed to active your account, please try again" })
@@ -223,11 +220,11 @@ const user_activation = async (req, res) => {
                                     }
                                 )
 
-                                if (currentUser && currentUser.referNumber) {
+                                if (currentUser && currentUser.referNumber != "0") {
                                     refUser = currentUser
                                 } else {
                                     refUser = {}
-                                    res.status(200).json({ data: activeHostUser})
+                                    res.status(200).json({ data: activeHostUser })
                                 }
 
                             } else {
@@ -258,11 +255,11 @@ const user_activation = async (req, res) => {
                                     }
                                 )
 
-                                if (currentUser && currentUser.referNumber) {
+                                if (currentUser && currentUser.referNumber != "0") {
                                     refUser = currentUser
                                 } else {
                                     refUser = {}
-                                    res.status(200).json({ data: activeHostUser})
+                                    res.status(200).json({ data: activeHostUser })
                                 }
 
                             } else {
@@ -293,11 +290,11 @@ const user_activation = async (req, res) => {
                                     }
                                 )
 
-                                if (currentUser && currentUser.referNumber) {
+                                if (currentUser && currentUser.referNumber != "0") {
                                     refUser = currentUser
                                 } else {
                                     refUser = {}
-                                    res.status(200).json({ data: activeHostUser})
+                                    res.status(200).json({ data: activeHostUser })
                                 }
 
                             } else {
@@ -328,11 +325,11 @@ const user_activation = async (req, res) => {
                                     }
                                 )
 
-                                if (currentUser && currentUser.referNumber) {
+                                if (currentUser && currentUser.referNumber != "0") {
                                     refUser = currentUser
                                 } else {
                                     refUser = {}
-                                    res.status(200).json({ data: activeHostUser})
+                                    res.status(200).json({ data: activeHostUser })
                                 }
                             } else {
                                 res.status(500).json({ failed: "Failed to active your account, please try again" })
@@ -362,11 +359,11 @@ const user_activation = async (req, res) => {
                                     }
                                 )
 
-                                if (currentUser && currentUser.referNumber) {
+                                if (currentUser && currentUser.referNumber != "0") {
                                     refUser = currentUser
                                 } else {
                                     refUser = {}
-                                    res.status(200).json({ data: activeHostUser})
+                                    res.status(200).json({ data: activeHostUser })
                                 }
                             } else {
                                 res.status(500).json({ failed: "Failed to active your account, please try again" })

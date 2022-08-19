@@ -29,7 +29,11 @@ const login = async (req, res) => {
                     }
                 })
 
+            } else {
+                res.status(401).json({ failed: "user/password are invalid, please try again." })
             }
+        } else {
+            res.status(401).json({ failed: "user/password are invalid, please try again." })
         }
 
     } catch (err) {

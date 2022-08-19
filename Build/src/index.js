@@ -124,7 +124,7 @@ app.post("/addSlider", adminAuthGard, add_slider_img)
 // ======Slider Image Delete Route  ======
 app.delete("/slider_img_delete", adminAuthGard, slider_img_delete)
 // ======Notice Add Route  ======
-app.post("/notice",adminAuthGard, add_notice)
+app.post("/notice", adminAuthGard, add_notice)
 // ======Notice Read Route  ======
 app.get("/notice", read_notice)
 
@@ -143,7 +143,21 @@ app.listen(port, () => {
     console.log(`listening to port ${port}`)
 })
 
+const dates = (date) => {
+    const container = date.toLocaleDateString('en-us', {
+        year: 'numeric',
+        month: 'short',
+        day: 'numeric'
+    })
+    return container
+}
 
-
-
+const date = new Date().toLocaleDateString('en-us', {
+    year: 'numeric',
+    month: 'short',
+    day: 'numeric'
+})
+const datess = new Date()
+console.log(date)
+console.log(dates(datess))
 

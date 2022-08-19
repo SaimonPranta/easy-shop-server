@@ -42,7 +42,6 @@ const registation = async (req, res) => {
                                 process.env.JWT_SECRET_KEY,
                                 { expiresIn: "1d" }
                             );
-                            console.log(createdUser)
                             createdUser.password = null
 
                             res.status(201).json({
