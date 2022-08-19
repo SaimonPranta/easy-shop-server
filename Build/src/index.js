@@ -143,21 +143,8 @@ app.listen(port, () => {
     console.log(`listening to port ${port}`)
 })
 
-const dates = (date) => {
-    const container = date.toLocaleDateString('en-us', {
-        year: 'numeric',
-        month: 'short',
-        day: 'numeric'
-    })
-    return container
+
 }
 
-const date = new Date().toLocaleDateString('en-us', {
-    year: 'numeric',
-    month: 'short',
-    day: 'numeric'
-})
-const datess = new Date()
-console.log(date)
-console.log(dates(datess))
+
 
