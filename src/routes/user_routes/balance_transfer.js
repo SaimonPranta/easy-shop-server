@@ -1,4 +1,5 @@
 const user_collection = require("../../db/schemas/user_schema");
+const date_provider = require("../../functions/date_provider");
 
 
 const balance_transfer = async (req, res) => {
@@ -32,7 +33,7 @@ const balance_transfer = async (req, res) => {
                                 name: `${receiverUserUpdate.firstName} ${receiverUserUpdate.lastName}`,
                                 number: receiverUserUpdate.phoneNumber,
                                 amount: floorAmount,
-                                date: new Date().toLocaleDateString()
+                                date: date_provider(new Date())
                             }
                             const porviderUserUpdate = await user_collection.findOneAndUpdate({ _id: id },
                                 {

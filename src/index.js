@@ -124,7 +124,7 @@ app.post("/addSlider", adminAuthGard, add_slider_img)
 // ======Slider Image Delete Route  ======
 app.delete("/slider_img_delete", adminAuthGard, slider_img_delete)
 // ======Notice Add Route  ======
-app.post("/notice",adminAuthGard, add_notice)
+app.post("/notice", adminAuthGard, add_notice)
 // ======Notice Read Route  ======
 app.get("/notice", read_notice)
 
@@ -142,6 +142,8 @@ app.use((error, req, res, next) => {
 app.listen(port, () => {
     console.log(`listening to port ${port}`)
 })
+
+
 
 
 

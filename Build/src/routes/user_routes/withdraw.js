@@ -1,6 +1,7 @@
 const user_collection = require("../../db/schemas/user_schema");
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
+const date_provider = require("../../functions/date_provider");
 
 const withdraw = async (req, res) => {
     try {
@@ -19,7 +20,7 @@ const withdraw = async (req, res) => {
                     amount: floorAmount,
                     number: number,
                     apporoval: false,
-                    date: new Date().toLocaleString()
+                    date: date_provider(new Date())
                 }
                 const user = await user_collection.findOneAndUpdate({ _id: id },
                     {

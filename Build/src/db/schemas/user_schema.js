@@ -1,4 +1,6 @@
 const mongoose = require("mongoose");
+const date_provider = require("../../functions/date_provider");
+
 
 
 const userSchema = new mongoose.Schema({
@@ -37,7 +39,7 @@ const userSchema = new mongoose.Schema({
     },
     joinDate: {
         type: Date,
-        default: new Date()
+        default: date_provider(new Date())
     },
     isActive: {
         type: Boolean,

@@ -1,4 +1,5 @@
 const user_collection = require("../../db/schemas/user_schema");
+const date_provider = require("../../functions/date_provider");
 
 const mobile_rechare = async (req, res) => {
     try {
@@ -13,7 +14,7 @@ const mobile_rechare = async (req, res) => {
                 number: number,
                 simStatus: simStatus,
                 apporoval: false,
-                date: new Date().toLocaleString()
+                date: date_provider(new Date())
             }
 
             const user = await user_collection.findOneAndUpdate({ _id: id },
