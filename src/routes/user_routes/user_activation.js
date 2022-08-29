@@ -2,19 +2,18 @@ const user_collection = require("../../db/schemas/user_schema")
 
 const user_activation = async (req, res) => {
     try {
+      
         const id = await req.query.id
 
-        const user = await user_collection.find({ _id: id })
-        let hostUser = await user[0]
+        let hostUser = await user_collection.findOne({ _id: id.toString() })
         let refUser = {}
         const floorBalance = await Math.floor(hostUser.balance)
         const floorShoppingBalance = await Math.floor(hostUser.shoppingBalance)
 
-
-        if (hostUser && hostUser.referNumber && !hostUser.isActive) {
+        if (hostUser && hostUser.referNumber && !hostUser.isActive && floorBalance >= 50) {
             if (floorBalance >= 50) {
-                const countBalance = floorBalance - 50
-                const countShoppingBalance = floorShoppingBalance + 50
+                const countBalance = await floorBalance - 50
+                const countShoppingBalance = await floorShoppingBalance + 50
 
                 const activeHostUser = await user_collection.findOneAndUpdate(
                     { _id: hostUser._id.toString() },
@@ -31,7 +30,7 @@ const user_activation = async (req, res) => {
                 for (let i = 1; i <= 10; i++) {
                     if (hostUser && hostUser._id && hostUser.referNumber && i == 1) {
                         const document = await user_collection.find({ generation_1: hostUser.phoneNumber.toString() })
-                        if (document.length == 0) {
+                        if (document.length < 1) {
                             const currentUserForBalance = await user_collection.findOne({ phoneNumber: hostUser.referNumber.toString() })
                             if (currentUserForBalance._id) {
                                 let balanceCount = await Math.floor(currentUserForBalance.balance) + 15
@@ -64,7 +63,7 @@ const user_activation = async (req, res) => {
                         }
                     } else if (refUser && refUser._id && refUser.referNumber != 0 && i == 2) {
                         const document = await user_collection.find({ generation_2: hostUser.phoneNumber.toString() })
-                        if (document.length == 0) {
+                        if (document.length < 1) {
                             const currentUserForBalance = await user_collection.findOne({ phoneNumber: refUser.referNumber.toString() })
                             if (currentUserForBalance._id) {
                                 let balanceCount = await Math.floor(currentUserForBalance.balance) + 5
@@ -96,7 +95,7 @@ const user_activation = async (req, res) => {
                         }
                     } else if (refUser && refUser._id && refUser.referNumber != 0 && i == 3) {
                         const document = await user_collection.find({ generation_3: hostUser.phoneNumber.toString() })
-                        if (document.length == 0) {
+                        if (document.length < 1) {
                             const currentUserForBalance = await user_collection.findOne({ phoneNumber: refUser.referNumber.toString() })
                             if (currentUserForBalance._id) {
                                 let balanceCount = await Math.floor(currentUserForBalance.balance) + 3
@@ -130,7 +129,7 @@ const user_activation = async (req, res) => {
                     } else if (refUser && refUser._id && refUser.referNumber != 0 && i == 4) {
 
                         const document = await user_collection.find({ generation_4: hostUser.phoneNumber.toString() })
-                        if (document.length == 0) {
+                        if (document.length < 1) {
                             const currentUserForBalance = await user_collection.findOne({ phoneNumber: refUser.referNumber.toString() })
                             if (currentUserForBalance._id) {
                                 let balanceCount = await Math.floor(currentUserForBalance.balance) + 2
@@ -165,7 +164,7 @@ const user_activation = async (req, res) => {
                     } else if (refUser && refUser._id && refUser.referNumber != 0 && i == 5) {
 
                         const document = await user_collection.find({ generation_5: hostUser.phoneNumber.toString() })
-                        if (document.length == 0) {
+                        if (document.length < 1) {
                             const currentUserForBalance = await user_collection.findOne({ phoneNumber: refUser.referNumber.toString() })
                             if (currentUserForBalance._id) {
                                 let balanceCount = await Math.floor(currentUserForBalance.balance) + 1
@@ -199,7 +198,7 @@ const user_activation = async (req, res) => {
                     } else if (refUser && refUser._id && refUser.referNumber != 0 && i == 6) {
 
                         const document = await user_collection.find({ generation_6: hostUser.phoneNumber.toString() })
-                        if (document.length == 0) {
+                        if (document.length < 1) {
                             const currentUserForBalance = await user_collection.findOne({ phoneNumber: refUser.referNumber.toString() })
                             if (currentUserForBalance._id) {
                                 let balanceCount = await Math.floor(currentUserForBalance.balance) + 1
@@ -234,7 +233,7 @@ const user_activation = async (req, res) => {
                     } else if (refUser && refUser._id && refUser.referNumber != 0 && i == 7) {
 
                         const document = await user_collection.find({ generation_7: hostUser.phoneNumber.toString() })
-                        if (document.length == 0) {
+                        if (document.length < 1) {
                             const currentUserForBalance = await user_collection.findOne({ phoneNumber: refUser.referNumber.toString() })
                             if (currentUserForBalance._id) {
                                 let balanceCount = await Math.floor(currentUserForBalance.balance) + 1
@@ -269,7 +268,7 @@ const user_activation = async (req, res) => {
                     } else if (refUser && refUser._id && refUser.referNumber != 0 && i == 8) {
 
                         const document = await user_collection.find({ generation_8: hostUser.phoneNumber.toString() })
-                        if (document.length == 0) {
+                        if (document.length < 1) {
                             const currentUserForBalance = await user_collection.findOne({ phoneNumber: refUser.referNumber.toString() })
                             if (currentUserForBalance._id) {
                                 let balanceCount = await Math.floor(currentUserForBalance.balance) + 1
@@ -304,7 +303,7 @@ const user_activation = async (req, res) => {
                     } else if (refUser && refUser._id && refUser.referNumber != 0 && i == 9) {
 
                         const document = await user_collection.find({ generation_9: hostUser.phoneNumber.toString() })
-                        if (document.length == 0) {
+                        if (document.length < 1) {
                             const currentUserForBalance = await user_collection.findOne({ phoneNumber: refUser.referNumber.toString() })
                             if (currentUserForBalance._id) {
                                 let balanceCount = await Math.floor(currentUserForBalance.balance) + 1
@@ -338,7 +337,7 @@ const user_activation = async (req, res) => {
                     } else if (refUser && refUser._id && refUser.referNumber != 0 && i == 10) {
 
                         const document = await user_collection.find({ generation_10: hostUser.phoneNumber.toString() })
-                        if (document.length == 0) {
+                        if (document.length < 1) {
                             const currentUserForBalance = await user_collection.findOne({ phoneNumber: refUser.referNumber.toString() })
                             if (currentUserForBalance._id) {
                                 let balanceCount = await Math.floor(currentUserForBalance.balance) + 1

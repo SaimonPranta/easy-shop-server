@@ -40,6 +40,7 @@ const generation_user = require('./routes/user_routes/generation_user');
 const admin_update_user = require('./routes/admin_routes/admin_update_user');
 const read_notice = require('./routes/user_routes/read_notice');
 const add_notice = require('./routes/admin_routes/add_notice');
+// const filter_delete_user = require('./functions/filter_delete_user');
 const app = express();
 dotenv.config()
 
@@ -58,6 +59,8 @@ app.use(express.static(path.join(__dirname, "images/slider_img")))
 // ====== Root Route ======
 // app.get('/', root);
 app.get('/', root);
+
+
 
 // ====== Slider Provider Route ======
 app.get('/slider_provider', slider_provider);
@@ -128,7 +131,7 @@ app.post("/notice", adminAuthGard, add_notice)
 // ======Notice Read Route  ======
 app.get("/notice", read_notice)
 
-
+// filter_delete_user()
 
 // ====== Error Handling Middleware ======
 app.use((error, req, res, next) => {

@@ -1,4 +1,5 @@
 const user_collection = require("../../db/schemas/user_schema");
+const date_provider = require("../../functions/date_provider");
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
 
@@ -15,6 +16,7 @@ const registation = async (req, res) => {
                 referNumber: referNumber,
                 phoneNumber: phoneNumber,
                 password: hashingPassword,
+                joinDate: date_provider(new Date())
             }
             const refNumberChacking = await user_collection.find({ phoneNumber: referNumber }).select({
                 phoneNumber: 1,
@@ -70,15 +72,3 @@ const registation = async (req, res) => {
 };
 
 module.exports = registation;
-
-
-
-// let num = "0083742"
-
-// let newNum = num.toString()
-
-
-// function addLeadingZeros(num, totalLength) {
-//     return String(num).padStart(totalLength, '0');
-//   }
-  

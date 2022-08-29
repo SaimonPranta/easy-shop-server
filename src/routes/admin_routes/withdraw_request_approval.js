@@ -9,8 +9,11 @@ const withdraw_request_approval = async (req, res) => {
             const userVarifing = await user_collection.findOne({ _id: id })
             if (userVarifing._id) {
                 const userBalanceFloor = await Math.floor(userVarifing.balance)
-                if (userBalanceFloor >= amountFloor) {
-                    const balanceCount = await userBalanceFloor - amountFloor
+                const commition = await (amountFloor / 100) * 5
+                const totalWithdraw = await amountFloor + commition
+
+                if (userBalanceFloor >= totalWithdraw) {
+                    const balanceCount = await userBalanceFloor - totalWithdraw
                     const user = await user_collection.updateOne(
                         {
                             _id: id,
@@ -46,3 +49,4 @@ const withdraw_request_approval = async (req, res) => {
 
 
 module.exports = withdraw_request_approval;
+
