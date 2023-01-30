@@ -3,7 +3,10 @@ const user_collection = require("../../db/schemas/user_schema");
 const withdraw_request_approval = async (req, res) => {
     try {
         const { id, requestID, amount } = req.body
+        console.log("1st", amount)
         const amountFloor = await Math.floor(amount);
+        console.log("2st", amountFloor)
+
 
         if (id && requestID && amountFloor) {
             const userVarifing = await user_collection.findOne({ _id: id })
@@ -11,6 +14,7 @@ const withdraw_request_approval = async (req, res) => {
                 const userBalanceFloor = await Math.floor(userVarifing.balance)
                 const commition = await (amountFloor / 100) * 5
                 const totalWithdraw = await amountFloor + commition
+                console.log("3st", amountFloor, commition)
 
                 if (userBalanceFloor >= totalWithdraw) {
                     const balanceCount = await userBalanceFloor - totalWithdraw

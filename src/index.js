@@ -60,7 +60,8 @@ app.use(express.static(path.join(__dirname, "images/slider_img")))
 // app.get('/', root);
 app.get('/', root);
 
-
+// ====== Products Route ======
+app.use('/product', require("./routes/product_routes/product_routes"));
 
 // ====== Slider Provider Route ======
 app.get('/slider_provider', slider_provider);
@@ -121,7 +122,6 @@ app.post("/withdraw_request_decline", adminAuthGard, withdraw_request_decline)
 
 
 
-
 // ======Slider Image Add Route  ======
 app.post("/addSlider", adminAuthGard, add_slider_img)
 // ======Slider Image Delete Route  ======
@@ -146,9 +146,5 @@ app.listen(port, () => {
     console.log(`listening to port ${port}`)
 })
 
-
-
-
-
-
+    
 
