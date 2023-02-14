@@ -10,9 +10,19 @@ const product_schema = new mongoose.Schema({
         type: String,
         required: true,
     },
+    price: {
+        type: Number,
+        required: true,
+    },
+    discount: {
+        type: Number,
+        required: true,
+        default: 0
+    },
     img: {
         type: String,
         required: true,
+        unique:true
     },
     rating: {
         type: Number,
@@ -30,12 +40,20 @@ const product_schema = new mongoose.Schema({
             }
         })
     ],
-    img: {
-        type: String,
+    trific: {
+        type: Number,
         required: true,
-        unique: true
+        default: 0,
+    },
+    viewAs: {
+        type: String,
+        default: "general",
     }
+}, {
+    timestamps: true
 });
+
+
 
 const product_collection = new mongoose.model("product_collectionss", product_schema);
 

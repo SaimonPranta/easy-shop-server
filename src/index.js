@@ -52,7 +52,10 @@ app.use(cors())
 app.use(express.json())
 app.use(cookieParser())
 app.use(fileUpload());
-app.use(express.static(path.join(__dirname, "images/slider_img")))
+// app.use(express.static(path.join(__dirname, "images/slider_img")))
+
+app.use(express.static(path.join(__dirname, "/../images/product_images")))
+app.use(express.static(path.join(__dirname, "/../images/slider_images")))
 
 
 
