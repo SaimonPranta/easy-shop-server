@@ -15,7 +15,8 @@ const add_slider_img = async (req, res) => {
         } else {
             const extention = await image.mimetype.split("/")[1]
             image.name = await image.name.split(".")[0] + Math.floor(Math.random() * 10) + Date.now() + "." + extention
-            const imageUpload = await image.mv(`${__dirname}/../../../src/images/slider_img/${image.name}`)
+
+            await image.mv(`${__dirname}/../../../images/slider_images/${image.name}`)
 
             const imgInfo = await {
                 img: image.name
@@ -30,10 +31,13 @@ const add_slider_img = async (req, res) => {
             }
         }
     } catch (error) {
+        console.log(error)
         res.status(200).json({ failed: "Failed to upload image, please try again" })
 
     }
 }
+// // await image.mv(`${__dirname}/../../../images/product_images/${image.name}`);
+// console.log("fileName" , `${__dirname}/../../../../images/slider_images`)
 
 
 module.exports = add_slider_img;
