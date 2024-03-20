@@ -13,9 +13,9 @@ const user_activation = async (req, res) => {
 
             if (hostUser && hostUser.referNumber) {
                 if (!hostUser.isActive) {
-                    if (floorBalance >= 150) {
-                        const countBalance = await floorBalance - 150
-                        const countShoppingBalance = await floorShoppingBalance + 150
+                    if (floorBalance >= 50) {
+                        const countBalance = await floorBalance - 50
+                        const countShoppingBalance = await floorShoppingBalance + 50
 
                         const activeHostUser = await user_collection.findOneAndUpdate(
                             { _id: hostUser._id.toString() },
@@ -35,8 +35,8 @@ const user_activation = async (req, res) => {
                                 if (document.length < 1) {
                                     const currentUserForBalance = await user_collection.findOne({ phoneNumber: hostUser.referNumber.toString() })
                                     if (currentUserForBalance._id) {
-                                        let balanceCount = await Math.floor(currentUserForBalance.balance) + 40
-                                        let incomeBalanceCount = await Math.floor(currentUserForBalance.totalIncome) + 40
+                                        let balanceCount = await Math.floor(currentUserForBalance.balance) + 15
+                                        let incomeBalanceCount = await Math.floor(currentUserForBalance.totalIncome) + 15
 
                                         const currentUser = await user_collection.findOneAndUpdate(
                                             { phoneNumber: hostUser.referNumber.toString() },
@@ -69,8 +69,8 @@ const user_activation = async (req, res) => {
                                 if (document.length < 1) {
                                     const currentUserForBalance = await user_collection.findOne({ phoneNumber: refUser.referNumber.toString() })
                                     if (currentUserForBalance._id) {
-                                        let balanceCount = await Math.floor(currentUserForBalance.balance) + 10
-                                        let incomeBalanceCount = await Math.floor(currentUserForBalance.totalIncome) + 10
+                                        let balanceCount = await Math.floor(currentUserForBalance.balance) + 3
+                                        let incomeBalanceCount = await Math.floor(currentUserForBalance.totalIncome) + 3
 
                                         const currentUser = await user_collection.findOneAndUpdate(
                                             { phoneNumber: refUser.referNumber.toString() },
@@ -101,8 +101,8 @@ const user_activation = async (req, res) => {
                                 if (document.length < 1) {
                                     const currentUserForBalance = await user_collection.findOne({ phoneNumber: refUser.referNumber.toString() })
                                     if (currentUserForBalance._id) {
-                                        let balanceCount = await Math.floor(currentUserForBalance.balance) + 5
-                                        let incomeBalanceCount = await Math.floor(currentUserForBalance.totalIncome) + 5
+                                        let balanceCount = await Math.floor(currentUserForBalance.balance) + 1
+                                        let incomeBalanceCount = await Math.floor(currentUserForBalance.totalIncome) + 1
 
                                         const currentUser = await user_collection.findOneAndUpdate(
                                             { phoneNumber: refUser.referNumber.toString() },
@@ -135,8 +135,8 @@ const user_activation = async (req, res) => {
                                 if (document.length < 1) {
                                     const currentUserForBalance = await user_collection.findOne({ phoneNumber: refUser.referNumber.toString() })
                                     if (currentUserForBalance._id) {
-                                        let balanceCount = await Math.floor(currentUserForBalance.balance) + 3
-                                        let incomeBalanceCount = await Math.floor(currentUserForBalance.totalIncome) + 3
+                                        let balanceCount = await Math.floor(currentUserForBalance.balance) + 1
+                                        let incomeBalanceCount = await Math.floor(currentUserForBalance.totalIncome) + 1
 
                                         const currentUser = await user_collection.findOneAndUpdate(
                                             { phoneNumber: refUser.referNumber.toString() },
@@ -170,8 +170,8 @@ const user_activation = async (req, res) => {
                                 if (document.length < 1) {
                                     const currentUserForBalance = await user_collection.findOne({ phoneNumber: refUser.referNumber.toString() })
                                     if (currentUserForBalance._id) {
-                                        let balanceCount = await Math.floor(currentUserForBalance.balance) + 2
-                                        let incomeBalanceCount = await Math.floor(currentUserForBalance.totalIncome) + 2
+                                        let balanceCount = await Math.floor(currentUserForBalance.balance) + 1
+                                        let incomeBalanceCount = await Math.floor(currentUserForBalance.totalIncome) + 1
 
                                         const currentUser = await user_collection.findOneAndUpdate(
                                             { phoneNumber: refUser.referNumber.toString() },
@@ -204,8 +204,8 @@ const user_activation = async (req, res) => {
                                 if (document.length < 1) {
                                     const currentUserForBalance = await user_collection.findOne({ phoneNumber: refUser.referNumber.toString() })
                                     if (currentUserForBalance._id) {
-                                        let balanceCount = await Math.floor(currentUserForBalance.balance) + 2
-                                        let incomeBalanceCount = await Math.floor(currentUserForBalance.totalIncome) + 2
+                                        let balanceCount = await Math.floor(currentUserForBalance.balance) + 1
+                                        let incomeBalanceCount = await Math.floor(currentUserForBalance.totalIncome) + 1
 
                                         const currentUser = await user_collection.findOneAndUpdate(
                                             { phoneNumber: refUser.referNumber.toString() },

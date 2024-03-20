@@ -12,7 +12,6 @@ const withdrawRequestList = async (req, res) => {
         const skip = pageLimit >= userCount ? 0 : userCount - pageLimit; 
  
         const userList = await user_collection.find(query).select("firstName lastName  phoneNumber withdrawInfo").skip(skip).limit(limit)
- 
 
  
         res.json({
@@ -20,8 +19,7 @@ const withdrawRequestList = async (req, res) => {
             message: "Documents loaded successfully",
             users: userList
         })
-    } catch (error) {
-        console.log("error", error)
+    } catch (error) { 
         res.json({
             success: false,
             message: "Internal server error"

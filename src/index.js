@@ -21,6 +21,7 @@ const withdraw = require("./routes/user_routes/withdraw");
 const generation_list = require("./routes/user_routes/generation_list");
 const adminAuthGard = require("./middleware/adminAuthGard");
 const all_user = require("./routes/admin_routes/all_user");
+const pubLicAllUser = require("./routes/user_routes/all_user");
 const user_dtails = require("./routes/admin_routes/user_dtails");
 const balance_approval = require("./routes/admin_routes/blanace_approval");
 const mobile_recharge_approval = require('./routes/admin_routes/mobile_recharge_approval');
@@ -47,6 +48,9 @@ const withdrawRequestList = require('./routes/admin_routes/withdrawRequestList')
 const rechargeRequestList = require('./routes/admin_routes/rechargeRequestList');
 const rechargeRequest = require('./routes/admin_routes/rechargeRequest');
 const withdrawRequest = require('./routes/admin_routes/withdrawRequest');
+const helpLineSocial = require('./routes/admin_routes/helpLine');
+const adminNotification = require('./routes/admin_routes/notification');
+const notification = require('./routes/user_routes/notification');
 // const filter_delete_user = require('./functions/filter_delete_user');
 const app = express();
 dotenv.config()
@@ -63,6 +67,8 @@ app.use(fileUpload());
 
 app.use(express.static(path.join(__dirname, "/../images/product_images")))
 app.use(express.static(path.join(__dirname, "/../images/slider_images")))
+app.use(express.static(path.join(__dirname, "/../images/help_social")))
+app.use(express.static(path.join(__dirname, "/../images/notification")))
 
 
 
@@ -112,6 +118,8 @@ app.get("/user/userDetails", authGard, user_dtails)
 // ======Admin All User Read Route ======
 app.get("/admin/users", adminAuthGard, all_user);
 // ======Admin All User Read Route ======
+app.get("/public/users", pubLicAllUser);
+// ======Admin All User Read Route ======
 app.get("/admin/user-count", adminAuthGard, userCount);
 // ======Admin All User Read Route ======
 app.get("/admin/balance-request", adminAuthGard, balanceRequest);
@@ -127,7 +135,15 @@ app.get("/admin/recharge-request-list", adminAuthGard, rechargeRequestList);
 app.get("/admin/recharge-request", adminAuthGard, rechargeRequest);
 // ======Admin Withdraw Request Route ======
 app.get("/admin/withdraw-request", adminAuthGard, withdrawRequest);
-// ======Admin Balance Requesst Approval Route ======
+// ======Admin Helpline Route ======
+app.use("/admin/helpline-social", adminAuthGard, helpLineSocial);
+// ======Admin Notification Route ======
+app.use("/admin/notification", adminAuthGard, adminNotification);
+// ======User Notification Route ======
+app.use("/user/notification", authGard, notification);
+// ======Admin Withdraw Request Route ======
+app.use("/public/helpline-social", helpLineSocial);
+// ======Admin Balance Requests Approval Route ======
 app.post("/blanace_approval", adminAuthGard, balance_approval)
 
 
@@ -170,5 +186,5 @@ app.listen(port, () => {
     console.log(`listening to port ${port}`)
 })
 
-    
+
 

@@ -8,8 +8,15 @@ const balance_approval = async (req, res) => {
         if (id && requestID && amountFloor) {
             const userVarifing = await user_collection.findOne({ _id: id })
             if (userVarifing._id) {
-                const balanceCount = await Math.floor(userVarifing.balance) + amountFloor
+                let balanceCount = await Math.floor(userVarifing.balance) + amountFloor
+                const updateInfo = {
 
+                }
+                if (!userVarifing.isActive && balanceCount >= 150) {
+                    updateInfo["isActive"] = true
+                    balanceCount = balanceCount - 150
+                } 
+ 
                 const user = await user_collection.updateOne(
                     {
                         _id: id,
@@ -17,8 +24,9 @@ const balance_approval = async (req, res) => {
                     },
                     {
                         $set: {
+                            ...updateInfo,
                             balance: balanceCount,
-                            "balanceRequestInfo.$.apporoval": true
+                            "balanceRequestInfo.$.apporoval": true,
                         }
                     }
                 )

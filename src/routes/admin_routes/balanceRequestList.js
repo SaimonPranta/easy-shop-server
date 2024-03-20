@@ -7,15 +7,10 @@ const balanceRequestList = async (req, res) => {
         const userCount = await user_collection.countDocuments(query)
         const limit = 25;
         //const page = 1;  
-        const pageLimit = limit * Number(page);
-        console.log("query", query)
-
+        const pageLimit = limit * Number(page); 
         const skip = pageLimit >= userCount ? 0 : userCount - pageLimit;
 
         const userList = await user_collection.find(query).select("firstName lastName  phoneNumber balanceRequestInfo ").skip(skip).limit(limit)
-        console.log("userList", userList.length)
-
-
         res.json({
             success: true,
             message: "Documents loaded successfully",
