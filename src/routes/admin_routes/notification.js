@@ -30,7 +30,7 @@ router.post("/", async (req, res) => {
 
         const createInfo = { ...data }
         if (image) {
-            image = image?.img;
+            image = image.img;
             const extension = path.extname(image.name)
             image.name = `${image.name.replace(extension, "")}${Date.now()}${extension}`
             createInfo["img"] = image.name

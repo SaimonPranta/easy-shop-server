@@ -1,4 +1,5 @@
 const user_collection = require("../../db/schemas/user_schema");
+const userActivation = require("./helper/userActivation");
 
 const balance_approval = async (req, res) => {
     try {
@@ -12,12 +13,8 @@ const balance_approval = async (req, res) => {
                 const updateInfo = {
 
                 }
-                if (!userVarifing.isActive && balanceCount >= 150) {
-                    updateInfo["isActive"] = true
-                    balanceCount = balanceCount - 150
-                } 
  
-                const user = await user_collection.updateOne(
+                const user = await user_collection.findOneAndUpdate(
                     {
                         _id: id,
                         "balanceRequestInfo.requestID": requestID
@@ -28,8 +25,19 @@ const balance_approval = async (req, res) => {
                             balance: balanceCount,
                             "balanceRequestInfo.$.apporoval": true,
                         }
+                    }, {
+                        new: true
                     }
                 )
+
+                console.log("user ==>>", user.balance)
+                if (!user.isActive && user.balance >= 150) {
+                    console.log("Enter to if condition ======>>>")
+                    // updateInfo["isActive"] = true
+                    // balanceCount = balanceCount - 150
+                    userActivation(user._id.toString())
+                    
+                } 
                 if (user.modifiedCount > 0) {
                     res.status(200).json({ sucess: "sucessfuly approved" })
                 } else {

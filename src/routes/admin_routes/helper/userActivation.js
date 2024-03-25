@@ -1,8 +1,8 @@
-const user_collection = require("../../db/schemas/user_schema")
 
-const user_activation = async (req, res) => {
-    try {
-        const id = await req.query.id
+const user_collection = require("../../../db/schemas/user_schema")
+
+const userActivation = async (id) => {
+    try { 
 
         if (id) {
             let hostUser = await user_collection.findOne({ _id: id.toString() })
@@ -56,10 +56,8 @@ const user_activation = async (req, res) => {
                                             refUser = currentUser
                                         } else {
                                             refUser = {}
-                                            res.status(200).json({ data: activeHostUser })
                                         }
                                     } else {
-                                        res.status(500).json({ failed: "Failed to Active Your Account, Please Try Again !" })
 
                                     }
                                 }
@@ -89,10 +87,8 @@ const user_activation = async (req, res) => {
                                             refUser = currentUser
                                         } else {
                                             refUser = {}
-                                            res.status(200).json({ data: activeHostUser })
                                         }
                                     } else {
-                                        res.status(500).json({ failed: "Failed to Active Your Account, Please Try Again !" })
                                     }
                                 }
                             } else if (refUser && refUser._id && refUser.referNumber != 0 && i == 3) {
@@ -122,10 +118,8 @@ const user_activation = async (req, res) => {
                                             refUser = currentUser
                                         } else {
                                             refUser = {}
-                                            res.status(200).json({ data: activeHostUser })
                                         }
                                     } else {
-                                        res.status(500).json({ failed: "Failed to Active Your Account, Please Try Again !" })
                                     }
                                 }
                             } else if (refUser && refUser._id && refUser.referNumber != 0 && i == 4) {
@@ -156,11 +150,9 @@ const user_activation = async (req, res) => {
                                             refUser = currentUser
                                         } else {
                                             refUser = {}
-                                            res.status(200).json({ data: activeHostUser })
                                         }
 
                                     } else {
-                                        res.status(500).json({ failed: "Failed to Active Your Account, Please Try Again !" })
                                     }
                                 }
                             } else if (refUser && refUser._id && refUser.referNumber != 0 && i == 5) {
@@ -191,10 +183,8 @@ const user_activation = async (req, res) => {
                                             refUser = currentUser
                                         } else {
                                             refUser = {}
-                                            res.status(200).json({ data: activeHostUser })
                                         }
                                     } else {
-                                        res.status(500).json({ failed: "Failed to Active Your Account, Please Try Again !" })
                                     }
                                 }
                             } else if (refUser && refUser._id && refUser.referNumber != 0 && i == 6) {
@@ -225,11 +215,9 @@ const user_activation = async (req, res) => {
                                             refUser = currentUser
                                         } else {
                                             refUser = {}
-                                            res.status(200).json({ data: activeHostUser })
                                         }
 
                                     } else {
-                                        res.status(500).json({ failed: "Failed to Active Your Account, Please Try Again !" })
                                     }
                                 }
                             } else if (refUser && refUser._id && refUser.referNumber != 0 && i == 7) {
@@ -260,11 +248,9 @@ const user_activation = async (req, res) => {
                                             refUser = currentUser
                                         } else {
                                             refUser = {}
-                                            res.status(200).json({ data: activeHostUser })
                                         }
 
                                     } else {
-                                        res.status(500).json({ failed: "Failed to Active Your Account, Please Try Again !" })
                                     }
                                 }
                             } else if (refUser && refUser._id && refUser.referNumber != 0 && i == 8) {
@@ -295,11 +281,9 @@ const user_activation = async (req, res) => {
                                             refUser = currentUser
                                         } else {
                                             refUser = {}
-                                            res.status(200).json({ data: activeHostUser })
                                         }
 
                                     } else {
-                                        res.status(500).json({ failed: "Failed to Active Your Account, Please Try Again !" })
                                     }
                                 }
                             } else if (refUser && refUser._id && refUser.referNumber != 0 && i == 9) {
@@ -330,10 +314,8 @@ const user_activation = async (req, res) => {
                                             refUser = currentUser
                                         } else {
                                             refUser = {}
-                                            res.status(200).json({ data: activeHostUser })
                                         }
                                     } else {
-                                        res.status(500).json({ failed: "Failed to Active Your Account, Please Try Again !" })
                                     }
                                 }
                             } else if (refUser && refUser._id && refUser.referNumber != 0 && i == 10) {
@@ -364,33 +346,21 @@ const user_activation = async (req, res) => {
                                             refUser = currentUser
                                         } else {
                                             refUser = {}
-                                            res.status(200).json({ data: activeHostUser })
                                         }
                                     } else {
-                                        res.status(500).json({ failed: "Failed to Active Your Account, Please Try Again !" })
                                     }
                                 }
                             }
                         }
                     } else {
-                        res.status(500).json({ failed: "Sorry, You Have Insufficient Balance, Please Invest Balance and Then Try !" })
                     }
                 } else {
-                    res.status(500).json({ failed: "Sorry, Your Account Are Already Active !" })
                 }
             } else {
-                res.status(500).json({ failed: "Sorry, We Find it was an Unauthorized Attempt !" })
             }
-        } else {
-            res.status(500).json({ failed: "Sorry, We Find it was an Unauthorized Attempt !" })
-        }
+        }  
     } catch (error) {
-        res.status(500).json({ failed: "Something is Wrong, Please try Again !" })
     }
-}
+};
 
-
-
-
-
-module.exports = user_activation;
+module.exports = userActivation;

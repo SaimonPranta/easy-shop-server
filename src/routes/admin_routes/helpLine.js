@@ -26,7 +26,7 @@ router.post("/", async (req, res) => {
                 message: "Failed to add social"
             })
         }
-        image = image?.img;
+        image = image.img;
         const extension = path.extname(image.name)
         image.name = `${image.name.replace(extension, "")}${Date.now()}${extension}`
         const createdInfo = await helplineSocial.create({ ...data, img: image.name })
