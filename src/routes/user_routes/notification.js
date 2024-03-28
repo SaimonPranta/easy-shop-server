@@ -12,8 +12,6 @@ router.get("/", async (req, res) => {
                 { userID: { $exists: false } }
             ]
         })
-
-
         res.json({
             data: data
         })

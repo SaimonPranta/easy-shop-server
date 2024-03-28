@@ -6,8 +6,12 @@ const fs = require("fs")
 
 
 router.get("/", async (req, res) => {
-    try { 
-        const data = await Notification.find()
+    try {
+        const data = await Notification.find().populate({
+            path: 'selectedUser.userID',
+            select: 'phoneNumber firstName lastName'
+        });
+
         res.json({
             data: data
         })
@@ -20,7 +24,9 @@ router.get("/", async (req, res) => {
 router.post("/", async (req, res) => {
     try {
         const data = JSON.parse(req.body.data)
-        let image = req.files 
+
+        console.log("data ==>>", data)
+        let image = req.files
 
         if (!data.description) {
             return res.json({
@@ -28,6 +34,26 @@ router.post("/", async (req, res) => {
             })
         }
 
+        if (data.expireTime) {
+            const date = new Date(data.expireTime)
+            date.setHours(11)
+            date.setMinutes(59)
+            date.setSeconds(59)
+            data.expireTime = date
+        }
+        if (data.allowNotice) {
+            if (data.allowNotice === "activeUser") {
+                data.activeUser = true
+            } else if (data.allowNotice === "nonActiveUser") {
+                data.nonActiveUser = true
+            } else if (data.allowNotice === "allUser") {
+                data.activeUser = true
+                data.nonActiveUser = true
+            }
+        }
+
+        console.log("data 2==>>", data)
+        throw Error("hello")
         const createInfo = { ...data }
         if (image) {
             image = image.img;
@@ -35,7 +61,7 @@ router.post("/", async (req, res) => {
             image.name = `${image.name.replace(extension, "")}${Date.now()}${extension}`
             createInfo["img"] = image.name
         }
-        const createdInfo = await Notification.create({ ...createInfo }) 
+        const createdInfo = await Notification.create({ ...createInfo })
         if (!createdInfo) {
             return res.json({
                 message: "Failed to add social "
@@ -69,7 +95,7 @@ router.delete("/", async (req, res) => {
                 await fs.unlinkSync(filePath)
             }
         }
-        
+
         res.json({
             data: createdInfo,
             success: true,
