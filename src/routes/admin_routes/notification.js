@@ -10,7 +10,7 @@ router.get("/", async (req, res) => {
         const data = await Notification.find().populate({
             path: 'selectedUser.userID',
             select: 'phoneNumber firstName lastName'
-        });
+        }).sort({ createdAt: -1 })
 
         res.json({
             data: data
@@ -52,8 +52,7 @@ router.post("/", async (req, res) => {
             }
         }
 
-        console.log("data 2==>>", data)
-        throw Error("hello")
+         
         const createInfo = { ...data }
         if (image) {
             image = image.img;

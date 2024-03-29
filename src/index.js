@@ -169,7 +169,7 @@ app.delete("/slider_img_delete", adminAuthGard, slider_img_delete)
 // ======Notice Add Route  ======
 app.post("/notice", adminAuthGard, add_notice)
 // ======Notice Read Route  ======
-app.get("/notice", read_notice)
+app.get("/notice",  read_notice)
 
 // filter_delete_user()
 
