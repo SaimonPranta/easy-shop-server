@@ -51,6 +51,7 @@ const withdrawRequest = require('./routes/admin_routes/withdrawRequest');
 const helpLineSocial = require('./routes/admin_routes/helpLine');
 const adminNotification = require('./routes/admin_routes/notification');
 const notification = require('./routes/user_routes/notification');
+const dailyTaskRoutes = require("./routes/DailyTask/index")
 // const filter_delete_user = require('./functions/filter_delete_user');
 const app = express();
 dotenv.config()
@@ -170,6 +171,8 @@ app.delete("/slider_img_delete", adminAuthGard, slider_img_delete)
 app.post("/notice", adminAuthGard, add_notice)
 // ======Notice Read Route  ======
 app.get("/notice",  read_notice)
+// ====== Daily Task  ======
+app.get("/daily-task",  dailyTaskRoutes)
 
 // filter_delete_user()
 

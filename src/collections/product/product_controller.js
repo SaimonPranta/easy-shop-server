@@ -42,7 +42,6 @@ exports.getProduct = async (req, res) => {
     }
 }
 
-console.log("Directory Name", path.join(`${__dirname}/../../../images/product_images`))
 exports.addProduct = async (req, res) => {
     try {
         const image = req.files.img;
