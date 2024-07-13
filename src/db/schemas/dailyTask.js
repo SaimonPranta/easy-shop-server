@@ -22,6 +22,13 @@ const dailyTaskSchema = new mongoose.Schema({
         default: true
     },
     tutorialLink: {
+    tutorialLink: {
+    
+        tutorialLink
+        
+        
+           
+             sss: {
         type: String,
         require: false
     },
