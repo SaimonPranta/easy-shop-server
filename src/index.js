@@ -172,7 +172,7 @@ app.post("/notice", adminAuthGard, add_notice)
 // ======Notice Read Route  ======
 app.get("/notice",  read_notice)
 // ====== Daily Task  ======
-app.get("/daily-task",  dailyTaskRoutes)
+app.use("/daily-task",  dailyTaskRoutes)
 
 // filter_delete_user()
 
