@@ -130,7 +130,6 @@ exports.deleteProduct = async (req, res) => {
 
 exports.updateProduct = async (req, res) => {
     try {
-
         const { title, dis, price, discount, img, rating, detailsArray, viewAs, _id } = await JSON.parse(req.body.data);
         const isImageExist = req.files ? true : false;
         const productInfo = await {

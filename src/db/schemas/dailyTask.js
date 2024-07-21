@@ -1,10 +1,15 @@
 const mongoose = require("mongoose");
 
 const dailyTaskSchema = new mongoose.Schema({
-    title: {
-        type: String,
-        required: true,
+    taskListID: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "daily_task_list",
+        require: true
     },
+    // title: {
+    //     type: String,
+    //     required: true,
+    // },
     description: {
         type: String,
         required: true
@@ -25,20 +30,11 @@ const dailyTaskSchema = new mongoose.Schema({
         type: String,
         require: false
     },
-    taskStartDate: {
-        type: Date,
-        require:true,
+    terminateDate: {
+        type: Date, 
     },
-    taskExpireDate: {
-        type: Date,
-        require:true,
-    },
-    inactive: {
-        type: Boolean,
-        require: false
-    }
 
 }, { timestamps: true })
-const DailyTasks = new mongoose.model("helpline_social", dailyTaskSchema)
+const DailyTasks = new mongoose.model("daily_task", dailyTaskSchema)
 
 module.exports = DailyTasks;
