@@ -14,22 +14,27 @@ const dailyTaskListSchema = new mongoose.Schema({
             },
         })
     ],
-    workedUserList: [
-        new mongoose.Schema({
-            user: {
-                type: mongoose.Schema.Types.ObjectId,
-                ref: "user_collectionsss",
-                require: true,
-            },
-            taskID: {
-                type: mongoose.Schema.Types.ObjectId,
-                ref: "daily_task",
-                require: true,
-            },
-        }, {
-            timestamps: true
-        })
-    ],
+    // workedUserList: [
+    //     new mongoose.Schema({
+    //         user: {
+    //             type: mongoose.Schema.Types.ObjectId,
+    //             ref: "user_collectionsss",
+    //             require: true,
+    //         },
+    //         taskID: {
+    //             type: mongoose.Schema.Types.ObjectId,
+    //             ref: "daily_task",
+    //             require: true,
+    //         },
+    //     }, {
+    //         timestamps: true
+    //     })
+    // ],
+    taskCompleteCount: {
+        type: Number,
+        required: true,
+        default: 0
+    },
     taskStartDate: {
         type: Date,
         require: true,

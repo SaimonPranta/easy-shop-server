@@ -1,5 +1,6 @@
-const {storageDirectory} = require("../../constants/storageDirectory");
+const { storageDirectory } = require("../../constants/storageDirectory");
 const DailyTaskList = require("../../db/schemas/dailyTaskList");
+const UserTaskHIstory = require("../../db/schemas/userTaskHistory")
 const DailyTasks = require("../../db/schemas/dailyTask");
 const dateConverter = require("../../functions/YDM_to_date");
 const { parseDate } = require("./utilities/index");
@@ -103,9 +104,7 @@ exports.createDailyTask = async (req, res) => {
 
 exports.getDailyTask = async (req, res) => {
     try {
-
-
-        const allTask = await DailyTaskList.aggregate([
+        let allTask = await DailyTaskList.aggregate([
             {
                 $lookup: {
                     from: "daily_tasks",
@@ -117,18 +116,41 @@ exports.getDailyTask = async (req, res) => {
                 $unwind: "$currentTaskID"
             }
         ])
-  
-
+        const userDailyTask = await UserTaskHIstory.find({ userID: req.id })
+        allTask = await Promise.all(allTask.map(async (task, i) => {
+            const isTaskComplete = await UserTaskHIstory.findOne({ userID: req.id, taskListID: task._id })
+            if (i === 3) {
+                return {
+                    ...task,
+                    isTaskComplete: true
+                }
+            }
+            return {
+                ...task,
+                isTaskComplete: isTaskComplete ? true : false
+            }
+        }))
+        console.log("allTask", allTask)
         res.json({
             message: "Successfully get daily task",
             data: [...allTask]
         })
     } catch (error) {
-        console.log("error =====>>>", error)
         res.json({
             message: "Internal server error"
         })
     }
 }
 
+exports.userDailyTask = async (req, res) => {
+    try {
+
+        const userDailyTask = UserTaskHIstory
+    } catch (error) {
+        console.log("error", error)
+        res.status(500).json({
+            message: "Internal server error"
+        })
+    }
+}
 

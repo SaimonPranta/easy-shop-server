@@ -1,8 +1,9 @@
 const router = require("express").Router()
-const { createDailyTask, getDailyTask } = require("../../collections/DailyTask/index")
+const { createDailyTask, getDailyTask } = require("../../collections/DailyTask/index");
+const authGard = require("../../middleware/authGard");
 
 //User Routes
-router.get("/get-daily-task", getDailyTask)
+router.get("/get-daily-task", authGard, getDailyTask)
 
 
 

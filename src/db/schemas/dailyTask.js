@@ -10,6 +10,11 @@ const dailyTaskSchema = new mongoose.Schema({
     //     type: String,
     //     required: true,
     // },
+    taskCompleteCount: {
+        type: Number,
+        required: true,
+        default: 0
+    },
     description: {
         type: String,
         required: true
