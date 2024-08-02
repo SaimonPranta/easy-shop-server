@@ -93,8 +93,7 @@ exports.createDailyTask = async (req, res) => {
         // res.json({
         //     message: "Success"
         // })
-    } catch (error) {
-        console.log("error", error)
+    } catch (error) { 
         res.json({
             message: "Internal server error"
 
@@ -104,7 +103,20 @@ exports.createDailyTask = async (req, res) => {
 
 exports.getDailyTask = async (req, res) => {
     try {
+        const today = new Date()
+        const startOfDay = new Date(today.setHours(0, 0, 0, 0));
+        const endOfDay = new Date(today.setHours(23, 59, 59, 999));
+
         let allTask = await DailyTaskList.aggregate([
+            {
+                $match: {
+                    $or: [
+                        { taskStartDate: { $lte: endOfDay }, taskExpireDate: { $gte: startOfDay } }, // Date range includes today
+                        { taskStartDate: { $gte: startOfDay, $lte: endOfDay } }, // taskStartDate is today
+                        // { taskExpireDate: { $gte: startOfDay, $lte: endOfDay } }  // taskExpireDate is today
+                    ]
+                }
+            },
             {
                 $lookup: {
                     from: "daily_tasks",
@@ -115,25 +127,28 @@ exports.getDailyTask = async (req, res) => {
             }, {
                 $unwind: "$currentTaskID"
             }
-        ])
-        const userDailyTask = await UserTaskHIstory.find({ userID: req.id })
+        ]) 
+
+        let isCompletedTask = true
         allTask = await Promise.all(allTask.map(async (task, i) => {
-            const isTaskComplete = await UserTaskHIstory.findOne({ userID: req.id, taskListID: task._id })
-            if (i === 3) {
-                return {
-                    ...task,
-                    isTaskComplete: true
-                }
+            const isTaskComplete = await UserTaskHIstory.findOne({
+                userID: req.id, taskListID: task._id, $and: [
+                    { createdAt: { $gte: startOfDay } },
+                    { createdAt: { $lte: endOfDay } },
+                ]
+            })
+            if (!isTaskComplete) {
+                isCompletedTask = false
             }
             return {
                 ...task,
                 isTaskComplete: isTaskComplete ? true : false
             }
-        }))
-        console.log("allTask", allTask)
+        })) 
         res.json({
             message: "Successfully get daily task",
-            data: [...allTask]
+            data: [...allTask],
+            isCompletedTask,
         })
     } catch (error) {
         res.json({
@@ -142,12 +157,52 @@ exports.getDailyTask = async (req, res) => {
     }
 }
 
-exports.userDailyTask = async (req, res) => {
+exports.createUserTaskHistory = async (req, res) => {
     try {
+        const { taskListID, dailyTaskID } = req.body
+        const id = req.id
+        const today = new Date()
+        const startOfDay = new Date(today.setHours(0, 0, 0, 0));
+        const endOfDay = new Date(today.setHours(23, 59, 59, 999));
 
-        const userDailyTask = UserTaskHIstory
-    } catch (error) {
-        console.log("error", error)
+        const isTaskComplete = await UserTaskHIstory.findOne({
+            userID: id, taskListID: taskListID,
+            $and: [
+                { createdAt: { $gte: startOfDay } },
+                { createdAt: { $lte: endOfDay } },
+            ]
+        })
+
+        if (isTaskComplete) {
+            return res.json({
+                message: "This task already completed"
+            })
+        }
+
+        const userTaskHistoryDocument = await new UserTaskHIstory({
+            taskListID,
+            dailyTaskID,
+            userID: id
+        })
+        const userTaskHistoryData = await userTaskHistoryDocument.save()
+
+        if (userTaskHistoryData) {
+            await DailyTaskList.findOneAndUpdate(
+                { _id: taskListID },
+                { $inc: { taskCompleteCount: 1 } },
+                { new: true }
+            )
+            await DailyTasks.findOneAndUpdate(
+                { _id: dailyTaskID },
+                { $inc: { taskCompleteCount: 1 } },
+                { new: true }
+            )
+        }   
+        res.json({
+            message: "Successfully, your task is completed",
+            taskListID: taskListID
+        })
+    } catch (error) { 
         res.status(500).json({
             message: "Internal server error"
         })
