@@ -26,9 +26,21 @@ const userTaskHistorySchema = new mongoose.Schema({
         required: true,
         default: false,
     },
+    images: {
+        type: Array, 
+        required: true,
+        default: [],
+    },
+    // images: {
+    //     type: Array, 
+    //     required: true,
+    //     default: [],
+    // },
     
 
 }, { timestamps: true })
+
+
 const UserTaskHIstory = new mongoose.model("user_task_history", userTaskHistorySchema)
 
 module.exports = UserTaskHIstory;

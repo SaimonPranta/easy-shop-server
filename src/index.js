@@ -34,8 +34,9 @@ const user_activation = require('./routes/user_routes/user_activation');
 const slider_provider = require('./routes/user_routes/slider_provider');
 const fileUpload = require('express-fileupload');
 const path = require('path');
-
 const fs = require('fs-extra');
+
+
 const slider_img_delete = require('./routes/admin_routes/slider_img_delete');
 const generation_user = require('./routes/user_routes/generation_user');
 const admin_update_user = require('./routes/admin_routes/admin_update_user');

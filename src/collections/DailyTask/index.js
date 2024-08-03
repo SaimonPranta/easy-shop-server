@@ -1,4 +1,4 @@
-const { storageDirectory } = require("../../constants/storageDirectory");
+const { storageDirectory, userTaskStorageDirectory } = require("../../constants/storageDirectory");
 const DailyTaskList = require("../../db/schemas/dailyTaskList");
 const UserTaskHIstory = require("../../db/schemas/userTaskHistory")
 const DailyTasks = require("../../db/schemas/dailyTask");
@@ -93,7 +93,7 @@ exports.createDailyTask = async (req, res) => {
         // res.json({
         //     message: "Success"
         // })
-    } catch (error) { 
+    } catch (error) {
         res.json({
             message: "Internal server error"
 
@@ -127,7 +127,7 @@ exports.getDailyTask = async (req, res) => {
             }, {
                 $unwind: "$currentTaskID"
             }
-        ]) 
+        ])
 
         let isCompletedTask = true
         allTask = await Promise.all(allTask.map(async (task, i) => {
@@ -144,7 +144,7 @@ exports.getDailyTask = async (req, res) => {
                 ...task,
                 isTaskComplete: isTaskComplete ? true : false
             }
-        })) 
+        }))
         res.json({
             message: "Successfully get daily task",
             data: [...allTask],
@@ -160,11 +160,25 @@ exports.getDailyTask = async (req, res) => {
 exports.createUserTaskHistory = async (req, res) => {
     try {
         const { taskListID, dailyTaskID } = req.body
+        const files = req.files || {}
         const id = req.id
         const today = new Date()
         const startOfDay = new Date(today.setHours(0, 0, 0, 0));
         const endOfDay = new Date(today.setHours(23, 59, 59, 999));
+        let images = []
+        let imageString = [] 
 
+        await Object.entries(files).map(([key, img]) => {
+            const fileExt = path.extname(img.name);
+            let fileName = img.name.replace(fileExt, "")
+            fileName = fileName + Math.floor(Math.random() * 10) + Date.now()
+            fileName = fileName + fileExt
+            img.name = fileName
+
+            imageString.push(fileName)
+            images.push(img)
+        }); 
+        
         const isTaskComplete = await UserTaskHIstory.findOne({
             userID: id, taskListID: taskListID,
             $and: [
@@ -182,7 +196,8 @@ exports.createUserTaskHistory = async (req, res) => {
         const userTaskHistoryDocument = await new UserTaskHIstory({
             taskListID,
             dailyTaskID,
-            userID: id
+            userID: id,
+            images: [...imageString]
         })
         const userTaskHistoryData = await userTaskHistoryDocument.save()
 
@@ -197,7 +212,17 @@ exports.createUserTaskHistory = async (req, res) => {
                 { $inc: { taskCompleteCount: 1 } },
                 { new: true }
             )
-        }   
+            await images.forEach(async (imgInfo) => { 
+
+                if (!fs.existsSync(userTaskStorageDirectory())) {
+                    await fs.mkdirSync(path.join(storageDirectory(), "user_task_history"))
+                }
+                const filepath = path.join(userTaskStorageDirectory(), imgInfo.name)
+                await imgInfo.mv(`${userTaskStorageDirectory()}/${imgInfo.name}`)
+
+            })
+
+        }
         res.json({
             message: "Successfully, your task is completed",
             taskListID: taskListID
