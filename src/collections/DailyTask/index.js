@@ -166,7 +166,7 @@ exports.createUserTaskHistory = async (req, res) => {
         const startOfDay = new Date(today.setHours(0, 0, 0, 0));
         const endOfDay = new Date(today.setHours(23, 59, 59, 999));
         let images = []
-        let imageString = [] 
+        let imageString = []
 
         await Object.entries(files).map(([key, img]) => {
             const fileExt = path.extname(img.name);
@@ -177,8 +177,8 @@ exports.createUserTaskHistory = async (req, res) => {
 
             imageString.push(fileName)
             images.push(img)
-        }); 
-        
+        });
+
         const isTaskComplete = await UserTaskHIstory.findOne({
             userID: id, taskListID: taskListID,
             $and: [
@@ -212,7 +212,7 @@ exports.createUserTaskHistory = async (req, res) => {
                 { $inc: { taskCompleteCount: 1 } },
                 { new: true }
             )
-            await images.forEach(async (imgInfo) => { 
+            await images.forEach(async (imgInfo) => {
 
                 if (!fs.existsSync(userTaskStorageDirectory())) {
                     await fs.mkdirSync(path.join(storageDirectory(), "user_task_history"))
@@ -223,11 +223,91 @@ exports.createUserTaskHistory = async (req, res) => {
             })
 
         }
+
         res.json({
             message: "Successfully, your task is completed",
-            taskListID: taskListID
+            taskListID: taskListID,
+            success: true
         })
-    } catch (error) { 
+    } catch (error) {
+        res.status(500).json({
+            message: "Internal server error"
+        })
+    }
+}
+exports.userConfig = async (req, res) => {
+    try {
+        const { taskListID, dailyTaskID } = req.body
+        const files = req.files || {}
+        const id = req.id
+        const today = new Date()
+        const startOfDay = new Date(today.setHours(0, 0, 0, 0));
+        const endOfDay = new Date(today.setHours(23, 59, 59, 999));
+        let images = []
+        let imageString = []
+
+        await Object.entries(files).map(([key, img]) => {
+            const fileExt = path.extname(img.name);
+            let fileName = img.name.replace(fileExt, "")
+            fileName = fileName + Math.floor(Math.random() * 10) + Date.now()
+            fileName = fileName + fileExt
+            img.name = fileName
+
+            imageString.push(fileName)
+            images.push(img)
+        });
+
+        const isTaskComplete = await UserTaskHIstory.findOne({
+            userID: id, taskListID: taskListID,
+            $and: [
+                { createdAt: { $gte: startOfDay } },
+                { createdAt: { $lte: endOfDay } },
+            ]
+        })
+
+        if (isTaskComplete) {
+            return res.json({
+                message: "This task already completed"
+            })
+        }
+
+        const userTaskHistoryDocument = await new UserTaskHIstory({
+            taskListID,
+            dailyTaskID,
+            userID: id,
+            images: [...imageString]
+        })
+        const userTaskHistoryData = await userTaskHistoryDocument.save()
+
+        if (userTaskHistoryData) {
+            await DailyTaskList.findOneAndUpdate(
+                { _id: taskListID },
+                { $inc: { taskCompleteCount: 1 } },
+                { new: true }
+            )
+            await DailyTasks.findOneAndUpdate(
+                { _id: dailyTaskID },
+                { $inc: { taskCompleteCount: 1 } },
+                { new: true }
+            )
+            await images.forEach(async (imgInfo) => {
+
+                if (!fs.existsSync(userTaskStorageDirectory())) {
+                    await fs.mkdirSync(path.join(storageDirectory(), "user_task_history"))
+                }
+                const filepath = path.join(userTaskStorageDirectory(), imgInfo.name)
+                await imgInfo.mv(`${userTaskStorageDirectory()}/${imgInfo.name}`)
+
+            })
+
+        }
+
+        res.json({
+            message: "Successfully, your task is completed",
+            taskListID: taskListID,
+            success: true
+        })
+    } catch (error) {
         res.status(500).json({
             message: "Internal server error"
         })
