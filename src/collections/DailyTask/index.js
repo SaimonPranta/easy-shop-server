@@ -7,6 +7,7 @@ const { parseDate } = require("./utilities/index");
 const testDate = require("./text");
 const fs = require("fs");
 const path = require("path");
+const Configs = require("../../db/schemas/Configs");
 
 const dailyTaskStorage = path.join(storageDirectory(), "daily_task")
 
@@ -230,6 +231,39 @@ exports.createUserTaskHistory = async (req, res) => {
             success: true
         })
     } catch (error) {
+        res.status(500).json({
+            message: "Internal server error"
+        })
+    }
+}
+exports.setConfig = async (req, res) => {
+    try {
+        const { taskRewardsList, maximumAmount } = req.body
+        const isConfigExist = await Configs.findOne({})
+        console.log("isConfigExist =>", isConfigExist)
+        if (!isConfigExist) {
+            await Configs.create({})
+    }
+
+        const updateInfo = {}
+        if (taskRewardsList) {
+            updateInfo["dailyTask.taskRewardsList"] = taskRewardsList
+        }
+        if (maximumAmount) {
+            updateInfo["dailyTask.maximumAmount"] = Number(maximumAmount)
+        }
+        console.log("updateInfo", updateInfo)
+        const updateConfig = await Configs.findOneAndUpdate({}, {
+            ...updateInfo
+        }, { new: true }) 
+
+        res.json({
+            message: "Your Config is completed successfully",
+            updateConfig: updateConfig,
+            success: true
+        })
+    } catch (error) {
+        console.log("error ->", error)
         res.status(500).json({
             message: "Internal server error"
         })

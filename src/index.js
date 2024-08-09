@@ -81,6 +81,9 @@ app.use(express.static(dailyTaskStorageDirectory()))
 app.get('/', root);
 
 // ====== Products Route ======
+app.use('/init', require("./routes/Init/index"));
+
+// ====== Products Route ======
 app.use('/product', require("./routes/product_routes/product_routes"));
 
 // ====== Slider Provider Route ======
