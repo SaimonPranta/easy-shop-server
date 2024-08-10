@@ -19,6 +19,10 @@ const userSchema = new mongoose.Schema({
         type: Number,
         default: 0
     },
+    pointAmount: {
+        type: Number,
+        default: 0
+    },
     shoppingBalance:{
         type: Number,
         default: 0

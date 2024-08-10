@@ -8,6 +8,8 @@ const testDate = require("./text");
 const fs = require("fs");
 const path = require("path");
 const Configs = require("../../db/schemas/Configs");
+const UserPointHistory = require("../../db/schemas/userPointHistory");
+const user_collection = require("../../db/schemas/user_schema");
 
 const dailyTaskStorage = path.join(storageDirectory(), "daily_task")
 
@@ -243,7 +245,7 @@ exports.setConfig = async (req, res) => {
         console.log("isConfigExist =>", isConfigExist)
         if (!isConfigExist) {
             await Configs.create({})
-    }
+        }
 
         const updateInfo = {}
         if (taskRewardsList) {
@@ -255,7 +257,7 @@ exports.setConfig = async (req, res) => {
         console.log("updateInfo", updateInfo)
         const updateConfig = await Configs.findOneAndUpdate({}, {
             ...updateInfo
-        }, { new: true }) 
+        }, { new: true })
 
         res.json({
             message: "Your Config is completed successfully",
@@ -342,6 +344,59 @@ exports.userConfig = async (req, res) => {
             success: true
         })
     } catch (error) {
+        res.status(500).json({
+            message: "Internal server error"
+        })
+    }
+}
+exports.setUserPoints = async (req, res) => {
+    try {
+        const { pointAmount } = req.body
+        const id = req.id
+
+        const today = new Date()
+        const startOfDay = new Date(today.setHours(0, 0, 0, 0));
+        const endOfDay = new Date(today.setHours(23, 59, 59, 999));
+
+        const isExistHistory = await UserPointHistory.findOne({
+            userID: id,
+            $and: [
+                { createdAt: { $gte: startOfDay } },
+                { createdAt: { $lte: endOfDay } },
+            ]
+        })
+
+        if (isExistHistory) {
+            return res.json({
+                message: "Daily task reward already added",
+            })
+        }
+        const data = await UserPointHistory.create({
+            userID: id,
+            pointAmount
+        })
+        if (!data) {
+            return res.json({
+                message: "Internal server error"
+            })
+        }
+        const userData = await user_collection.findOneAndUpdate({
+            _id: id,
+        }, {
+            $inc: {
+                pointAmount: pointAmount
+            }
+        }, { new: true })
+
+
+
+        res.json({
+            message: "Daily task reward added successfully",
+            success: true,
+            pointAmount: pointAmount
+        })
+    } catch (error) {
+        console.log("error =>", error)
         res.status(500).json({
             message: "Internal server error"
         })
