@@ -10,6 +10,7 @@ const path = require("path");
 const Configs = require("../../db/schemas/Configs");
 const UserPointHistory = require("../../db/schemas/userPointHistory");
 const user_collection = require("../../db/schemas/user_schema");
+const mongoose = require("mongoose");
 
 const dailyTaskStorage = path.join(storageDirectory(), "daily_task")
 
@@ -394,6 +395,169 @@ exports.setUserPoints = async (req, res) => {
             message: "Daily task reward added successfully",
             success: true,
             pointAmount: pointAmount
+        })
+    } catch (error) {
+        console.log("error =>", error)
+        res.status(500).json({
+            message: "Internal server error"
+        })
+    }
+}
+exports.spinInfo = async (req, res) => {
+    try {
+        const { pointAmount } = req.body
+        const id = req.id
+
+        const today = new Date()
+        const startOfDay = new Date(today.setHours(0, 0, 0, 0));
+        const endOfDay = new Date(today.setHours(23, 59, 59, 999));
+
+        const isExistHistory = await UserPointHistory.findOne({
+            userID: id,
+            $and: [
+                { createdAt: { $gte: startOfDay } },
+                { createdAt: { $lte: endOfDay } },
+            ]
+        })
+        const spinPointHistory = await UserPointHistory.aggregate([
+            {
+                $match: {
+                    $and: [
+                        { createdAt: { $gte: startOfDay } },
+                        { createdAt: { $lte: endOfDay } },
+                    ]
+                }
+            },
+            {
+                $group: {
+                    _id: "$pointAmount",
+                    pointAmount: { $first: "$pointAmount" },
+                    count: { $sum: 1 }
+                }
+            },
+            {
+                $project: {
+                    _id: 0
+                }
+            },
+
+        ])
+
+        res.json({
+            message: "Daily task reward added successfully",
+            success: true,
+            data: {
+                disableSpin: isExistHistory ? true : false,
+                spinPointHistory: spinPointHistory || [],
+            }
+
+        })
+    } catch (error) {
+        console.log("error =>", error)
+        res.status(500).json({
+            message: "Internal server error"
+        })
+    }
+}
+exports.userList = async (req, res) => {
+    try {
+
+
+        const spinPointHistory = await UserTaskHIstory.aggregate([
+            {
+                $lookup: {
+                    localField: "userID",
+                    foreignField: "_id",
+                    from: "user_collectionssses",
+                    as: "userID"
+                }
+            },
+            {
+                $unwind: {
+                    path: "$userID",
+                    preserveNullAndEmptyArrays: true
+                }
+            },
+            {
+                $group: {
+                    _id: "$userID",
+                    userID: {
+                        $first: "$userID"
+                    }
+                }
+            },
+            {
+                $sort: {
+                    createdAt: 1
+                }
+            }
+        ]);
+
+        res.json({
+            message: "Daily task reward added successfully",
+            success: true,
+            data: spinPointHistory
+
+        })
+    } catch (error) {
+        console.log("error =>", error)
+        res.status(500).json({
+            message: "Internal server error"
+        })
+    }
+}
+exports.adminGetTask = async (req, res) => {
+    try {
+        const { userID } = req.query
+
+        const spinPointHistory = await UserTaskHIstory.aggregate([
+            {
+                $match: {
+                    userID: mongoose.Types.ObjectId(userID)
+                }
+            }
+            ,
+            {
+                $lookup: {
+                    localField: "taskListID",
+                    foreignField: "_id",
+                    from: "daily_task_lists",
+                    as: "taskListID"
+                }
+            },
+            {
+                $lookup: {
+                    localField: "dailyTaskID",
+                    foreignField: "_id",
+                    from: "daily_tasks",
+                    as: "dailyTaskID"
+                }
+            },
+            {
+                $unwind: {
+                    path: "$taskListID",
+                    preserveNullAndEmptyArrays: true
+                }
+            },
+            {
+                $unwind: {
+                    path: "$dailyTaskID",
+                    preserveNullAndEmptyArrays: true
+                }
+            },
+            {
+                $sort: {
+                    createdAt: -1
+                }
+            }
+        ]);
+        console.log("spinPointHistory =>>", spinPointHistory)
+
+        res.json({
+            message: "Daily task reward added successfully",
+            success: true,
+            data: spinPointHistory
+
         })
     } catch (error) {
         console.log("error =>", error)
