@@ -1,5 +1,5 @@
 const router = require("express").Router()
-const { createDailyTask, getDailyTask, createUserTaskHistory, userConfig, setConfig,userList, setUserPoints, spinInfo, adminGetTask } = require("../../collections/DailyTask/index");
+const { createDailyTask, getDailyTask, createUserTaskHistory, taskApprove, userConfig, setConfig, userList, setUserPoints, spinInfo, adminGetTask } = require("../../collections/DailyTask/index");
 const authGard = require("../../middleware/authGard");
 
 //User Routes
@@ -15,6 +15,7 @@ router.get("/spin-info", authGard, spinInfo)
 router.post("/admin-create-task", createDailyTask)
 router.get("/admin-user-list", userList)
 router.get("/admin-get-task", adminGetTask)
+router.post("/task-approve", taskApprove)
 
 
 

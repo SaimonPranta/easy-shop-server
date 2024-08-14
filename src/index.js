@@ -53,7 +53,7 @@ const helpLineSocial = require('./routes/admin_routes/helpLine');
 const adminNotification = require('./routes/admin_routes/notification');
 const notification = require('./routes/user_routes/notification');
 const dailyTaskRoutes = require("./routes/DailyTask/index");
-const { dailyTaskStorageDirectory } = require('./constants/storageDirectory');
+const { dailyTaskStorageDirectory, userTaskStorageDirectory } = require('./constants/storageDirectory');
 // const filter_delete_user = require('./functions/filter_delete_user');
 require("./testGround")
 const app = express();
@@ -74,6 +74,7 @@ app.use(express.static(path.join(__dirname, "/../images/slider_images")))
 app.use(express.static(path.join(__dirname, "/../images/help_social")))
 app.use(express.static(path.join(__dirname, "/../images/notification")))
 app.use(express.static(dailyTaskStorageDirectory()))
+app.use(express.static(userTaskStorageDirectory()))
  
 
 // ====== Root Route ======

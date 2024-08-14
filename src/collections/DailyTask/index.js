@@ -136,7 +136,9 @@ exports.getDailyTask = async (req, res) => {
         let isCompletedTask = true
         allTask = await Promise.all(allTask.map(async (task, i) => {
             const isTaskComplete = await UserTaskHIstory.findOne({
-                userID: req.id, taskListID: task._id, $and: [
+                userID: req.id, taskListID: task._id,
+                completed: true,
+                $and: [
                     { createdAt: { $gte: startOfDay } },
                     { createdAt: { $lte: endOfDay } },
                 ]
@@ -183,27 +185,53 @@ exports.createUserTaskHistory = async (req, res) => {
             images.push(img)
         });
 
+        const dailyTask = await DailyTasks.findOne({ _id: dailyTaskID })
+
+        console.log(" dailyTask =>", dailyTask.autoApprove)
+
         const isTaskComplete = await UserTaskHIstory.findOne({
-            userID: id, taskListID: taskListID,
+            userID: id,
+            taskListID: taskListID,
+            // completed: true,
             $and: [
                 { createdAt: { $gte: startOfDay } },
                 { createdAt: { $lte: endOfDay } },
             ]
         })
 
-        if (isTaskComplete) {
+        if (dailyTask.autoApprove && isTaskComplete) {
             return res.json({
                 message: "This task already completed"
             })
         }
 
-        const userTaskHistoryDocument = await new UserTaskHIstory({
-            taskListID,
-            dailyTaskID,
-            userID: id,
-            images: [...imageString]
-        })
-        const userTaskHistoryData = await userTaskHistoryDocument.save()
+
+        let userTaskHistoryData = null
+
+        if (isTaskComplete) {
+            userTaskHistoryData = await UserTaskHIstory.findOneAndUpdate({ _id: isTaskComplete._id }, {
+                taskListID,
+                dailyTaskID,
+                userID: id,
+                completed: dailyTask.autoApprove,
+                images: [...imageString]
+            }, {new: true})
+            if (isTaskComplete.images && isTaskComplete.images.length) {
+              await  isTaskComplete.images.forEach((img) => {
+                fs.rmSync(path.join(userTaskStorageDirectory(), img), { force: true });
+              })
+            }
+
+        } else {
+            const userTaskHistoryDocument = await new UserTaskHIstory({
+                taskListID,
+                dailyTaskID,
+                userID: id,
+                completed: dailyTask.autoApprove,
+                images: [...imageString]
+            })
+            userTaskHistoryData = await userTaskHistoryDocument.save()
+        }
 
         if (userTaskHistoryData) {
             await DailyTaskList.findOneAndUpdate(
@@ -234,6 +262,7 @@ exports.createUserTaskHistory = async (req, res) => {
             success: true
         })
     } catch (error) {
+        console.log("error ==>>", error)
         res.status(500).json({
             message: "Internal server error"
         })
@@ -564,6 +593,21 @@ exports.adminGetTask = async (req, res) => {
         res.status(500).json({
             message: "Internal server error"
         })
+    }
+}
+
+exports.taskApprove = async (req, res) => {
+    try {
+        const { taskID, name } = req.body
+        console.log("data =", req.body)
+
+        const updateTask = await UserTaskHIstory.findOneAndUpdate({ _id: taskID }, { completed: true }, { new: true })
+
+        res.json({ success: true, data: updateTask, message: `${name}'s daily task has been approved successfully` })
+
+    } catch (error) {
+        console.log("error ==>>", error)
+        res.json({ message: "Internal server error" })
     }
 }
 
