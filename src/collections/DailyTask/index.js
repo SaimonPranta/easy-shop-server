@@ -270,7 +270,7 @@ exports.createUserTaskHistory = async (req, res) => {
 }
 exports.setConfig = async (req, res) => {
     try {
-        const { taskRewardsList, maximumAmount } = req.body
+        const { taskRewardsList, maximumAmount, tutorialVideoId } = req.body
         const isConfigExist = await Configs.findOne({})
         console.log("isConfigExist =>", isConfigExist)
         if (!isConfigExist) {
@@ -283,6 +283,9 @@ exports.setConfig = async (req, res) => {
         }
         if (maximumAmount) {
             updateInfo["dailyTask.maximumAmount"] = Number(maximumAmount)
+        }
+        if (tutorialVideoId) {
+            updateInfo["dailyTask.tutorialVideoId"] = tutorialVideoId
         }
         console.log("updateInfo", updateInfo)
         const updateConfig = await Configs.findOneAndUpdate({}, {

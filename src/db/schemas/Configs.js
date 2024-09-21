@@ -11,6 +11,11 @@ const configsSchema = new mongoose.Schema({
             type: Number,
             require: true,
             default: 0
+        },
+        tutorialVideoId: {
+            type: String,
+            require: true,
+            default: ""
         }
     })
 
