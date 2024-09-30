@@ -1,5 +1,6 @@
 const fs = require('fs-extra')
 const slider_collection = require("../../db/schemas/slider_schema");
+const { sliderDirectory } = require('../../constants/storageDirectory');
 
 const add_slider_img = async (req, res) => {
     try {
@@ -16,7 +17,7 @@ const add_slider_img = async (req, res) => {
             const extention = await image.mimetype.split("/")[1]
             image.name = await image.name.split(".")[0] + Math.floor(Math.random() * 10) + Date.now() + "." + extention
 
-            await image.mv(`${__dirname}/../../../images/slider_images/${image.name}`)
+            await image.mv(`${sliderDirectory()}/${image.name}`)
 
             const imgInfo = await {
                 img: image.name
@@ -36,8 +37,6 @@ const add_slider_img = async (req, res) => {
 
     }
 }
-// // await image.mv(`${__dirname}/../../../images/product_images/${image.name}`);
-// console.log("fileName" , `${__dirname}/../../../../images/slider_images`)
 
 
 module.exports = add_slider_img;

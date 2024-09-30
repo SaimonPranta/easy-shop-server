@@ -3,6 +3,7 @@ const user_collection = require("../../db/schemas/user_schema")
 const Notification = require("../../db/schemas/notification")
 const path = require("path")
 const fs = require("fs")
+const { notificationDirectory } = require("../../constants/storageDirectory")
 
 
 router.get("/", async (req, res) => {
@@ -67,7 +68,7 @@ router.post("/", async (req, res) => {
             })
         }
         if (createdInfo.img) {
-            await image.mv(path.join(__dirname, "../../../images/notification", image.name))
+            await image.mv(path.join(__dirname, notificationDirectory(), image.name))
         }
         res.json({
             data: createdInfo
@@ -89,7 +90,7 @@ router.delete("/", async (req, res) => {
             })
         }
         if (createdInfo.img) {
-            const filePath = path.join(__dirname, "../../../images/notification", createdInfo.img)
+            const filePath = path.join(__dirname, notificationDirectory(), createdInfo.img)
             if (fs.existsSync(filePath)) {
                 await fs.unlinkSync(filePath)
             }

@@ -94,9 +94,9 @@ const userSchema = new mongoose.Schema({
     mobileRechareInfo: {
         type: Array
     },
-    withdrawInfo: {
-        type: Array
-    }
+    // withdrawInfo: {
+    //     type: Array
+    // }
 })
 const user_collection = new mongoose.model("user_collectionsss", userSchema)
 

@@ -1,13 +1,14 @@
 const slider_collection = require("../../db/schemas/slider_schema");
 const path = require('path');
-const fs = require('fs-extra')
+const fs = require('fs-extra');
+const { sliderDirectory } = require("../../constants/storageDirectory");
 
 const slider_img_delete = async (req, res) => {
     try {
         const { id } = await req.query
         const imageContaienr = await slider_collection.findOneAndDelete({ _id: id })
         if (imageContaienr.img) {
-            const iamgePath = await `${__dirname}/../../../images/slider_images/${imageContaienr.img}`;
+            const iamgePath = await `${sliderDirectory()}/${imageContaienr.img}`;
             
             fs.remove(iamgePath, (error) => {
                 if (error) {

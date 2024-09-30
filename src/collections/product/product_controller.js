@@ -1,6 +1,7 @@
 const product_collection = require("../../db/schemas/product_schema")
 const fs = require("fs-extra");
 const path = require("path");
+const { productDirectory } = require("../../constants/storageDirectory");
 exports.product = async (req, res) => {
     try {
         const data = await product_collection.find()
@@ -81,7 +82,7 @@ exports.addProduct = async (req, res) => {
             console.log(data)
 
             if (data._id) {
-                await image.mv(`${__dirname}/../../../images/product_images/${image.name}`);
+                await image.mv(`${productDirectory()}/${image.name}`);
 
                 res.status(201).json({
                     data: data,
@@ -114,7 +115,7 @@ exports.deleteProduct = async (req, res) => {
                     failed: "failed to deleted product"
                 })
             }
-            await fs.removeSync(`${__dirname}/../../../images/product_images/${data.img}`)
+            await fs.removeSync(`${productDirectory()}/${data.img}`)
             res.status(200).json({
                 sucess: "sucessfully deleted product",
                 data: data
@@ -171,8 +172,8 @@ exports.updateProduct = async (req, res) => {
                         })
                     }
                     console.log(data)
-                    await image.mv(`${__dirname}/../../../images/product_images/${image.name}`);
-                    await fs.removeSync(`${__dirname}/../../../images/product_images/${data.im}`)
+                    await image.mv(`${productDirectory()}/${image.name}`);
+                    await fs.removeSync(`${productDirectory()}/${data.img}`)
 
                     res.status(200).json({
                         sucess: "sucessfully updated product",

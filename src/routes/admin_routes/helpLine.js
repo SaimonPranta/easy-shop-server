@@ -3,6 +3,7 @@ const user_collection = require("../../db/schemas/user_schema")
 const helplineSocial = require("../../db/schemas/helpLineSocial")
 const path = require("path")
 const fs = require("fs")
+const { helpSocialDirectory } = require("../../constants/storageDirectory")
 
 
 router.get("/", async (req, res) => {
@@ -35,7 +36,7 @@ router.post("/", async (req, res) => {
                 message: "Failed to add social "
             })
         }
-        await image.mv(path.join(__dirname, "../../../images/help_social", image.name))
+        await image.mv(path.join(__dirname, helpSocialDirectory(), image.name))
         res.json({
             data: createdInfo
         })
@@ -57,7 +58,7 @@ router.delete("/", async (req, res) => {
             })
         }
 
-        const filePath = path.join(__dirname, "../../../images/help_social", createdInfo.img)
+        const filePath = path.join(__dirname, helpSocialDirectory(), createdInfo.img)
         if (fs.existsSync(filePath)) {
             await fs.unlinkSync(filePath)
         }

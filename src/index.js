@@ -53,7 +53,14 @@ const helpLineSocial = require('./routes/admin_routes/helpLine');
 const adminNotification = require('./routes/admin_routes/notification');
 const notification = require('./routes/user_routes/notification');
 const dailyTaskRoutes = require("./routes/DailyTask/index");
-const { dailyTaskStorageDirectory, userTaskStorageDirectory } = require('./constants/storageDirectory');
+const { 
+    dailyTaskStorageDirectory,
+    userTaskStorageDirectory,
+    productDirectory,
+    sliderDirectory,
+    helpSocialDirectory,
+    notificationDirectory
+} = require('./constants/storageDirectory');
 // const filter_delete_user = require('./functions/filter_delete_user');
 require("./testGround")
 const app = express();
@@ -67,12 +74,11 @@ app.use(cors())
 app.use(express.json())
 app.use(cookieParser())
 app.use(fileUpload());
-// app.use(express.static(path.join(__dirname, "images/slider_img")))
 
-app.use(express.static(path.join(__dirname, "/../images/product_images")))
-app.use(express.static(path.join(__dirname, "/../images/slider_images")))
-app.use(express.static(path.join(__dirname, "/../images/help_social")))
-app.use(express.static(path.join(__dirname, "/../images/notification")))
+app.use(express.static(productDirectory()))
+app.use(express.static(sliderDirectory()))
+app.use(express.static(helpSocialDirectory()))
+app.use(express.static(notificationDirectory()))
 app.use(express.static(dailyTaskStorageDirectory()))
 app.use(express.static(userTaskStorageDirectory()))
  
@@ -112,7 +118,7 @@ app.post("/balance_request", authGard, balance_request);
 // ======Mobile Recharge Route ======
 app.post("/mobile_rechare", authGard, mobile_rechare);
 // ======Withdraw Route ======
-app.post("/withdraw", authGard, withdraw);
+app.use("/withdraw", authGard, withdraw);
 
 // ======Generation User list Route ======
 app.get("/generation", authGard, generation_list);
