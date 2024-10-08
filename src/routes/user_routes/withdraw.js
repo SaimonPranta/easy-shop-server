@@ -19,8 +19,21 @@ router.get("/", async (req, res) => {
         const limit = 5
         const page = req.query.page || 1
         const totalItems = await TransactionHistory.countDocuments(query)
+        const totalBalance = await TransactionHistory.aggregate([
+            {
+                $match: query
+            },
+            {
+                $group: {
+                    _id: null,
+                    amount: {
+                        $sum: "$amount"
+                    }
+                }
+            }
+        ])
 
-
+        console.log("totalBalance ==..J..", totalBalance)
         const skip = Number(page - 1) * limit
 
         if (skip >= totalItems) {

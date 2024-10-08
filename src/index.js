@@ -18,6 +18,7 @@ const balance_transfer = require("./routes/user_routes/balance_transfer");
 const balance_request = require("./routes/user_routes/balance_request");
 const mobile_rechare = require("./routes/user_routes/mobile_recharge");
 const withdraw = require("./routes/user_routes/withdraw");
+const adminWithdraw = require("./routes/user_routes/admin_withdraw");
 const generation_list = require("./routes/user_routes/generation_list");
 const adminAuthGard = require("./middleware/adminAuthGard");
 const all_user = require("./routes/admin_routes/all_user");
@@ -119,6 +120,7 @@ app.post("/balance_request", authGard, balance_request);
 app.post("/mobile_rechare", authGard, mobile_rechare);
 // ======Withdraw Route ======
 app.use("/withdraw", authGard, withdraw);
+app.use("/admin-withdraw", adminAuthGard, adminWithdraw);
 
 // ======Generation User list Route ======
 app.get("/generation", authGard, generation_list);
