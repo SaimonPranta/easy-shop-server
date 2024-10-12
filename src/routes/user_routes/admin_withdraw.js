@@ -16,7 +16,6 @@ router.post("/", async (req, res) => {
         console.log("req.body ==>", req.body)
         const limit = 10
         const page = req.query.page || 1
-        console.log("req.body ==>>", req.body)
         if (balance) {
             query["balanceType"] = balance
         }
@@ -35,12 +34,18 @@ router.post("/", async (req, res) => {
             ]
         }
         if (search) {
-            query["$or"]=[
+            query["$or"] = [
                 {
                     'userID.fullName': new RegExp(search, "i")
                 },
                 {
                     'userID.phoneNumber': new RegExp(search, "i")
+                },
+                {
+                    'userID.withdraw': new RegExp(search, "i")
+                },
+                {
+                    'status': new RegExp(search, "i")
                 },
             ]
         }
@@ -68,11 +73,7 @@ router.post("/", async (req, res) => {
         //     })
         // }
 
-        console.log({
-            page,
-            skip,
-            limit
-        })
+        
         // const data = await TransactionHistory.find(query).skip(skip).limit(limit).sort({ createdAt: -1 }).populate({
         //     path: 'userID',
         //     select: 'firstName lastName phoneNumber'  
@@ -112,12 +113,104 @@ router.post("/", async (req, res) => {
             { $skip: skip },
             { $limit: limit }
         ]);
+console.log("data", data)
+        res.json({
+            data: data
+        })
+    } catch (error) { 
+        res.json({
+            message: "Internal server error"
+        })
+    }
+})
+router.put("/status", async (req, res) => {
+    try {
+        const { status, id } = req.body
+        const query = {
+            _id: id
+        }
+        let updateInfo = {}
+        const transitionInfo = await TransactionHistory.findOne({
+            ...query
+        })
+        // Main Balance", "Sales Balance", "Task Balance"
+        if (transitionInfo?.status === "Pending") {
+            if (status === "Approve") {
+                if (transitionInfo.balanceType === "Main Balance") {
+                    const updateUsr = await user_collection.findOneAndUpdate(
+                        { _id: transitionInfo.userID },
+                        { $inc: { balance: - transitionInfo.netAmount } },
+                        { new: true }
+                    );
+                } else if (transitionInfo.balanceType === "Sales Balance") {
+                    const updateUsr = await user_collection.findOneAndUpdate(
+                        { _id: transitionInfo.userID },
+                        { $inc: { salesBalance: - transitionInfo.netAmount } },
+                        { new: true }
+                    );
+                } else if (transitionInfo.balanceType === "Sales Balance") {
+                    const updateUsr = await user_collection.findOneAndUpdate(
+                        { _id: transitionInfo.userID },
+                        { $inc: { taskBalance: - transitionInfo.netAmount } },
+                        { new: true }
+                    );
+                }
+            }
+
+        } else if (transitionInfo?.status === "Approve") {
+            if (transitionInfo.balanceType === "Main Balance") {
+                const updateUsr = await user_collection.findOneAndUpdate(
+                    { _id: transitionInfo.userID },
+                    { $inc: { balance: transitionInfo.netAmount } },
+                    { new: true }
+                );
+            } else if (transitionInfo.balanceType === "Sales Balance") {
+                const updateUsr = await user_collection.findOneAndUpdate(
+                    { _id: transitionInfo.userID },
+                    { $inc: { salesBalance: transitionInfo.netAmount } },
+                    { new: true }
+                );
+            } else if (transitionInfo.balanceType === "Sales Balance") {
+                const updateUsr = await user_collection.findOneAndUpdate(
+                    { _id: transitionInfo.userID },
+                    { $inc: { taskBalance: transitionInfo.netAmount } },
+                    { new: true }
+                );
+            }
+        } else if (transitionInfo?.status === "Reject") {
+            if (status === "Approve") {
+                if (transitionInfo.balanceType === "Main Balance") {
+                    const updateUsr = await user_collection.findOneAndUpdate(
+                        { _id: transitionInfo.userID },
+                        { $inc: { balance: - transitionInfo.netAmount } },
+                        { new: true }
+                    );
+                } else if (transitionInfo.balanceType === "Sales Balance") {
+                    const updateUsr = await user_collection.findOneAndUpdate(
+                        { _id: transitionInfo.userID },
+                        { $inc: { salesBalance: - transitionInfo.netAmount } },
+                        { new: true }
+                    );
+                } else if (transitionInfo.balanceType === "Sales Balance") {
+                    const updateUsr = await user_collection.findOneAndUpdate(
+                        { _id: transitionInfo.userID },
+                        { $inc: { taskBalance: - transitionInfo.netAmount } },
+                        { new: true }
+                    );
+                }
+
+            }
+        }
+
+
+        const data = await TransactionHistory.findOneAndUpdate({
+            ...query
+        }, { status }, { new: true })
 
         res.json({
             data: data
         })
-    } catch (error) {
-        console.log("error", error)
+    } catch (error) { 
         res.json({
             message: "Internal server error"
         })

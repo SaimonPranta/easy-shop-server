@@ -66,18 +66,23 @@ router.get("/", async (req, res) => {
 router.post("/", async (req, res) => {
     try {
         const id = req.id
+        const chargePercent = 5
         const { balanceType, provider, phoneNumber, amount, accountPIN } = req.body;
         const query = {
             _id: req.id,
 
         }
+        const withdrawAmount = Number(amount)
+        const withdrawCost = withdrawAmount * (chargePercent / 100)
+        const netAmount = withdrawAmount + withdrawCost
         const userInfo = await user_collection.findOne(query)
         const info = {
             userID: id,
             transactionType: "Withdraw",
             balanceType,
-            amount: amount,
-            netAmount: amount,
+            amount: withdrawAmount,
+            charge: withdrawCost,
+            netAmount: netAmount,
             status: "Pending",
             withdraw: {
                 provider,
@@ -85,14 +90,15 @@ router.post("/", async (req, res) => {
                 accountPIN
             }
         }
+        console.log("info ==>>", info)
         const data = await TransactionHistory.create(info)
         console.log("data ==>>", data)
         res.json({
             success: "Withdraw request submitted successfully",
             data,
-            total: totalItems
         })
     } catch (error) {
+        console.log("error =>", error)
         res.status(500).json({ failed: "Failed to submit withdraw request, please try again." })
     }
 })

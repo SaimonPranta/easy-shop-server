@@ -15,7 +15,7 @@ const userSchema = new mongoose.Schema({
         type: String,
         require: true
     },
-    balance: {
+    balance: {  // Main Balance
         type: Number,
         default: 0
     },
@@ -23,7 +23,11 @@ const userSchema = new mongoose.Schema({
         type: Number,
         default: 0
     },
-    shoppingBalance:{
+    salesBalance:{ // Sales Balance
+        type: Number,
+        default: 0
+    },
+    taskBalance:{ // Task Balance
         type: Number,
         default: 0
     },
