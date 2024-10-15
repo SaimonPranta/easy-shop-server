@@ -187,8 +187,6 @@ exports.createUserTaskHistory = async (req, res) => {
 
         const dailyTask = await DailyTasks.findOne({ _id: dailyTaskID })
 
-        console.log(" dailyTask =>", dailyTask.autoApprove)
-
         const isTaskComplete = await UserTaskHIstory.findOne({
             userID: id,
             taskListID: taskListID,
@@ -262,7 +260,6 @@ exports.createUserTaskHistory = async (req, res) => {
             success: true
         })
     } catch (error) {
-        console.log("error ==>>", error)
         res.status(500).json({
             message: "Internal server error"
         })
@@ -272,7 +269,6 @@ exports.setConfig = async (req, res) => {
     try {
         const { taskRewardsList, maximumAmount, tutorialVideoId } = req.body
         const isConfigExist = await Configs.findOne({})
-        console.log("isConfigExist =>", isConfigExist)
         if (!isConfigExist) {
             await Configs.create({})
         }
@@ -287,18 +283,16 @@ exports.setConfig = async (req, res) => {
         if (tutorialVideoId) {
             updateInfo["dailyTask.tutorialVideoId"] = tutorialVideoId
         }
-        console.log("updateInfo", updateInfo)
         const updateConfig = await Configs.findOneAndUpdate({}, {
             ...updateInfo
         }, { new: true })
 
         res.json({
             message: "Your Config is completed successfully",
-            updateConfig: updateConfig,
+            data: updateConfig,
             success: true
         })
     } catch (error) {
-        console.log("error ->", error)
         res.status(500).json({
             message: "Internal server error"
         })
@@ -429,7 +423,6 @@ exports.setUserPoints = async (req, res) => {
             pointAmount: pointAmount
         })
     } catch (error) {
-        console.log("error =>", error)
         res.status(500).json({
             message: "Internal server error"
         })
@@ -485,7 +478,6 @@ exports.spinInfo = async (req, res) => {
 
         })
     } catch (error) {
-        console.log("error =>", error)
         res.status(500).json({
             message: "Internal server error"
         })
@@ -532,7 +524,6 @@ exports.userList = async (req, res) => {
 
         })
     } catch (error) {
-        console.log("error =>", error)
         res.status(500).json({
             message: "Internal server error"
         })
@@ -583,8 +574,6 @@ exports.adminGetTask = async (req, res) => {
                 }
             }
         ]);
-        console.log("spinPointHistory =>>", spinPointHistory)
-
         res.json({
             message: "Daily task reward added successfully",
             success: true,
@@ -592,7 +581,6 @@ exports.adminGetTask = async (req, res) => {
 
         })
     } catch (error) {
-        console.log("error =>", error)
         res.status(500).json({
             message: "Internal server error"
         })
@@ -602,14 +590,12 @@ exports.adminGetTask = async (req, res) => {
 exports.taskApprove = async (req, res) => {
     try {
         const { taskID, name } = req.body
-        console.log("data =", req.body)
 
         const updateTask = await UserTaskHIstory.findOneAndUpdate({ _id: taskID }, { completed: true }, { new: true })
 
         res.json({ success: true, data: updateTask, message: `${name}'s daily task has been approved successfully` })
 
     } catch (error) {
-        console.log("error ==>>", error)
         res.json({ message: "Internal server error" })
     }
 }

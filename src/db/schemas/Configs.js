@@ -17,7 +17,61 @@ const configsSchema = new mongoose.Schema({
             require: true,
             default: ""
         }
-    })
+    }),
+    withdraw: new mongoose.Schema({
+        withdrawCost: {
+            type: Number,
+            require: true,
+            default: 0,
+        },
+        withdrawAmounts: [
+            new mongoose.Schema({
+                balance: {
+                    type: Number,
+                    require: true
+                }
+            })
+        ],
+        paymentMethods: new mongoose.Schema({
+            bikash: {
+                type: Boolean,
+                require: true,
+                default: false
+            },
+            nagad: {
+                type: Boolean,
+                require: true,
+                default: false
+            },
+            rocket: {
+                type: Boolean,
+                require: true,
+                default: false
+            },
+            upay: {
+                type: Boolean,
+                require: true,
+                default: false
+            }
+        }),
+        balances: new mongoose.Schema({
+            mainBalance: {
+                type: Boolean,
+                require: true,
+                default: false
+            },
+            salesBalance: {
+                type: Boolean,
+                require: true,
+                default: false
+            },
+            taskBalance: {
+                type: Boolean,
+                require: true,
+                default: false
+            }
+        }),
+    }),
 
 
 })

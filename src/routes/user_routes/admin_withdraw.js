@@ -3,7 +3,8 @@ const user_collection = require("../../db/schemas/user_schema");
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
 const date_provider = require("../../functions/date_provider");
-const TransactionHistory = require("../../db/schemas/transactionHistory")
+const TransactionHistory = require("../../db/schemas/transactionHistory");
+const Configs = require("../../db/schemas/Configs");
 
 
 router.post("/", async (req, res) => {
@@ -13,7 +14,6 @@ router.post("/", async (req, res) => {
         }
         const { sort } = req.query;
         const { balance, fromDate, toDate, search } = req.body;
-        console.log("req.body ==>", req.body)
         const limit = 10
         const page = req.query.page || 1
         if (balance) {
@@ -50,30 +50,29 @@ router.post("/", async (req, res) => {
             ]
         }
         const totalItems = await TransactionHistory.countDocuments(query)
-        const totalBalance = await TransactionHistory.aggregate([
-            {
-                $match: query
-            },
-            {
-                $group: {
-                    _id: null,
-                    amount: {
-                        $sum: "$amount"
-                    }
-                }
-            }
-        ])
+        // const totalBalance = await TransactionHistory.aggregate([
+        //     {
+        //         $match: query
+        //     },
+        //     {
+        //         $group: {
+        //             _id: null,
+        //             amount: {
+        //                 $sum: "$amount"
+        //             }
+        //         }
+        //     }
+        // ])
 
         const skip = Number(page - 1) * limit
 
         // if (skip >= totalItems) {
-        //     console.log("Hello from if")
         //     return res.json({
         //         message: "All item are already loaded",
         //     })
         // }
 
-        
+
         // const data = await TransactionHistory.find(query).skip(skip).limit(limit).sort({ createdAt: -1 }).populate({
         //     path: 'userID',
         //     select: 'firstName lastName phoneNumber'  
@@ -113,11 +112,13 @@ router.post("/", async (req, res) => {
             { $skip: skip },
             { $limit: limit }
         ]);
-console.log("data", data)
         res.json({
-            data: data
+            data: data,
+            total: totalItems,
+            page: Number(page),
+            data: data,
         })
-    } catch (error) { 
+    } catch (error) {
         res.json({
             message: "Internal server error"
         })
@@ -134,7 +135,7 @@ router.put("/status", async (req, res) => {
             ...query
         })
         // Main Balance", "Sales Balance", "Task Balance"
-        if (transitionInfo?.status === "Pending") {
+        if (transitionInfo && transitionInfo.status === "Pending") {
             if (status === "Approve") {
                 if (transitionInfo.balanceType === "Main Balance") {
                     const updateUsr = await user_collection.findOneAndUpdate(
@@ -157,7 +158,7 @@ router.put("/status", async (req, res) => {
                 }
             }
 
-        } else if (transitionInfo?.status === "Approve") {
+        } else if (transitionInfo && transitionInfo.status === "Approve") {
             if (transitionInfo.balanceType === "Main Balance") {
                 const updateUsr = await user_collection.findOneAndUpdate(
                     { _id: transitionInfo.userID },
@@ -177,7 +178,7 @@ router.put("/status", async (req, res) => {
                     { new: true }
                 );
             }
-        } else if (transitionInfo?.status === "Reject") {
+        } else if (transitionInfo && transitionInfo.status === "Reject") {
             if (status === "Approve") {
                 if (transitionInfo.balanceType === "Main Balance") {
                     const updateUsr = await user_collection.findOneAndUpdate(
@@ -210,8 +211,62 @@ router.put("/status", async (req, res) => {
         res.json({
             data: data
         })
-    } catch (error) { 
+    } catch (error) {
         res.json({
+            message: "Internal server error"
+        })
+    }
+})
+
+router.post("/set-config", async (req, res) => {
+    try {
+        const { withdrawCost, paymentMethods, balances, withdrawAmounts} = req.body
+        const isConfigExist = await Configs.findOne({})
+        if (!isConfigExist) {
+            await Configs.create({})
+        }
+
+        const updateInfo = {}
+        if (withdrawCost) {
+            updateInfo["withdraw.withdrawCost"] = withdrawCost
+        }
+        if (withdrawAmounts) {
+            updateInfo["withdraw.withdrawAmounts"] = withdrawAmounts
+        }
+        if (paymentMethods.hasOwnProperty("bikash")) {
+            updateInfo["withdraw.paymentMethods.bikash"] = paymentMethods.bikash
+        }
+        if (paymentMethods.hasOwnProperty("nagad")) {
+            updateInfo["withdraw.paymentMethods.nagad"] = paymentMethods.nagad
+        }
+        if (paymentMethods.hasOwnProperty("rocket")) {
+            updateInfo["withdraw.paymentMethods.rocket"] = paymentMethods.rocket
+        }
+        if (paymentMethods.hasOwnProperty("upay")) {
+            updateInfo["withdraw.paymentMethods.upay"] = paymentMethods.upay
+        }
+        if (balances.hasOwnProperty("mainBalance")) {
+            updateInfo["withdraw.balances.mainBalance"] = balances.mainBalance
+        }
+        if (balances.hasOwnProperty("salesBalance")) {
+            updateInfo["withdraw.balances.salesBalance"] = balances.salesBalance
+        }
+        if (balances.hasOwnProperty("taskBalance")) {
+            updateInfo["withdraw.balances.taskBalance"] = balances.taskBalance
+        }
+
+
+        const updateConfig = await Configs.findOneAndUpdate({}, {
+            ...updateInfo
+        }, { new: true })
+ 
+        res.json({
+            message: "Your Config is completed successfully",
+            data: updateConfig,
+            success: true
+        })
+    } catch (error) {
+        res.status(500).json({
             message: "Internal server error"
         })
     }

@@ -47,7 +47,7 @@ const transactionSchema = new mongoose.Schema({
     status: {
         type: String,
         required: true,
-        enum: ["Pending", "Approve", "Reject"]
+        enum: ["Pending", "Approve", "Reject", "Cancel"]
     }
 
 }, { timestamps: true })

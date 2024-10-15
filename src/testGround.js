@@ -24,4 +24,3 @@ const objects = [
 
 // Get a randomly selected object based on percentageage
 const selectedObject = getRandomObjectByPercentage(objects);
-console.log("selectedObject ======>>>", selectedObject);

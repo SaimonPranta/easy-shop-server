@@ -3,37 +3,99 @@ const user_collection = require("../../db/schemas/user_schema");
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
 const date_provider = require("../../functions/date_provider");
-const TransactionHistory = require("../../db/schemas/transactionHistory")
+const TransactionHistory = require("../../db/schemas/transactionHistory");
+const { default: mongoose } = require("mongoose");
+const Configs = require("../../db/schemas/Configs");
 
 
-router.get("/", async (req, res) => {
+router.post("/get-list", async (req, res) => {
     try {
         const userID = req.id
-        console.log("userID", userID)
+        const { balance, fromDate, toDate, search } = req.body;
         const query = {
-            userID: userID,
+            userID: mongoose.Types.ObjectId(userID),
             transactionType: "Withdraw",
         }
         const { sort } = req.query;
-
-        const limit = 5
+        const limit = req.query.limit || 5
         const page = req.query.page || 1
-        const totalItems = await TransactionHistory.countDocuments(query)
-        const totalBalance = await TransactionHistory.aggregate([
+        if (balance) {
+            query["balanceType"] = balance
+        }
+        if (fromDate && toDate) {
+            const startDate = new Date(fromDate)
+            const endDate = new Date(toDate)
+            const startOfDay = new Date(startDate.setHours(0, 0, 0, 0));
+            const endOfDay = new Date(endDate.setHours(23, 59, 59, 999));
+            query["$and"] = [
+                {
+                    createdAt: { $lte: endOfDay },
+                },
+                {
+                    createdAt: { $gte: startOfDay },
+                },
+            ]
+        }
+        if (search) {
+            query["$or"] = [
+                {
+                    'withdraw.phoneNumber': new RegExp(search, "i")
+                },
+                {
+                    'status': new RegExp(search, "i")
+                },
+                {
+                    'provider': new RegExp(search, "i")
+                },
+            ]
+        }
+        console.log('query ==>', query)
+        let totalItems = await TransactionHistory.aggregate([
             {
-                $match: query
+                $match: {
+                    ...query
+                }
+            }, {
+                $project: {
+                    _id: 1
+                }
+            }
+        ])
+        totalItems = totalItems.length || 0
+
+        let pendingBalance = await TransactionHistory.aggregate([
+            { $match: { ...query, status: "Pending" } },
+            {
+                $group: {
+                    _id: null,
+                    totalBalance: { $sum: "$netAmount" },
+                },
+            },
+        ]);
+        let approveBalance = await TransactionHistory.aggregate([
+            { $match: { ...query, status: "Approve" } },
+            {
+                $group: {
+                    _id: null,
+                    totalBalance: { $sum: "$netAmount" },
+                },
+            },
+        ]);
+
+        let totalBalance = await TransactionHistory.aggregate([
+            {
+                $match: { ...query }
             },
             {
                 $group: {
                     _id: null,
-                    amount: {
-                        $sum: "$amount"
+                    totalBalance: {
+                        $sum: "$netAmount"
                     }
                 }
             }
         ])
 
-        console.log("totalBalance ==..J..", totalBalance)
         const skip = Number(page - 1) * limit
 
         if (skip >= totalItems) {
@@ -45,18 +107,35 @@ router.get("/", async (req, res) => {
         console.log({
             page,
             skip,
-            limit
+            limit,
+            totalItems
         })
         const data = await TransactionHistory.find(query).skip(skip).limit(limit).sort({ createdAt: -1 })
 
-        console.log("totalItems ==>>", totalItems)
-        console.log("data ==>>", data.length)
-
+        if (pendingBalance.length) {
+            pendingBalance = pendingBalance[0].totalBalance || 0
+        } else {
+            pendingBalance = 0
+        }
+        if (approveBalance.length) {
+            approveBalance = approveBalance[0].totalBalance || 0
+        } else {
+            approveBalance = 0
+        }
+        if (totalBalance.length) {
+            totalBalance = totalBalance[0].totalBalance || 0
+        } else {
+            totalBalance = 0
+        }
         res.json({
-            data: data
+            data: data,
+            total: totalItems,
+            page: Number(page),
+            pendingBalance,
+            approveBalance,
+            totalBalance
         })
     } catch (error) {
-        console.log("error", error)
         res.json({
             message: "Internal server error"
         })
@@ -66,11 +145,15 @@ router.get("/", async (req, res) => {
 router.post("/", async (req, res) => {
     try {
         const id = req.id
-        const chargePercent = 5
+        let chargePercent = 0
         const { balanceType, provider, phoneNumber, amount, accountPIN } = req.body;
         const query = {
             _id: req.id,
 
+        }
+        const config = await Configs.findOne({})
+        if (config && config.withdraw && config.withdraw.withdrawCost) {
+            chargePercent = config.withdraw.withdrawCost
         }
         const withdrawAmount = Number(amount)
         const withdrawCost = withdrawAmount * (chargePercent / 100)
@@ -90,61 +173,80 @@ router.post("/", async (req, res) => {
                 accountPIN
             }
         }
-        console.log("info ==>>", info)
         const data = await TransactionHistory.create(info)
-        console.log("data ==>>", data)
         res.json({
             success: "Withdraw request submitted successfully",
             data,
         })
     } catch (error) {
-        console.log("error =>", error)
         res.status(500).json({ failed: "Failed to submit withdraw request, please try again." })
     }
 })
-// const withdraw = async (req, res) => {
-//     try {
-//         const id = req.id
-//         const { porvider, amount, number } = req.body;
-//         if (porvider && amount && number) {
-//             const floorAmount = Math.floor(amount)
-//             const charge = floorAmount * 5 / 100
-//             const total = charge + floorAmount
-//             const userBalanceChecker = await user_collection.findOne({ _id: id })
-//             if (userBalanceChecker.balance >= total) {
-//                 const requestID = await Math.floor(Math.random() * 10) + Date.now();
-//                 const reqestObj = await {
-//                     requestID: requestID,
-//                     porvider: porvider,
-//                     amount: floorAmount,
-//                     number: number,
-//                     apporoval: false,
-//                     date: date_provider(new Date())
-//                 }
-//                 const user = await user_collection.findOneAndUpdate({ _id: id },
-//                     {
-//                         $push: { withdrawInfo: { $each: [reqestObj], $position: 0 } }
-//                     },
-//                     {
-//                         new: true
-//                     });
-//                 if (user._id) {
-//                     res.status(200).json({
-//                         sucess: "Your withdraw request are sucessfully submited ",
-//                         data: user
-//                     })
-//                 } else {
-//                     res.status(500).json({ failed: "Failed to submit withdraw request, please try again." })
-//                 }
-//             } else {
-//                 res.status(500).json({ failed: "Sorry, you can't withdrad more then your balance" })
-//             }
-//         } else {
-//             res.status(500).json({ failed: "Failed to submit withdraw request, please try again." })
-//         }
-//     } catch (error) {
-//         res.status(500).json({ failed: "Failed to submit withdraw request, please try again." })
-//     }
-// };
+router.put("/status", async (req, res) => {
+    try {
+        const { id } = req.body
+        const query = {
+            _id: id
+        }
+        let updateInfo = {}
+        const transitionInfo = await TransactionHistory.findOne({
+            ...query
+        })
+        if (transitionInfo.status !== "Pending") {
+            return res.json({
+                message: "Sorry, Your can't cancel this transaction"
+            })
+        }
+
+        const data = await TransactionHistory.findOneAndUpdate({
+            ...query
+        }, { status: "Cancel" }, { new: true })
+
+        res.json({
+            data: data
+        })
+    } catch (error) {
+        res.json({
+            message: "Internal server error"
+        })
+    }
+})
+router.get("/last-balance", async (req, res) => {
+    try {
+        const  id  = req.id
+        const query = {
+            userID: id,
+            status: "Approve"
+        }
+        let lastMainBalance = await TransactionHistory.findOne({
+            ...query,
+            balanceType: "Main Balance"
+        }).select("amount")
+        let lastSalesBalance = await TransactionHistory.findOne({
+            ...query,
+            balanceType: "Sales Balance",
+        }).select("amount")
+        let lastTaskBalance = await TransactionHistory.findOne({
+            ...query,
+            balanceType: "Task Balance"
+        }).select("amount")
+        lastMainBalance = lastMainBalance ? lastMainBalance.amount : 0
+        lastSalesBalance = lastSalesBalance ? lastSalesBalance.amount : 0
+        lastTaskBalance = lastTaskBalance ? lastTaskBalance.amount : 0
+
+
+        res.json({
+            data: {
+                lastMainBalance,
+                lastSalesBalance,
+                lastTaskBalance
+            }
+        })
+    } catch (error) {
+        res.json({
+            message: "Internal server error"
+        })
+    }
+})
 
 module.exports = router;
