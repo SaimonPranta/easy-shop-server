@@ -7,6 +7,7 @@ const TransactionHistory = require("../../db/schemas/transactionHistory");
 const Configs = require("../../db/schemas/Configs");
 
 
+
 router.post("/", async (req, res) => {
     try {
         const query = {
@@ -101,6 +102,9 @@ router.post("/", async (req, res) => {
                     'userID.firstName': 1,
                     'userID.lastName': 1,
                     'userID.phoneNumber': 1,
+                    'userID.balance': 1,
+                    'userID.salesBalance': 1,
+                    'userID.taskBalance': 1,
                     'userID.fullName': {
                         $concat: ['$userID.firstName', '', '$userID.lastName']
                     }
@@ -131,10 +135,32 @@ router.put("/status", async (req, res) => {
             _id: id
         }
         let updateInfo = {}
+
         const transitionInfo = await TransactionHistory.findOne({
             ...query
         })
-        // Main Balance", "Sales Balance", "Task Balance"
+
+        if (status === "Approve") {
+            let balanceQuery = {}
+
+            if (transitionInfo.balanceType === "Main Balance") {
+                balanceQuery = { balance: { $lte: transitionInfo?.netAmount } }
+            } else if (transitionInfo.balanceType === "Sales Balance") {
+                balanceQuery = { salesBalance: { $lte: transitionInfo?.netAmount } }
+            } else if (transitionInfo.balanceType === "Task Balance") {
+                balanceQuery = { taskBalance: { $lte: transitionInfo?.netAmount } }
+            }
+            let checkBalance = await user_collection.findOne({
+               _id: transitionInfo.userID,
+                ...balanceQuery
+            });
+        
+            if (checkBalance) {
+                return res.json({
+                    message: `${checkBalance.firstName} ${checkBalance.lastName} has insufficient balance`
+                })
+            }
+        }
         if (transitionInfo && transitionInfo.status === "Pending") {
             if (status === "Approve") {
                 if (transitionInfo.balanceType === "Main Balance") {
@@ -202,12 +228,16 @@ router.put("/status", async (req, res) => {
 
             }
         }
-
-
-        const data = await TransactionHistory.findOneAndUpdate({
-            ...query
-        }, { status }, { new: true })
-
+        let data = null
+        if (status === "Delete") {
+            data = await TransactionHistory.findOneAndDelete({
+                ...query
+            })
+        } else {
+            data = await TransactionHistory.findOneAndUpdate({
+                ...query
+            }, { status }, { new: true })
+        }
         res.json({
             data: data
         })
@@ -220,7 +250,7 @@ router.put("/status", async (req, res) => {
 
 router.post("/set-config", async (req, res) => {
     try {
-        const { withdrawCost, paymentMethods, balances, withdrawAmounts} = req.body
+        const { withdrawCost, paymentMethods, balances, withdrawAmounts } = req.body
         const isConfigExist = await Configs.findOne({})
         if (!isConfigExist) {
             await Configs.create({})
@@ -259,7 +289,7 @@ router.post("/set-config", async (req, res) => {
         const updateConfig = await Configs.findOneAndUpdate({}, {
             ...updateInfo
         }, { new: true })
- 
+
         res.json({
             message: "Your Config is completed successfully",
             data: updateConfig,

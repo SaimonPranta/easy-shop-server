@@ -151,6 +151,10 @@ router.post("/", async (req, res) => {
             _id: req.id,
 
         }
+        let balanceQuery = {}
+
+
+
         const config = await Configs.findOne({})
         if (config && config.withdraw && config.withdraw.withdrawCost) {
             chargePercent = config.withdraw.withdrawCost
@@ -158,7 +162,26 @@ router.post("/", async (req, res) => {
         const withdrawAmount = Number(amount)
         const withdrawCost = withdrawAmount * (chargePercent / 100)
         const netAmount = withdrawAmount + withdrawCost
-        const userInfo = await user_collection.findOne(query)
+
+        if (balanceType === "Main Balance") {
+            balanceQuery = { balance: { $lte: netAmount } }
+        } else if (balanceType === "Sales Balance") {
+            balanceQuery = { salesBalance: { $lte: netAmount } }
+
+        } else if (balanceType === "Task Balance") {
+            balanceQuery = { taskBalance: { $lte: netAmount } }
+
+        }
+        let checkBalance = await user_collection.findOne({
+            ...query,
+            ...balanceQuery
+        });
+        if (checkBalance) {
+            return res.json({
+                message: "Insufficient balance"
+            })
+        }
+
         const info = {
             userID: id,
             transactionType: "Withdraw",
@@ -213,7 +236,7 @@ router.put("/status", async (req, res) => {
 })
 router.get("/last-balance", async (req, res) => {
     try {
-        const  id  = req.id
+        const id = req.id
         const query = {
             userID: id,
             status: "Approve"
