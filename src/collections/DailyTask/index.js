@@ -599,4 +599,76 @@ exports.taskApprove = async (req, res) => {
         res.json({ message: "Internal server error" })
     }
 }
+exports.dailyTaskList = async (req, res) => {
+    try {
+        const query = {
+        }
+        const { sort } = req.query;
+        const { balance, fromDate, toDate, search } = req.body;
+        const limit = 10
+        const page = req.query.page || 1
+        if (balance) {
+            query["balanceType"] = balance
+        }
+        if (fromDate && toDate) {
+            const startDate = new Date(fromDate)
+            const endDate = new Date(toDate)
+            const startOfDay = new Date(startDate.setHours(0, 0, 0, 0));
+            const endOfDay = new Date(endDate.setHours(23, 59, 59, 999));
+            query["$and"] = [
+                {
+                    createdAt: { $lte: endOfDay },
+                },
+                {
+                    createdAt: { $gte: startOfDay },
+                },
+            ]
+        }
+        if (search) {
+            query["$or"] = [
+                {
+                    'userID.fullName': new RegExp(search, "i")
+                },
+                {
+                    'userID.phoneNumber': new RegExp(search, "i")
+                },
+                {
+                    'userID.withdraw': new RegExp(search, "i")
+                },
+                {
+                    'status': new RegExp(search, "i")
+                },
+            ]
+        }
+        const totalItems = await DailyTasks.countDocuments(query)
+
+        const skip = Number(page - 1) * limit
+
+        const data = await DailyTasks.aggregate([
+            {
+                $lookup: {
+                    from: 'daily_task_lists',
+                    localField: 'taskListID',
+                    foreignField: '_id',
+                    as: 'taskListID'
+                }
+            },
+            // { $unwind: { path: '$userInfo'} },  
+            { $unwind: { path: '$taskListID', preserveNullAndEmptyArrays: true } },
+            { $match: query },
+            
+        ]);
+        console.log("query ==>", query)
+        console.log("data ==>", data.length)
+        res.json({
+            data: data,
+            total: totalItems,
+            page: Number(page),
+        })
+    } catch (error) {
+        res.json({
+            message: "Internal server error"
+        })
+    }
+}
 
