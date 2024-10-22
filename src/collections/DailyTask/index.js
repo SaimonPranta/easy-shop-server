@@ -17,14 +17,10 @@ const dailyTaskStorage = path.join(storageDirectory(), "daily_task")
 
 exports.createDailyTask = async (req, res) => {
     try {
-        const { title, description, taskLink, tutorialLink, autoApprove, taskStartDate, taskExpireDate } = JSON.parse(req.body.data)
+        const { title, description, taskLink, tutorialLink, autoApprove, taskStartDate, taskExpireDate, taskListID } = JSON.parse(req.body.data)
         const image = req.files.img;
 
-        let plainStartDate = parseDate("2024-07-11")
-
-        let plainEndDate = dateConverter(taskStartDate)
-
-
+        console.log("taskListID =>>", taskListID)
         if (
             image.mimetype !== "image/jpg" &&
             image.mimetype !== "image/png" &&
@@ -38,13 +34,22 @@ exports.createDailyTask = async (req, res) => {
             image.name = await image.name.split(".")[0] + Math.floor(Math.random() * 10) + Date.now() + "." + extention;
 
 
+            let dailyTaskListId = null
+            let data = null
+            if (taskListID) {
+                dailyTaskListId = taskListID
+                data = await DailyTaskList.findOne({ _id: taskListID });
 
-            const taskListDocuments = await new DailyTaskList({
-                taskStartDate: parseDate(taskStartDate, "Start Date"),
-                taskExpireDate: parseDate(taskExpireDate, "Expire Date"),
-                taskList: []
-            });
-            const data = await taskListDocuments.save();
+            } else {
+                const taskListDocuments = await new DailyTaskList({
+                    taskStartDate: parseDate(taskStartDate, "Start Date"),
+                    taskExpireDate: parseDate(taskExpireDate, "Expire Date"),
+                    taskList: []
+                });
+                data = await taskListDocuments.save();
+                dailyTaskListId = data._id
+            }
+
 
             const additionalQuery = {}
             if (autoApprove) {
@@ -56,7 +61,7 @@ exports.createDailyTask = async (req, res) => {
                 additionalQuery["tutorialLink"] = tutorialLink
             }
             const dailyTaskDocuments = await new DailyTasks({
-                taskListID: data._id,
+                taskListID: dailyTaskListId,
                 img: image.name,
                 // title,
                 description,
@@ -64,8 +69,8 @@ exports.createDailyTask = async (req, res) => {
                 ...additionalQuery
             })
             const dailyTaskData = await dailyTaskDocuments.save()
-
-            await DailyTaskList.findOneAndUpdate({ _id: data._id }, {
+            console.log("dailyTaskData ==>>", dailyTaskData)
+            await DailyTaskList.findOneAndUpdate({ _id: dailyTaskListId }, {
                 currentTaskID: dailyTaskData._id,
                 $push: {
                     taskList: {
@@ -76,7 +81,7 @@ exports.createDailyTask = async (req, res) => {
                 },
             })
 
-            if (data._id) {
+            if (dailyTaskListId) {
                 if (!fs.existsSync(dailyTaskStorage)) {
                     fs.mkdirSync(dailyTaskStorage)
                 }
@@ -98,6 +103,8 @@ exports.createDailyTask = async (req, res) => {
         //     message: "Success"
         // })
     } catch (error) {
+        console.log("error ==>>", error)
+
         res.json({
             message: "Internal server error"
 
@@ -162,6 +169,44 @@ exports.getDailyTask = async (req, res) => {
         })
     }
 }
+exports.getDailyTaskDetails = async (req, res) => {
+    try {
+        const { dailyTaskID } = req.query
+        function formatDate(isoString) {
+            // Parse the ISO date string
+            const date = new Date(isoString);
+        
+            // Extract year, month, and day
+            const year = date.getUTCFullYear();
+            const month = String(date.getUTCMonth() + 1).padStart(2, '0'); // Months are 0-based, so add 1
+            const day = String(date.getUTCDate()).padStart(2, '0');
+        
+            // Return the formatted date
+            return `${year}-${month}-${day}`;
+        }
+        let dailyTask = await DailyTasks.findOne({
+            _id: dailyTaskID
+        }).populate("taskListID") 
+        console.log("dailyTask ==>>", dailyTask)
+        if (dailyTask) {
+            dailyTask = {
+                ...dailyTask._doc,
+                taskStartDate: formatDate(dailyTask?.taskListID?.taskStartDate),
+                taskExpireDate: formatDate(dailyTask?.taskListID?.taskExpireDate)
+            } 
+            console.log("dailyTask 3 ==>>", dailyTask)
+        }
+
+        res.json({
+            message: "Successfully get daily task",
+            data: dailyTask
+        })
+    } catch (error) {
+        res.json({
+            message: "Internal server error"
+        })
+    }
+}
 
 exports.createUserTaskHistory = async (req, res) => {
     try {
@@ -213,11 +258,11 @@ exports.createUserTaskHistory = async (req, res) => {
                 userID: id,
                 completed: dailyTask.autoApprove,
                 images: [...imageString]
-            }, {new: true})
+            }, { new: true })
             if (isTaskComplete.images && isTaskComplete.images.length) {
-              await  isTaskComplete.images.forEach((img) => {
-                fs.rmSync(path.join(userTaskStorageDirectory(), img), { force: true });
-              })
+                await isTaskComplete.images.forEach((img) => {
+                    fs.rmSync(path.join(userTaskStorageDirectory(), img), { force: true });
+                })
             }
 
         } else {
@@ -601,15 +646,16 @@ exports.taskApprove = async (req, res) => {
 }
 exports.dailyTaskList = async (req, res) => {
     try {
-        const query = {
+        let query = {
         }
         const { sort } = req.query;
-        const { balance, fromDate, toDate, search } = req.body;
-        const limit = 10
+        const { balance, fromDate, toDate, search, groupID, tableType } = req.body;
+        const limit = 20
         const page = req.query.page || 1
         if (balance) {
             query["balanceType"] = balance
         }
+        // tableType === "Group Daily Task"
         if (fromDate && toDate) {
             const startDate = new Date(fromDate)
             const endDate = new Date(toDate)
@@ -627,37 +673,99 @@ exports.dailyTaskList = async (req, res) => {
         if (search) {
             query["$or"] = [
                 {
-                    'userID.fullName': new RegExp(search, "i")
-                },
-                {
-                    'userID.phoneNumber': new RegExp(search, "i")
-                },
-                {
-                    'userID.withdraw': new RegExp(search, "i")
-                },
-                {
-                    'status': new RegExp(search, "i")
+                    'description': new RegExp(search, "i")
                 },
             ]
         }
-        const totalItems = await DailyTasks.countDocuments(query)
+        if (groupID) {
+            query = {
+                // 'taskListID._id': groupID
+                'taskListID._id': mongoose.Types.ObjectId(groupID)
+            }
+        }
+        let totalItems = 0
+        if (tableType === "Group Daily Task") {
 
+            totalItems = await DailyTaskList.aggregate([
+                {
+                    $lookup: {
+                        from: 'daily_tasks',
+                        localField: 'taskList.taskID',
+                        foreignField: '_id',
+                        as: 'taskList'
+                    }
+                },
+                { $unwind: { path: '$taskListID', preserveNullAndEmptyArrays: true } },
+                { $match: query },
+                { $count: 'totalCount' }
+            ])
+        } else {
+
+            totalItems = await DailyTasks.aggregate([
+                {
+                    $lookup: {
+                        from: 'daily_task_lists',
+                        localField: 'taskListID',
+                        foreignField: '_id',
+                        as: 'taskListID'
+                    }
+                },
+                { $unwind: { path: '$taskListID', preserveNullAndEmptyArrays: true } },
+                { $match: query },
+                { $count: 'totalCount' }
+            ])
+        }
+
+        console.log("totalItems ====>", totalItems[0])
+        if (totalItems.length) {
+            totalItems = totalItems[0].totalCount || 0
+        } else {
+            totalItems = 0
+        }
+        console.log("totalItems 2 =>", totalItems)
+        console.log("query =>", query)
+        console.log("req.body =>", req.body)
         const skip = Number(page - 1) * limit
+        console.log("skip=>", skip)
 
-        const data = await DailyTasks.aggregate([
-            {
-                $lookup: {
-                    from: 'daily_task_lists',
-                    localField: 'taskListID',
-                    foreignField: '_id',
-                    as: 'taskListID'
-                }
-            },
-            // { $unwind: { path: '$userInfo'} },  
-            { $unwind: { path: '$taskListID', preserveNullAndEmptyArrays: true } },
-            { $match: query },
-            
-        ]);
+        let data = []
+        if (tableType === "Group Daily Task") {
+            data = await DailyTaskList.aggregate([
+                {
+                    $lookup: {
+                        from: 'daily_tasks',
+                        localField: 'taskList.taskID',
+                        foreignField: '_id',
+                        as: 'taskList'
+                    }
+                },
+                { $unwind: { path: '$taskListID', preserveNullAndEmptyArrays: true } },
+                { $match: query },
+                { $sort: { createdAt: -1 } },
+                { $skip: skip },
+                { $limit: limit }
+
+            ]);
+        } else {
+            data = await DailyTasks.aggregate([
+                {
+                    $lookup: {
+                        from: 'daily_task_lists',
+                        localField: 'taskListID',
+                        foreignField: '_id',
+                        as: 'taskListID'
+                    }
+                },
+                // { $unwind: { path: '$userInfo'} },  
+                { $unwind: { path: '$taskListID', preserveNullAndEmptyArrays: true } },
+                { $match: query },
+                { $sort: { createdAt: -1 } },
+                { $skip: skip },
+                { $limit: limit }
+
+            ]);
+        }
+        console.log("req.query ==>", req.query)
         console.log("query ==>", query)
         console.log("data ==>", data.length)
         res.json({
@@ -665,6 +773,18 @@ exports.dailyTaskList = async (req, res) => {
             total: totalItems,
             page: Number(page),
         })
+    } catch (error) {
+        console.log("error =>", error)
+        res.json({
+            message: "Internal server error"
+        })
+    }
+}
+exports.dailySelectTask = async (req, res) => {
+    try {
+        const { taskID, taskGroupID } = req.body
+        const updateTask = await DailyTaskList.findOneAndUpdate({ _id: taskGroupID }, { currentTaskID: taskID }, { new: true })
+        res.json({ data: updateTask })
     } catch (error) {
         res.json({
             message: "Internal server error"
