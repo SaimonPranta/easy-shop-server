@@ -11,6 +11,9 @@ const userSchema = new mongoose.Schema({
         type: String,
         required: true
     },
+    profilePicture: {
+        type: String, 
+    },
     referNumber: {
         type: String,
         require: true

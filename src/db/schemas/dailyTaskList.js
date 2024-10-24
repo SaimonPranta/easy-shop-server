@@ -45,7 +45,7 @@ const dailyTaskListSchema = new mongoose.Schema({
     },
     inactive: {
         type: Boolean,
-        require: false
+        required: false
     }
 
 }, { timestamps: true })

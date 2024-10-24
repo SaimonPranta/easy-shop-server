@@ -48,8 +48,7 @@ router.post("/get-list", async (req, res) => {
                     'provider': new RegExp(search, "i")
                 },
             ]
-        }
-        console.log('query ==>', query)
+        } 
         let totalItems = await TransactionHistory.aggregate([
             {
                 $match: {
@@ -151,7 +150,9 @@ router.post("/", async (req, res) => {
             _id: req.id,
 
         }
-        let balanceQuery = {}
+        let balanceQuery = {
+
+        }
 
 
 
@@ -239,7 +240,8 @@ router.get("/last-balance", async (req, res) => {
         const id = req.id
         const query = {
             userID: id,
-            status: "Approve"
+            status: "Approve",
+            transactionType: "Withdraw"
         }
         let lastMainBalance = await TransactionHistory.findOne({
             ...query,

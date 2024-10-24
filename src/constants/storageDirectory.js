@@ -36,6 +36,14 @@ const notificationDirectory = () => {
     const storageDir = path.join(storageDirectory(), "notification");
     return storageDir
 }
+const profileDirectory = () => {
+    const storageDir = path.join(storageDirectory(), "profile_picture");
+    return storageDir
+}
+const transactionDirectory = () => {
+    const storageDir = path.join(storageDirectory(), "transaction");
+    return storageDir
+}
 
 
 
@@ -46,6 +54,8 @@ module.exports = {
     productDirectory,
     sliderDirectory,
     helpSocialDirectory,
-    notificationDirectory
+    notificationDirectory,
+    profileDirectory,
+    transactionDirectory 
 };
 

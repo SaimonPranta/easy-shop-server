@@ -50,6 +50,8 @@ const withdrawRequestList = require('./routes/admin_routes/withdrawRequestList')
 const rechargeRequestList = require('./routes/admin_routes/rechargeRequestList');
 const rechargeRequest = require('./routes/admin_routes/rechargeRequest');
 const withdrawRequest = require('./routes/admin_routes/withdrawRequest');
+const payments = require('./routes/user_routes/payments');
+const profileRoutes = require('./routes/profile/index');
 const helpLineSocial = require('./routes/admin_routes/helpLine');
 const adminNotification = require('./routes/admin_routes/notification');
 const notification = require('./routes/user_routes/notification');
@@ -60,7 +62,8 @@ const {
     productDirectory,
     sliderDirectory,
     helpSocialDirectory,
-    notificationDirectory
+    notificationDirectory,
+    profileDirectory
 } = require('./constants/storageDirectory');
 // const filter_delete_user = require('./functions/filter_delete_user');
 require("./testGround")
@@ -82,6 +85,7 @@ app.use(express.static(helpSocialDirectory()))
 app.use(express.static(notificationDirectory()))
 app.use(express.static(dailyTaskStorageDirectory()))
 app.use(express.static(userTaskStorageDirectory()))
+app.use(express.static(profileDirectory()))
  
 
 // ====== Root Route ======
@@ -122,6 +126,8 @@ app.post("/mobile_rechare", authGard, mobile_rechare);
 app.use("/withdraw", authGard, withdraw);
 app.use("/admin-withdraw", adminAuthGard, adminWithdraw);
 
+// ======Withdraw Route ======
+app.use("/payments", authGard, payments);
 // ======Generation User list Route ======
 app.get("/generation", authGard, generation_list);
 
@@ -188,6 +194,7 @@ app.post("/notice", adminAuthGard, add_notice)
 app.get("/notice", read_notice)
 // ====== Daily Task  ======
 app.use("/daily-task", dailyTaskRoutes)
+app.use("/profile", authGard, profileRoutes)
 
 // filter_delete_user()
 

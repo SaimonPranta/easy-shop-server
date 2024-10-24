@@ -105,6 +105,7 @@ router.post("/", async (req, res) => {
                     'userID.balance': 1,
                     'userID.salesBalance': 1,
                     'userID.taskBalance': 1,
+                    'userID.profilePicture': 1,
                     'userID.fullName': {
                         $concat: ['$userID.firstName', '', '$userID.lastName']
                     }
