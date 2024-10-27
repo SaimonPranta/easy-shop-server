@@ -4,7 +4,10 @@ const read_user = async (req, res) => {
     try {
         const phoneNumber = req.phoneNumber.toString()
         const userId = req.id;
-        const user = await user_collection.findOne({ _id: userId, phoneNumber: phoneNumber });
+        const user = await user_collection.findOne({ _id: userId, phoneNumber: phoneNumber }).populate({
+            path: "referUser", 
+            select: "firstName lastName phoneNumber",  
+          });
         user.password = null;
         res.status(200).json(user)
     } catch (error) {

@@ -72,6 +72,25 @@ const configsSchema = new mongoose.Schema({
             }
         }),
     }),
+    payment: new mongoose.Schema({
+        paymentNotice: {
+            type: String, 
+        },
+        paymentFormNotice: {
+            type: String, 
+        }, 
+        paymentsNumbers: new mongoose.Schema({
+            bkashNumber: {
+                type: String, 
+            },
+            nagadNumber: {
+                type: String, 
+            },
+            rocketNumber: {
+                type: String, 
+            },
+        })
+    }),
 
 
 })

@@ -61,8 +61,7 @@ router.post("/", async (req, res) => {
         img: img.name,
       },
     };
-    const data = await TransactionHistory.create(info);
-    console.log("data ==>>", data);
+    const data = await TransactionHistory.create(info); 
     if (data) {
       const imagePath = await path.join(transactionDirectory(), img.name);
      console.log("imagePath ==>>", imagePath)

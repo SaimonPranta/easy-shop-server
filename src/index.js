@@ -19,6 +19,7 @@ const balance_request = require("./routes/user_routes/balance_request");
 const mobile_rechare = require("./routes/user_routes/mobile_recharge");
 const withdraw = require("./routes/user_routes/withdraw");
 const adminWithdraw = require("./routes/user_routes/admin_withdraw");
+const adminPayments = require("./routes/user_routes/admin_payments");
 const generation_list = require("./routes/user_routes/generation_list");
 const adminAuthGard = require("./middleware/adminAuthGard");
 const all_user = require("./routes/admin_routes/all_user");
@@ -36,6 +37,7 @@ const slider_provider = require('./routes/user_routes/slider_provider');
 const fileUpload = require('express-fileupload');
 const path = require('path');
 const fs = require('fs-extra');
+
 
 
 const slider_img_delete = require('./routes/admin_routes/slider_img_delete');
@@ -63,7 +65,8 @@ const {
     sliderDirectory,
     helpSocialDirectory,
     notificationDirectory,
-    profileDirectory
+    profileDirectory,
+    transactionDirectory,
 } = require('./constants/storageDirectory');
 // const filter_delete_user = require('./functions/filter_delete_user');
 require("./testGround")
@@ -86,6 +89,7 @@ app.use(express.static(notificationDirectory()))
 app.use(express.static(dailyTaskStorageDirectory()))
 app.use(express.static(userTaskStorageDirectory()))
 app.use(express.static(profileDirectory()))
+app.use(express.static(transactionDirectory()))
  
 
 // ====== Root Route ======
@@ -128,6 +132,8 @@ app.use("/admin-withdraw", adminAuthGard, adminWithdraw);
 
 // ======Withdraw Route ======
 app.use("/payments", authGard, payments);
+app.use("/admin-payments", adminAuthGard, adminPayments);
+
 // ======Generation User list Route ======
 app.get("/generation", authGard, generation_list);
 
