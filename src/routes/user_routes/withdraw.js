@@ -101,14 +101,7 @@ router.post("/get-list", async (req, res) => {
             return res.json({
                 message: "All item are already loaded",
             })
-        }
-
-        console.log({
-            page,
-            skip,
-            limit,
-            totalItems
-        })
+        } 
         const data = await TransactionHistory.find(query).skip(skip).limit(limit).sort({ createdAt: -1 })
 
         if (pendingBalance.length) {

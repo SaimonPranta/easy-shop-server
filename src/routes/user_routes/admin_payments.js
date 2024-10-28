@@ -6,6 +6,7 @@ const date_provider = require("../../functions/date_provider");
 const TransactionHistory = require("../../db/schemas/transactionHistory");
 const Configs = require("../../db/schemas/Configs");
 const Generations = require("../../db/schemas/generations");
+const { default: mongoose } = require("mongoose");
 
 router.post("/", async (req, res) => {
   try {
@@ -56,7 +57,6 @@ router.post("/", async (req, res) => {
       ];
     }
     const totalItems = await TransactionHistory.countDocuments(query);
-    console.log("totalItems ==>>", totalItems);
     // const totalBalance = await TransactionHistory.aggregate([
     //     {
     //         $match: query
@@ -137,7 +137,7 @@ router.put("/status", async (req, res) => {
   try {
     const { status, id } = req.body;
     const query = {
-      _id: id,
+      _id: mongoose.Types.ObjectId(id),
       transactionType: "Payments",
     };
     let updateInfo = {};
@@ -148,17 +148,20 @@ router.put("/status", async (req, res) => {
     const userInfo = await user_collection.findOne({
       _id: transitionInfo.userID,
     });
-    if (userInfo.isActive) {
-      console.log("status ==>>", status);
+    if ( userInfo.isActive) {
       return res.json({
         message: "User account is already activate",
       });
     }
 
-    if (status === "Approve") {
+      if (status === "Approve") {
       let totalAmount = await TransactionHistory.aggregate([
         {
-          $match: query,
+          $match: {
+            userID: transitionInfo.userID,
+            transactionType: "Payments",
+            status: "Approve",
+          },
         },
         {
           $group: {
@@ -168,264 +171,309 @@ router.put("/status", async (req, res) => {
         },
       ]);
 
-      // Extract the total amount (if any results found)
       totalAmount = totalAmount.length > 0 ? totalAmount[0].totalAmount : 0;
 
-      if (totalAmount >= 150) {
+      if (Number(transitionInfo.amount + totalAmount) >= 150) {
         const activeHostUser = await user_collection.findOneAndUpdate(
           { _id: transitionInfo.userID },
           {
             isActive: true,
           },
           { new: true }
-        ); 
-        let currentReferUser = null;
-        await Promise.all(
-          new Array(10).fill("").map(async (item, index) => {
-            try {
-              const currentIndex = index + 1;
-              // referUser
-              if (currentIndex === 1) {
-                currentReferUser = await user_collection.findOneAndUpdate(
-                  {
-                    $or: [
-                      {
-                        _id: activeHostUser.referUser,
-                      },
-                      {
-                        phoneNumber: activeHostUser.referNumber,
-                      },
-                    ],
-                  },
-                  { $inc: { balance: 40, totalIncome: 40 } }
-                );
-                await Generations.create({
-                  referByUser: currentReferUser._id,
-                  generationNumber: currentIndex,
-                  referredUser: activeHostUser._id,
-                });
-              } else if (currentIndex === 2) {
-                currentReferUser = await user_collection.findOneAndUpdate(
-                  {
-                    $or: [
-                      {
-                        _id: currentReferUser.referUser,
-                      },
-                      {
-                        phoneNumber: currentReferUser.referNumber,
-                      },
-                    ],
-                  },
-                  {
-                    $inc: { balance: 10, totalIncome: 10 },
-                  },
-                  {
-                    new: true,
-                  }
-                );
-                await Generations.create({
-                  referByUser: currentReferUser._id,
-                  generationNumber: currentIndex,
-                  referredUser: activeHostUser._id,
-                });
-              } else if (currentIndex === 3) {
-                currentReferUser = await user_collection.findOneAndUpdate(
-                  {
-                    $or: [
-                      {
-                        _id: currentReferUser.referUser,
-                      },
-                      {
-                        phoneNumber: currentReferUser.referNumber,
-                      },
-                    ],
-                  },
-                  {
-                    $inc: { balance: 5, totalIncome: 5 },
-                  },
-                  {
-                    new: true,
-                  }
-                );
-                await Generations.create({
-                  referByUser: currentReferUser._id,
-                  generationNumber: currentIndex,
-                  referredUser: activeHostUser._id,
-                });
-              } else if (currentIndex === 4) {
-                currentReferUser = await user_collection.findOneAndUpdate(
-                  {
-                    $or: [
-                      {
-                        _id: currentReferUser.referUser,
-                      },
-                      {
-                        phoneNumber: currentReferUser.referNumber,
-                      },
-                    ],
-                  },
-                  {
-                    $inc: { balance: 3, totalIncome: 3 },
-                  },
-                  {
-                    new: true,
-                  }
-                );
-                await Generations.create({
-                  referByUser: currentReferUser._id,
-                  generationNumber: currentIndex,
-                  referredUser: activeHostUser._id,
-                });
-              } else if (currentIndex === 5) {
-                currentReferUser = await user_collection.findOneAndUpdate(
-                  {
-                    $or: [
-                      {
-                        _id: currentReferUser.referUser,
-                      },
-                      {
-                        phoneNumber: currentReferUser.referNumber,
-                      },
-                    ],
-                  },
-                  {
-                    $inc: { balance: 2, totalIncome: 2 },
-                  },
-                  {
-                    new: true,
-                  }
-                );
-                await Generations.create({
-                  referByUser: currentReferUser._id,
-                  generationNumber: currentIndex,
-                  referredUser: activeHostUser._id,
-                });
-              } else if (currentIndex === 6) {
-                currentReferUser = await user_collection.findOneAndUpdate(
-                  {
-                    $or: [
-                      {
-                        _id: currentReferUser.referUser,
-                      },
-                      {
-                        phoneNumber: currentReferUser.referNumber,
-                      },
-                    ],
-                  },
-                  {
-                    $inc: { balance: 2, totalIncome: 2 },
-                  },
-                  {
-                    new: true,
-                  }
-                );
-                await Generations.create({
-                  referByUser: currentReferUser._id,
-                  generationNumber: currentIndex,
-                  referredUser: activeHostUser._id,
-                });
-              } else if (currentIndex === 7) {
-                currentReferUser = await user_collection.findOneAndUpdate(
-                  {
-                    $or: [
-                      {
-                        _id: currentReferUser.referUser,
-                      },
-                      {
-                        phoneNumber: currentReferUser.referNumber,
-                      },
-                    ],
-                  },
-                  {
-                    $inc: { balance: 1, totalIncome: 1 },
-                  },
-                  {
-                    new: true,
-                  }
-                );
-                await Generations.create({
-                  referByUser: currentReferUser._id,
-                  generationNumber: currentIndex,
-                  referredUser: activeHostUser._id,
-                });
-              } else if (currentIndex === 8) {
-                currentReferUser = await user_collection.findOneAndUpdate(
-                  {
-                    $or: [
-                      {
-                        _id: currentReferUser.referUser,
-                      },
-                      {
-                        phoneNumber: currentReferUser.referNumber,
-                      },
-                    ],
-                  },
-                  {
-                    $inc: { balance: 1, totalIncome: 1 },
-                  },
-                  {
-                    new: true,
-                  }
-                );
-                await Generations.create({
-                  referByUser: currentReferUser._id,
-                  generationNumber: currentIndex,
-                  referredUser: activeHostUser._id,
-                });
-              } else if (currentIndex === 9) {
-                currentReferUser = await user_collection.findOneAndUpdate(
-                  {
-                    $or: [
-                      {
-                        _id: currentReferUser.referUser,
-                      },
-                      {
-                        phoneNumber: currentReferUser.referNumber,
-                      },
-                    ],
-                  },
-                  {
-                    $inc: { balance: 1, totalIncome: 1 },
-                  },
-                  {
-                    new: true,
-                  }
-                );
-                await Generations.create({
-                  referByUser: currentReferUser._id,
-                  generationNumber: currentIndex,
-                  referredUser: activeHostUser._id,
-                });
-              } else if (currentIndex === 10) {
-                currentReferUser = await user_collection.findOneAndUpdate(
-                  {
-                    $or: [
-                      {
-                        _id: currentReferUser.referUser,
-                      },
-                      {
-                        phoneNumber: currentReferUser.referNumber,
-                      },
-                    ],
-                  },
-                  {
-                    $inc: { balance: 1, totalIncome: 1 },
-                  },
-                  {
-                    new: true,
-                  }
-                );
-                await Generations.create({
-                  referByUser: currentReferUser._id,
-                  generationNumber: currentIndex,
-                  referredUser: activeHostUser._id,
-                });
-              }
-            } catch (error) {
-              console.log("error ===>>", error);
-            }
-          })
         );
+        let currentReferUser = {};
+
+        for (let index = 0; index < 10; index++) {
+          const currentIndex = index + 1;
+          // referUser
+          if (currentIndex === 1) {
+            const currentUserInfo = await user_collection.findOneAndUpdate(
+              {
+                $or: [
+                  {
+                    _id: activeHostUser.referUser,
+                  },
+                  {
+                    phoneNumber: activeHostUser.referNumber,
+                  },
+                ],
+              },
+              { $inc: { balance: 40, totalIncome: 40 } }
+            );
+            if (!currentUserInfo) {
+              break
+            }
+            currentReferUser = currentUserInfo._doc
+            await Generations.create({
+              referByUser: currentReferUser._id,
+              generationNumber: currentIndex,
+              referredUser: activeHostUser._id,
+            });
+          } else if (currentIndex === 2) {
+            const currentUserInfo = await user_collection.findOneAndUpdate(
+              {
+                $or: [
+                  {
+                    _id: currentReferUser.referUser,
+                  },
+                  {
+                    phoneNumber: currentReferUser.referNumber,
+                  },
+                ],
+              },
+              {
+                $inc: { balance: 10, totalIncome: 10 },
+              },
+              {
+                new: true,
+              }
+            );
+            if (!currentUserInfo) {
+              break
+            }
+
+            currentReferUser = currentUserInfo._doc
+            await Generations.create({
+              referByUser: currentReferUser._id,
+              generationNumber: currentIndex,
+              referredUser: activeHostUser._id,
+            });
+          } else if (currentIndex === 3) {
+            const currentUserInfo = await user_collection.findOneAndUpdate(
+              {
+                $or: [
+                  {
+                    _id: currentReferUser.referUser,
+                  },
+                  {
+                    phoneNumber: currentReferUser.referNumber,
+                  },
+                ],
+              },
+              {
+                $inc: { balance: 5, totalIncome: 5 },
+              },
+              {
+                new: true,
+              }
+            );
+            if (!currentUserInfo) {
+              break
+            }
+            currentReferUser = currentUserInfo._doc
+            await Generations.create({
+              referByUser: currentReferUser._id,
+              generationNumber: currentIndex,
+              referredUser: activeHostUser._id,
+            });
+          } else if (currentIndex === 4) {
+            const currentUserInfo = await user_collection.findOneAndUpdate(
+              {
+                $or: [
+                  {
+                    _id: currentReferUser.referUser,
+                  },
+                  {
+                    phoneNumber: currentReferUser.referNumber,
+                  },
+                ],
+              },
+              {
+                $inc: { balance: 3, totalIncome: 3 },
+              },
+              {
+                new: true,
+              }
+            );
+            if (!currentUserInfo) {
+              break
+            }
+            currentReferUser = currentUserInfo._doc
+            await Generations.create({
+              referByUser: currentReferUser._id,
+              generationNumber: currentIndex,
+              referredUser: activeHostUser._id,
+            });
+          } else if (currentIndex === 5) {
+            const currentUserInfo = await user_collection.findOneAndUpdate(
+              {
+                $or: [
+                  {
+                    _id: currentReferUser.referUser,
+                  },
+                  {
+                    phoneNumber: currentReferUser.referNumber,
+                  },
+                ],
+              },
+              {
+                $inc: { balance: 2, totalIncome: 2 },
+              },
+              {
+                new: true,
+              }
+            );
+            if (!currentUserInfo) {
+              break
+            }
+            currentReferUser = currentUserInfo._doc
+            await Generations.create({
+              referByUser: currentReferUser._id,
+              generationNumber: currentIndex,
+              referredUser: activeHostUser._id,
+            });
+          } else if (currentIndex === 6) {
+            const currentUserInfo = await user_collection.findOneAndUpdate(
+              {
+                $or: [
+                  {
+                    _id: currentReferUser.referUser,
+                  },
+                  {
+                    phoneNumber: currentReferUser.referNumber,
+                  },
+                ],
+              },
+              {
+                $inc: { balance: 2, totalIncome: 2 },
+              },
+              {
+                new: true,
+              }
+            );
+            if (!currentUserInfo) {
+              break
+            }
+            currentReferUser = currentUserInfo._doc
+            await Generations.create({
+              referByUser: currentReferUser._id,
+              generationNumber: currentIndex,
+              referredUser: activeHostUser._id,
+            });
+          } else if (currentIndex === 7) {
+            const currentUserInfo = await user_collection.findOneAndUpdate(
+              {
+                $or: [
+                  {
+                    _id: currentReferUser.referUser,
+                  },
+                  {
+                    phoneNumber: currentReferUser.referNumber,
+                  },
+                ],
+              },
+              {
+                $inc: { balance: 1, totalIncome: 1 },
+              },
+              {
+                new: true,
+              }
+            );
+            if (!currentUserInfo) {
+              break
+            }
+            currentReferUser = currentUserInfo._doc
+            await Generations.create({
+              referByUser: currentReferUser._id,
+              generationNumber: currentIndex,
+              referredUser: activeHostUser._id,
+            });
+          } else if (currentIndex === 8) {
+            const currentUserInfo = await user_collection.findOneAndUpdate(
+              {
+                $or: [
+                  {
+                    _id: currentReferUser.referUser,
+                  },
+                  {
+                    phoneNumber: currentReferUser.referNumber,
+                  },
+                ],
+              },
+              {
+                $inc: { balance: 1, totalIncome: 1 },
+              },
+              {
+                new: true,
+              }
+            );
+            if (!currentUserInfo) {
+              break
+            }
+            currentReferUser = currentUserInfo._doc
+            await Generations.create({
+              referByUser: currentReferUser._id,
+              generationNumber: currentIndex,
+              referredUser: activeHostUser._id,
+            });
+          } else if (currentIndex === 9) {
+            const currentUserInfo = await user_collection.findOneAndUpdate(
+              {
+                $or: [
+                  {
+                    _id: currentReferUser.referUser,
+                  },
+                  {
+                    phoneNumber: currentReferUser.referNumber,
+                  },
+                ],
+              },
+              {
+                $inc: { balance: 1, totalIncome: 1 },
+              },
+              {
+                new: true,
+              }
+            );
+            if (!currentUserInfo) {
+              break
+            }
+            currentReferUser = currentUserInfo._doc
+            await Generations.create({
+              referByUser: currentReferUser._id,
+              generationNumber: currentIndex,
+              referredUser: activeHostUser._id,
+            });
+          } else if (currentIndex === 10) {
+            const currentUserInfo = await user_collection.findOneAndUpdate(
+              {
+                $or: [
+                  {
+                    _id: currentReferUser.referUser,
+                  },
+                  {
+                    phoneNumber: currentReferUser.referNumber,
+                  },
+                ],
+              },
+              {
+                $inc: { balance: 1, totalIncome: 1 },
+              },
+              {
+                new: true,
+              }
+            );
+            if (!currentUserInfo) {
+              break
+            }
+            currentReferUser = currentUserInfo._doc
+            await Generations.create({
+              referByUser: currentReferUser._id,
+              generationNumber: currentIndex,
+              referredUser: activeHostUser._id,
+            });
+          }
+        }
+
+        // await Promise.all(
+        // await new Array(10).fill("").map(async (item, index) => {
+        //   try {
+
+        //   } catch (error) {
+        //     console.log("error ===>>", error);
+        //   }
+        // });
+        // );
       }
     }
     let data = null;

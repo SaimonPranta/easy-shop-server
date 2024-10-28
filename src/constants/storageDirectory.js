@@ -1,16 +1,14 @@
 const path = require("path");
 
 const storageDirectory = () => {
-    const storageDir = path.join(__dirname, "../../../../storage.imp/easyshop50.com");
-    // const storageDir = path.join(__dirname, "../../../storage.imp/easyshop50.com");
-    console.log("storageDir ==>", storageDir)
+    // const storageDir = path.join(__dirname, "../../../../storage.imp/easyshop50.com");
+    const storageDir = path.join(__dirname, "../../../storage.imp/easyshop50.com");
     return storageDir
 
 }
 // const storageDirectory = () => {
 //     const storageDir = path.join(__dirname, "../../../storage_easyshop50.com");
 //     return storageDir
-
 // }
 const dailyTaskStorageDirectory = () => {
     const storageDir = path.join(storageDirectory(), "daily_task");
