@@ -16,7 +16,26 @@ const configsSchema = new mongoose.Schema({
             type: String,
             require: true,
             default: ""
-        }
+        },
+        pointConvertAmount: {
+            type: Number,
+            require: true,
+            default: 0
+        },
+        taskNotice: {
+            type: String,
+            require: true,
+            default: ""
+        },
+        taskOffNotice: {
+            type: String, 
+        },
+        taskStartDate: {
+            type: Date, 
+        },
+        taskExpireDate: { 
+            type: Date, 
+        },
     }),
     withdraw: new mongoose.Schema({
         withdrawCost: {

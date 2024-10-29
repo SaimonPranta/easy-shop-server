@@ -151,5 +151,117 @@ router.get("/search-user", async (req, res) => {
     });
   }
 });
+router.post("/generation-team-member-list", async (req, res) => {
+  try {
+    const userID = req.id;
+    const { balance, fromDate, toDate, search } = req.body;
+    const query = {
+      referByUser: mongoose.Types.ObjectId(userID),
+      generationNumber: 1,
+    };
+    const limit = req.query.limit || 5;
+    const page = req.query.page || 1;
+    if (balance) {
+      query["balanceType"] = balance;
+    }
+    if (fromDate && toDate) {
+      const startDate = new Date(fromDate);
+      const endDate = new Date(toDate);
+      const startOfDay = new Date(startDate.setHours(0, 0, 0, 0));
+      const endOfDay = new Date(endDate.setHours(23, 59, 59, 999));
+      query["$and"] = [
+        {
+          createdAt: { $lte: endOfDay },
+        },
+        {
+          createdAt: { $gte: startOfDay },
+        },
+      ];
+    }
+    let totalItems = await Generations.aggregate([
+      {
+        $match: {
+          ...query,
+        },
+      },
+      {
+        $project: {
+          _id: 1,
+        },
+      },
+    ]);
+    totalItems = totalItems.length || 0;
+
+    const skip = Number(page - 1) * limit;
+
+    if (skip >= totalItems) {
+      return res.json({
+        message: "All Refer user are already loaded",
+      });
+    }
+    let data = await Generations.find(query)
+      .populate({
+        path: "referredUser",
+        select: "firstName lastName profilePicture phoneNumber",
+      })
+      .skip(skip)
+      .limit(limit);
+    let totalReferUser = 0;
+    
+    data = await Promise.all(
+      data.map(async (user) => {
+        try {
+          const length = await Generations.countDocuments({
+            referByUser: mongoose.Types.ObjectId(user.referredUser),
+            generationNumber: 1,
+            active: true,
+          });
+          totalReferUser += length;
+          return {
+            ...user._doc,
+            referCount: length,
+          };
+        } catch (error) {
+          return {};
+        }
+      })
+    ); 
+    data = await data.sort((a, b) => b.referCount - a.referCount);
+    res.json({
+      data: data,
+      total: totalItems,
+      totalReferUser: totalReferUser,
+    });
+  } catch (error) {
+    res.json({
+      message: "Internal server error",
+    });
+  }
+});
+router.get("/refer-list", async (req, res) => {
+  try {
+    const { userID } = req.query;
+    const data = await Generations.find({
+      referByUser: userID,
+      generationNumber: 1,
+    }).populate({
+      path: "referredUser",
+      select:
+        "firstName lastName profilePicture phoneNumber joinDate rank referUser",
+      populate: {
+        path: "referUser",
+        select: "firstName lastName profilePicture phoneNumber joinDate rank",
+      },
+    }); 
+    res.json({
+      data: data,
+    });
+  } catch (error) {
+    console.log("error ==>>", error);
+    res.json({
+      message: "Internal server error",
+    });
+  }
+});
 
 module.exports = router;

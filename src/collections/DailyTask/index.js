@@ -31,7 +31,6 @@ exports.createDailyTask = async (req, res) => {
     } = JSON.parse(req.body.data);
     const image = req.files.img;
 
-    console.log("taskListID =>>", taskListID);
     if (
       image.mimetype !== "image/jpg" &&
       image.mimetype !== "image/png" &&
@@ -84,7 +83,6 @@ exports.createDailyTask = async (req, res) => {
         ...additionalQuery,
       });
       const dailyTaskData = await dailyTaskDocuments.save();
-      console.log("dailyTaskData ==>>", dailyTaskData);
       await DailyTaskList.findOneAndUpdate(
         { _id: dailyTaskListId },
         {
@@ -118,8 +116,6 @@ exports.createDailyTask = async (req, res) => {
     //     message: "Success"
     // })
   } catch (error) {
-    console.log("error ==>>", error);
-
     res.json({
       message: "Internal server error",
     });
@@ -138,9 +134,9 @@ exports.editDailyTask = async (req, res) => {
       dailyTaskID,
       imageUpdate,
     } = JSON.parse(req.body.data);
-    const image = req?.files?.img;
+    const files = req.files;
+    const image = files ? files.img : null
 
-    console.log("dailyTaskID =>>", dailyTaskID);
     if (
       imageUpdate &&
       image.mimetype !== "image/jpg" &&
@@ -181,14 +177,10 @@ exports.editDailyTask = async (req, res) => {
       if (taskLink) {
         additionalQuery["taskLink"] = taskLink;
       }
-      console.log("dailyTaskID =>", dailyTaskID);
-      console.log("additionalQuery =>", additionalQuery);
-      console.log("imageUpdate =>", imageUpdate);
+
       if (imageUpdate) {
         const dailyTask = await DailyTasks.findOne({ _id: dailyTaskID });
-        console.log("dailyTask ==>>", dailyTask);
         let imgPath = `${dailyTaskStorage}/${dailyTask.img}`;
-        console.log("imgPath =>>", imgPath);
         if (fs.existsSync(imgPath)) {
           await fs.unlinkSync(imgPath);
         }
@@ -201,12 +193,11 @@ exports.editDailyTask = async (req, res) => {
         },
         { new: true }
       );
-      // console.log("dailyTaskData ==>>", dailyTaskData)
 
       if (dailyTaskData) {
         if (taskStartDate && taskExpireDate) {
           await DailyTaskList.findOneAndUpdate(
-            { _id: dailyTaskData?.taskListID },
+            { _id: dailyTaskData.taskListID },
             {
               taskStartDate: parseDate(taskStartDate, "Start Date"),
               taskExpireDate: parseDate(taskExpireDate, "Expire Date"),
@@ -235,8 +226,6 @@ exports.editDailyTask = async (req, res) => {
     //     message: "Success"
     // })
   } catch (error) {
-    console.log("error ==>>", error);
-
     res.json({
       message: "Internal server error",
     });
@@ -325,11 +314,11 @@ exports.getDailyTaskDetails = async (req, res) => {
     let dailyTask = await DailyTasks.findOne({
       _id: dailyTaskID,
     }).populate("taskListID");
-    if (dailyTask) {
+    if (dailyTask && dailyTask.taskListID) {
       dailyTask = {
         ...dailyTask._doc,
-        taskStartDate: formatDate(dailyTask?.taskListID?.taskStartDate),
-        taskExpireDate: formatDate(dailyTask?.taskListID?.taskExpireDate),
+        taskStartDate: formatDate(dailyTask.taskListID.taskStartDate),
+        taskExpireDate: formatDate(dailyTask.taskListID.taskExpireDate),
       };
     }
 
@@ -451,26 +440,64 @@ exports.createUserTaskHistory = async (req, res) => {
 };
 exports.setConfig = async (req, res) => {
   try {
-    const { taskRewardsList, maximumAmount, tutorialVideoId } = req.body;
+    const body = req.body;
+    const {
+      taskRewardsList,
+      maximumAmount,
+      tutorialVideoId,
+      taskNotice,
+      taskOffNotice,
+      taskStartDate,
+      taskExpireDate,
+      pointConvertAmount,
+    } = body;
     const isConfigExist = await Configs.findOne({});
     if (!isConfigExist) {
       await Configs.create({});
     }
 
     const updateInfo = {};
-    if (taskRewardsList) {
+    const unsetUpdateInfo = {};
+    if (body.hasOwnProperty("taskRewardsList")) {
       updateInfo["dailyTask.taskRewardsList"] = taskRewardsList;
     }
-    if (maximumAmount) {
+    if (body.hasOwnProperty("maximumAmount")) {
       updateInfo["dailyTask.maximumAmount"] = Number(maximumAmount);
     }
-    if (tutorialVideoId) {
+    if (body.hasOwnProperty("tutorialVideoId")) {
       updateInfo["dailyTask.tutorialVideoId"] = tutorialVideoId;
     }
+    if (body.hasOwnProperty("pointConvertAmount")) {
+      updateInfo["dailyTask.pointConvertAmount"] = pointConvertAmount;
+    }
+    if (body.hasOwnProperty("taskNotice")) {
+      updateInfo["dailyTask.taskNotice"] = taskNotice;
+    }
+    if (body.hasOwnProperty("taskOffNotice")) {
+      updateInfo["dailyTask.taskOffNotice"] = taskOffNotice;
+    }
+    if (body.hasOwnProperty("taskStartDate")) {
+      if (!isNaN(new Date(taskStartDate))) {
+        updateInfo["dailyTask.taskStartDate"] = new Date(taskStartDate);
+      } else {
+        unsetUpdateInfo["dailyTask.taskStartDate"] = "";
+      }
+    }
+    if (body.hasOwnProperty("taskExpireDate")) {
+      if (!isNaN(new Date(taskExpireDate))) {
+        updateInfo["dailyTask.taskExpireDate"] = new Date(taskExpireDate);
+      } else {
+        unsetUpdateInfo["dailyTask.taskExpireDate"] = "";
+      }
+    }
+
     const updateConfig = await Configs.findOneAndUpdate(
       {},
       {
         ...updateInfo,
+        $unset: {
+          ...unsetUpdateInfo,
+        },
       },
       { new: true }
     );
@@ -573,6 +600,8 @@ exports.setUserPoints = async (req, res) => {
     const startOfDay = new Date(today.setHours(0, 0, 0, 0));
     const endOfDay = new Date(today.setHours(23, 59, 59, 999));
 
+    const config = await Configs.findOne({}).select("dailyTask");
+
     const isExistHistory = await UserPointHistory.findOne({
       userID: id,
       $and: [
@@ -586,6 +615,7 @@ exports.setUserPoints = async (req, res) => {
         message: "Daily task reward already added",
       });
     }
+
     const data = await UserPointHistory.create({
       userID: id,
       pointAmount,
@@ -595,22 +625,49 @@ exports.setUserPoints = async (req, res) => {
         message: "Internal server error",
       });
     }
-    const userData = await user_collection.findOneAndUpdate(
-      {
-        _id: id,
-      },
-      {
-        $inc: {
-          pointAmount: pointAmount,
+    let currentPoint = 0;
+    const user = await user_collection
+      .findOneAndUpdate(
+        {
+          _id: id,
         },
-      },
-      { new: true }
-    );
+        {
+          $inc: { pointAmount: Number(pointAmount) },
+        },
+        {
+          new: true,
+        }
+      )
+      .select("pointAmount");
+    currentPoint = user.pointAmount;
+    if (user && user.pointAmount) {
+      if (
+        config.dailyTask &&
+        Number(config.dailyTask.pointConvertAmount) <= Number(user.pointAmount)
+      ) {
+        const currentTaskBalance = Number(user.pointAmount) / 100;
+        const currentUser = await user_collection
+          .findOneAndUpdate(
+            {
+              _id: id,
+            },
+            {
+              taskBalance: currentTaskBalance,
+              pointAmount: 0,
+            },
+            {
+              new: true,
+            }
+          )
+          .select("pointAmount");
+        currentPoint = currentUser.pointAmount;
+      }
+    }
 
     res.json({
       message: "Daily task reward added successfully",
       success: true,
-      pointAmount: pointAmount,
+      pointAmount: currentPoint,
     });
   } catch (error) {
     res.status(500).json({
@@ -858,17 +915,13 @@ exports.dailyTaskList = async (req, res) => {
       ]);
     }
 
-    console.log("totalItems ====>", totalItems[0]);
     if (totalItems.length) {
       totalItems = totalItems[0].totalCount || 0;
     } else {
       totalItems = 0;
     }
-    console.log("totalItems 2 =>", totalItems);
-    console.log("query =>", query);
-    console.log("req.body =>", req.body);
+
     const skip = Number(page - 1) * limit;
-    console.log("skip=>", skip);
 
     let data = [];
     if (tableType === "Group Daily Task") {
@@ -905,16 +958,13 @@ exports.dailyTaskList = async (req, res) => {
         { $limit: limit },
       ]);
     }
-    console.log("req.query ==>", req.query);
-    console.log("query ==>", query);
-    console.log("data ==>", data.length);
+
     res.json({
       data: data,
       total: totalItems,
       page: Number(page),
     });
   } catch (error) {
-    console.log("error =>", error);
     res.json({
       message: "Internal server error",
     });
@@ -952,7 +1002,6 @@ exports.dailyTaskStatus = async (req, res) => {
     );
     res.json({ data: updateTask });
   } catch (error) {
-    console.log("error", error)
     res.json({
       message: "Internal server error",
     });

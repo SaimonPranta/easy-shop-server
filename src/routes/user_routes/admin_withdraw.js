@@ -145,11 +145,11 @@ router.put("/status", async (req, res) => {
             let balanceQuery = {}
 
             if (transitionInfo.balanceType === "Main Balance") {
-                balanceQuery = { balance: { $lte: transitionInfo?.netAmount } }
+                balanceQuery = { balance: { $lte: transitionInfo.netAmount } }
             } else if (transitionInfo.balanceType === "Sales Balance") {
-                balanceQuery = { salesBalance: { $lte: transitionInfo?.netAmount } }
+                balanceQuery = { salesBalance: { $lte: transitionInfo.netAmount } }
             } else if (transitionInfo.balanceType === "Task Balance") {
-                balanceQuery = { taskBalance: { $lte: transitionInfo?.netAmount } }
+                balanceQuery = { taskBalance: { $lte: transitionInfo.netAmount } }
             }
             let checkBalance = await user_collection.findOne({
                _id: transitionInfo.userID,
