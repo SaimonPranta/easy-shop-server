@@ -1,8 +1,8 @@
 const path = require("path");
 
 const storageDirectory = () => {
-    // const storageDir = path.join(__dirname, "../../../../storage.imp/easyshop50.com");
-    const storageDir = path.join(__dirname, "../../../storage.imp/easyshop50.com");
+    const storageDir = path.join(__dirname, "../../../../storage.imp/easyshop50.com");
+    // const storageDir = path.join(__dirname, "../../../storage.imp/easyshop50.com");
     return storageDir
 
 }
@@ -42,6 +42,10 @@ const transactionDirectory = () => {
     const storageDir = path.join(storageDirectory(), "transaction");
     return storageDir
 }
+const ranksDirectory = () => {
+    const storageDir = path.join(storageDirectory(), "ranks");
+    return storageDir
+}
 
 
 
@@ -54,6 +58,7 @@ module.exports = {
     helpSocialDirectory,
     notificationDirectory,
     profileDirectory,
-    transactionDirectory 
+    transactionDirectory, 
+    ranksDirectory
 };
 

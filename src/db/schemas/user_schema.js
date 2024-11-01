@@ -21,6 +21,7 @@ const userSchema = new mongoose.Schema({
     ref: "user_collectionsss",
     require: true,
   },
+ 
   balance: {
     // Main Balance
     type: Number,
@@ -68,36 +69,40 @@ const userSchema = new mongoose.Schema({
     type: String,
     default: "No Rank",
   },
-  generation_1: {
-    type: Array,
+  rankID: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "rank", 
   },
-  generation_2: {
-    type: Array,
-  },
-  generation_3: {
-    type: Array,
-  },
-  generation_4: {
-    type: Array,
-  },
-  generation_5: {
-    type: Array,
-  },
-  generation_6: {
-    type: Array,
-  },
-  generation_7: {
-    type: Array,
-  },
-  generation_8: {
-    type: Array,
-  },
-  generation_9: {
-    type: Array,
-  },
-  generation_10: {
-    type: Array,
-  },
+  // generation_1: {
+  //   type: Array,
+  // },
+  // generation_2: {
+  //   type: Array,
+  // },
+  // generation_3: {
+  //   type: Array,
+  // },
+  // generation_4: {
+  //   type: Array,
+  // },
+  // generation_5: {
+  //   type: Array,
+  // },
+  // generation_6: {
+  //   type: Array,
+  // },
+  // generation_7: {
+  //   type: Array,
+  // },
+  // generation_8: {
+  //   type: Array,
+  // },
+  // generation_9: {
+  //   type: Array,
+  // },
+  // generation_10: {
+  //   type: Array,
+  // },
   balanceTransperInfo: {
     type: Array,
   },

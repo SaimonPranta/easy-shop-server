@@ -3,8 +3,7 @@ const user_collection = require("../../db/schemas/user_schema")
 const withdrawRequestList = async (req, res) => {
     try {
         const {page, approve} = req.query  
-
-        console.log("approve", approve)
+ 
         const query = { "withdrawInfo.apporoval": approve === "true" ? true : false }
         const userCount = await user_collection.countDocuments(query)
         const limit = 25; 

@@ -54,6 +54,7 @@ const rechargeRequest = require('./routes/admin_routes/rechargeRequest');
 const withdrawRequest = require('./routes/admin_routes/withdrawRequest');
 const payments = require('./routes/user_routes/payments');
 const profileRoutes = require('./routes/profile/index');
+const adminProfileRoutes = require('./routes/admin_profile/index');
 const helpLineSocial = require('./routes/admin_routes/helpLine');
 const adminNotification = require('./routes/admin_routes/notification');
 const notification = require('./routes/user_routes/notification');
@@ -67,6 +68,7 @@ const {
     notificationDirectory,
     profileDirectory,
     transactionDirectory,
+    ranksDirectory,
 } = require('./constants/storageDirectory');
 // const filter_delete_user = require('./functions/filter_delete_user');
 require("./testGround")
@@ -90,6 +92,7 @@ app.use(express.static(dailyTaskStorageDirectory()))
 app.use(express.static(userTaskStorageDirectory()))
 app.use(express.static(profileDirectory()))
 app.use(express.static(transactionDirectory()))
+app.use(express.static(ranksDirectory()))
  
 
 // ====== Root Route ======
@@ -201,6 +204,7 @@ app.get("/notice", read_notice)
 // ====== Daily Task  ======
 app.use("/daily-task", dailyTaskRoutes)
 app.use("/profile", authGard, profileRoutes)
+app.use("/admin-profile", adminAuthGard, adminProfileRoutes)
 
 // filter_delete_user()
 

@@ -4,11 +4,13 @@ const user_collection = require("../../db/schemas/user_schema");
 const all_user = async (req, res) => {
     try {
         const { page, search } = req.query; 
+        console.log("search ==>>", search)
         const phoneNumber = await req.phoneNumber;
         const userId = await req.id;
         const user = await user_collection.findOne({ _id: userId, phoneNumber: phoneNumber });
+        let userLeangth = 0
         if (user.role === "admin") {
-            const userLeangth = await user_collection.count()
+             userLeangth = await user_collection.count()
             const limit = 10;
             const skip = userLeangth > Number(page) * limit ? userLeangth - Number(page) * limit : 0;
             let userArray = []
@@ -21,7 +23,7 @@ const all_user = async (req, res) => {
 
 
             if (userArray.length > 0) {
-                res.status(200).json({data: userArray})
+                res.status(200).json({data: userArray, total: userLeangth, page: Number(page)})
             } else {
                 res.status(500).json({ failed: "Failed to load data, please try again." })
             }

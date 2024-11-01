@@ -848,7 +848,7 @@ exports.taskApprove = async (req, res) => {
 };
 exports.dailyTaskList = async (req, res) => {
   try {
-    let query = {};
+  let query = {};
     const { sort } = req.query;
     const { balance, fromDate, toDate, search, groupID, tableType } = req.body;
     const limit = 20;

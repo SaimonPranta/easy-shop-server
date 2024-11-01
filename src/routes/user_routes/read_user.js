@@ -7,10 +7,12 @@ const read_user = async (req, res) => {
     const userId = req.id;
     let user = await user_collection
       .findOne({ _id: userId, phoneNumber: phoneNumber })
-      .populate({
+      .populate([{
+        path: "rankID", 
+      }, {
         path: "referUser",
         select: "firstName lastName phoneNumber",
-      });
+      }]);
     user.password = null;
     if (user) {
       const date = new Date();
