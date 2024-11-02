@@ -11,9 +11,7 @@ router.post("/", async (req, res) => {
     const files = req.files;
     const id = req.id;
     const body = JSON.parse(req.body.data);
-    const { paymentMethod, paymentNumber, transitionNumber, amount } = body;
-    console.log("body ==>>", body);
-    console.log("files ==>>", files);
+    const { paymentMethod, paymentNumber, transitionNumber, amount } = body; 
 
     if (
       !paymentMethod ||
@@ -34,17 +32,7 @@ router.post("/", async (req, res) => {
 
     const withdrawAmount = Number(amount);
     const withdrawCost = 0;
-    const netAmount = withdrawAmount + withdrawCost;
-
-    // let checkUser = await user_collection.findOne({
-    //   _id: id,
-    //   isActive: true
-    // }).select("_id")
-    // if (checkUser) {
-    //   return res.json({
-    //     message: "User account is already active",
-    //   });
-    // }
+    const netAmount = withdrawAmount + withdrawCost; 
 
     const info = {
       userID: id,
@@ -63,8 +51,7 @@ router.post("/", async (req, res) => {
     };
     const data = await TransactionHistory.create(info); 
     if (data) {
-      const imagePath = await path.join(transactionDirectory(), img.name);
-     console.log("imagePath ==>>", imagePath)
+      const imagePath = await path.join(transactionDirectory(), img.name); 
       await img.mv(imagePath);
     }
 
@@ -72,8 +59,7 @@ router.post("/", async (req, res) => {
       success: "Withdraw request submitted successfully",
       data,
     });
-  } catch (error) {
-    console.log("error ==>>", error);
+  } catch (error) { 
     res.json({
       message: "Internal server error",
     });
@@ -179,14 +165,7 @@ router.post("/get-list", async (req, res) => {
           return res.json({
               message: "All item are already loaded",
           })
-      }
-
-      console.log({
-          page,
-          skip,
-          limit,
-          totalItems
-      })
+      } 
       const data = await TransactionHistory.find(query).skip(skip).limit(limit).sort({ createdAt: -1 })
 
       if (pendingBalance.length) {
