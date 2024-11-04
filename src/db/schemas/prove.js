@@ -14,14 +14,15 @@ const proveSchema = new mongoose.Schema(
     images: {
       type: Array,
       required: true,
-      default: []
+      default: [],
     },
     disable: {
-      type: Boolean, 
+      type: Boolean,
+      default: false,
     },
   },
   { timestamps: true }
 );
-const proveHistory = new mongoose.model("prove_history", proveSchema);
+const ProveHistory = new mongoose.model("prove_post_history", proveSchema);
 
-module.exports = proveHistory;
+module.exports = ProveHistory;

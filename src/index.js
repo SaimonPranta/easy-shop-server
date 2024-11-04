@@ -20,6 +20,7 @@ const mobile_rechare = require("./routes/user_routes/mobile_recharge");
 const withdraw = require("./routes/user_routes/withdraw");
 const prove = require("./routes/user_routes/prove");
 const adminWithdraw = require("./routes/user_routes/admin_withdraw");
+const adminProve = require("./routes/user_routes/admin_Prove_Post");
 const adminPayments = require("./routes/user_routes/admin_payments");
 const generation_list = require("./routes/user_routes/generation_list");
 const adminAuthGard = require("./middleware/adminAuthGard");
@@ -137,6 +138,8 @@ app.use("/admin-withdraw", adminAuthGard, adminWithdraw);
 
 // ======Withdraw Route ======
 app.use("/prove", authGard, prove);
+app.use("/admin-prove", adminAuthGard, adminProve);
+
 // ======Withdraw Route ======
 app.use("/payments", authGard, payments);
 app.use("/admin-payments", adminAuthGard, adminPayments);
