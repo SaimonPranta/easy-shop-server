@@ -50,6 +50,10 @@ const proveDirectory = () => {
     const storageDir = path.join(storageDirectory(), "prove");
     return storageDir
 }
+const categoriesDirectory = () => {
+    const storageDir = path.join(storageDirectory(), "categories");
+    return storageDir
+}
 
 
 
@@ -65,5 +69,6 @@ module.exports = {
     transactionDirectory, 
     ranksDirectory,
     proveDirectory,
+    categoriesDirectory,
 };
 

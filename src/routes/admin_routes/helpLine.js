@@ -50,7 +50,6 @@ router.delete("/", async (req, res) => {
     try {
         const { id } = req.query
         const createdInfo = await helplineSocial.findOneAndDelete({ _id: id })
-        console.log("createdInfo ==>>", createdInfo)
 
         if (!createdInfo) {
             return res.json({
@@ -68,7 +67,6 @@ router.delete("/", async (req, res) => {
             message: "Social item delete successfully"
         })
     } catch (error) {
-        console.log(error)
         res.json({
             message: "Failed to delete social "
         })

@@ -12,14 +12,12 @@ const index = async (req, res) => {
         
         const userList = await user_collection.find(query).select("firstName lastName  phoneNumber mobileRechareInfo").skip(skip).limit(limit)
         
-        console.log("userList", userList )
         res.json({
             success: true,
             message: "Documents loaded successfully",
             users: userList
         })
     } catch (error) {
-        console.log("error", error)
         res.json({
             success: false,
             message: "Internal server error"

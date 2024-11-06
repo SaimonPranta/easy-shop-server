@@ -5,11 +5,9 @@ const admin_update_user = async (req, res) => {
     try {
         const id = await req.body._id
         let hashingPassword = null
-        console.log("password", req.body.password , "type :" , typeof req.body.password)
 
         if (req.body.password) {
             hashingPassword = await bcrypt.hash(req.body.password, 10)
-            console.log("password -2", hashingPassword)
         }
         if (id) {
             const userObj = {}

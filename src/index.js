@@ -56,6 +56,8 @@ const withdrawRequest = require('./routes/admin_routes/withdrawRequest');
 const payments = require('./routes/user_routes/payments');
 const profileRoutes = require('./routes/profile/index');
 const adminProfileRoutes = require('./routes/admin_profile/index');
+const adminCategories = require('./routes/admin_routes/admin_categories');
+const userCategories = require('./routes/user_routes/user_categories');
 const helpLineSocial = require('./routes/admin_routes/helpLine');
 const adminNotification = require('./routes/admin_routes/notification');
 const notification = require('./routes/user_routes/notification');
@@ -70,7 +72,8 @@ const {
     profileDirectory,
     transactionDirectory,
     ranksDirectory,
-    proveDirectory
+    proveDirectory,
+    categoriesDirectory,
 } = require('./constants/storageDirectory');
 // const filter_delete_user = require('./functions/filter_delete_user');
 require("./testGround")
@@ -96,6 +99,7 @@ app.use(express.static(profileDirectory()))
 app.use(express.static(transactionDirectory()))
 app.use(express.static(ranksDirectory()))
 app.use(express.static(proveDirectory()))
+app.use(express.static(categoriesDirectory()))
  
 
 // ====== Root Route ======
@@ -212,6 +216,10 @@ app.get("/notice", read_notice)
 app.use("/daily-task", dailyTaskRoutes)
 app.use("/profile", authGard, profileRoutes)
 app.use("/admin-profile", adminAuthGard, adminProfileRoutes)
+
+// ====== E-commerce Categories  ======
+app.use("/categories",  userCategories)
+app.use("/admin-categories", adminAuthGard, adminCategories)
 
 // filter_delete_user()
 

@@ -9,7 +9,6 @@ const dateConverter = (dateString) => {
 
     // Format the date to ISO 8601 format 
 
-    console.log("date -->>" , date); 
     return date
 }
 

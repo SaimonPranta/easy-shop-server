@@ -9,8 +9,6 @@ exports.getConfigs = async (req, res) => {
             data: configs || {}
         })
     } catch (error) {
-        console.log("error", error)
-
         res.status(500).json({
             message: "Internal server error"
         })

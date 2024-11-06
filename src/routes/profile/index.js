@@ -49,12 +49,10 @@ router.post("/profile-pic", async (req, res) => {
       }
     }
 
-    console.log("user ==>>", user.profilePicture);
     res.json({
       data: user,
     });
   } catch (error) {
-    console.log("error ==>>", error);
     res.json({
       message: "Internal server error",
     });
@@ -76,7 +74,6 @@ router.get("/generation", async (req, res) => {
           generationList[`generation_${newIndex}`] = genUserCount;
           totalReferMember += genUserCount;
         } catch (error) {
-          console.log("error");
         }
       })
     );
@@ -84,7 +81,6 @@ router.get("/generation", async (req, res) => {
       data: { generationList, totalReferMember },
     });
   } catch (error) {
-    console.log("error ==>>", error);
     res.json({
       message: "Internal server error",
     });
@@ -145,7 +141,6 @@ router.get("/search-user", async (req, res) => {
       data: userList,
     });
   } catch (error) {
-    console.log("error ==>>", error);
     res.json({
       message: "Internal server error",
     });
@@ -257,7 +252,6 @@ router.get("/refer-list", async (req, res) => {
       data: data,
     });
   } catch (error) {
-    console.log("error ==>>", error);
     res.json({
       message: "Internal server error",
     });

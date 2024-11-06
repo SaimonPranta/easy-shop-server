@@ -4,7 +4,6 @@ const user_collection = require("../../db/schemas/user_schema");
 const all_user = async (req, res) => {
     try {
         const { page, search } = req.query; 
-        console.log("search ==>>", search)
         const phoneNumber = await req.phoneNumber;
         const userId = await req.id;
         const user = await user_collection.findOne({ _id: userId, phoneNumber: phoneNumber });
@@ -31,7 +30,6 @@ const all_user = async (req, res) => {
             res.status(500).json({ failed: "Failed to load data, please try again." })
         }
     } catch (error) {
-        console.log(error)
         res.status(500).json({ failed: "Failed to load data, please try again." })
 
     }

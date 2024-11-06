@@ -17,7 +17,6 @@ const balanceRequestList = async (req, res) => {
             users: userList
         })
     } catch (error) {
-        console.log("error", error)
         res.json({
             success: false,
             message: "Internal server error"

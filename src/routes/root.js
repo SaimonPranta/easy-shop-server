@@ -8,7 +8,6 @@ const root = async (req, res) => {
     try {  
 
         // const product = await product_collection.findOne({})
-        // console.log(product)
         res.json({storagePath: storageDirectory()})
     } catch (error) {
         res.send("we are now online")

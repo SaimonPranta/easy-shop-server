@@ -20,7 +20,6 @@ const all_user = async (req, res) => {
         }
 
     } catch (error) {
-        console.log(error)
         res.status(500).json({ failed: "Failed to load data, please try again." })
 
     }

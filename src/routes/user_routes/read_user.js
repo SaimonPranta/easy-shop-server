@@ -28,7 +28,6 @@ const read_user = async (req, res) => {
         ...user._doc,
         availableForTask: recentReferList >= 4 ? true : false,
       };
-      console.log("user ==>>", user);
     }
 
     res.status(200).json(user);

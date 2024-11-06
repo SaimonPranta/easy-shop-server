@@ -26,7 +26,6 @@ router.post("/", async (req, res) => {
     try {
         const data = JSON.parse(req.body.data)
 
-        console.log("data ==>>", data)
         let image = req.files
 
         if (!data.description) {

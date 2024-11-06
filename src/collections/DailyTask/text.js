@@ -13,7 +13,6 @@ const formattedDate = localDate.replace(
   "$1-$2-$3 and $4:$5"
 );
 
-console.log("formattedDate form test: ->", formattedDate); // Outputs: "17-07-2024 and 11:59 PM"
 
 }
 

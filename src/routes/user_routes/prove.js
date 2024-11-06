@@ -134,7 +134,6 @@ router.post("/add-prove", async (req, res) => {
     }else{
       info["disable"] = true
     }
-    console.log("info ==>>", info)
     const data = await proveHistory.create(info);
     if (data) {
       await images.map(async (img) => {

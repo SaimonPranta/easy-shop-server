@@ -45,7 +45,6 @@ router.post("/set-ranks/:userID", async (req, res) => {
         message: "User not found",
       });
     }
-    console.log("userInfo ==>>", userInfo.rankID);
 
     if (!img && !userInfo.rankID.profilePicture) {
       return res.json({
@@ -64,8 +63,6 @@ router.post("/set-ranks/:userID", async (req, res) => {
     const bodyInfo = { ...body };
     delete bodyInfo["_id"];
 
-    console.log("imageName ==>>", imageName);
-    console.log("img.name ==>>", img);
 
     const updateInfo = {
       ...bodyInfo,
@@ -79,7 +76,6 @@ router.post("/set-ranks/:userID", async (req, res) => {
         { _id: userID },
         { rankID: data._id }
       );
-      console.log("img before save===>>>", img);
       if (img) {
         const imagePath = await path.join(ranksDirectory(), img.name);
         await img.mv(imagePath);
@@ -109,7 +105,6 @@ router.post("/set-ranks/:userID", async (req, res) => {
       data: data,
     });
   } catch (error) {
-    console.log("error ==>>", error);
     res.json({
       message: "Internal server error",
     });
@@ -164,12 +159,10 @@ router.get("/all-user", async (req, res) => {
       ];
     }
     let userCount = await user_collection.countDocuments(query);
-    console.log("req.query >>", req.query);
     const limit = 10;
     const skip =
       userCount > Number(page) * limit ? userCount - Number(page) * limit : 0;
 
-    console.log("query ==>", query);
     // const userList = await user_collection.find(query).sort({joinDate: 1}).skip(skip).limit(limit)
     const userList = await user_collection.aggregate([
       {
@@ -190,15 +183,10 @@ router.get("/all-user", async (req, res) => {
         $limit: limit,
       },
     ]);
-    console.log({
-      leng: userList.length,
-      total: userCount,
-      page,
-    });
+
 
     res.json({ data: userList, total: userCount, page: Number(page) });
   } catch (error) {
-    console.log("error ==>>", error);
     res.json({
       message: "Internal server error",
     });

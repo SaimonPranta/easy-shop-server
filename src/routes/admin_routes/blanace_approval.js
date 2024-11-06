@@ -30,9 +30,7 @@ const balance_approval = async (req, res) => {
                     }
                 )
 
-                console.log("user ==>>", user.balance)
                 if (!user.isActive && user.balance >= 150) {
-                    console.log("Enter to if condition ======>>>")
                     // updateInfo["isActive"] = true
                     // balanceCount = balanceCount - 150
                     userActivation(user._id.toString())

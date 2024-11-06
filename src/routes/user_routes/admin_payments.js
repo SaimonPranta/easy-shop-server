@@ -470,7 +470,6 @@ router.put("/status", async (req, res) => {
         //   try {
 
         //   } catch (error) {
-        //     console.log("error ===>>", error);
         //   }
         // });
         // );
@@ -494,7 +493,6 @@ router.put("/status", async (req, res) => {
       data: data,
     });
   } catch (error) {
-    console.log("error ==>>", error);
     res.json({
       message: "Internal server error",
     });

@@ -32,7 +32,6 @@ const withdrawRequest = async (req, res) => {
             message: "Documents loaded successfully"
         })
     } catch (error) {
-        console.log("error", error)
         res.json({
             success: false,
             message: "Internal server error"

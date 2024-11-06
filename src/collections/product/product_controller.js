@@ -49,7 +49,6 @@ exports.addProduct = async (req, res) => {
         const { title, dis, price, discount, rating, detailsArray, viewAs } = await JSON.parse(req.body.data);
 
         if (!title && !dis && !price && !discount && !image && !rating && !detailsArray) {
-            console.log("enter to failed data")
             return res.status(417).json({
                 message: "failed to add product"
             })
@@ -79,8 +78,6 @@ exports.addProduct = async (req, res) => {
 
             const documents = await new product_collection(productInfo);
             const data = await documents.save();
-            console.log(data)
-
             if (data._id) {
                 await image.mv(`${productDirectory()}/${image.name}`);
 
@@ -96,7 +93,6 @@ exports.addProduct = async (req, res) => {
         }
 
     } catch (error) {
-        // console.log(error)
         res.status(417).json({
             message: "failed to add product"
         })
@@ -106,10 +102,8 @@ exports.addProduct = async (req, res) => {
 exports.deleteProduct = async (req, res) => {
     try {
         const { id } = await req.params;
-        // console.log(id)
         if (id) {
             const data = await product_collection.findOneAndDelete({ _id: id })
-            console.log("This is Data of delete product", data)
             if (!data._id) {
                 return res.status(200).json({
                     failed: "failed to deleted product"
@@ -122,7 +116,6 @@ exports.deleteProduct = async (req, res) => {
             })
         }
     } catch (error) {
-        console.log(error)
         res.status(200).json({
             failed: "failed to deleted product"
         })
@@ -141,7 +134,6 @@ exports.updateProduct = async (req, res) => {
             rating,
             detailsArray
         }
-        console.log(isImageExist)
 
         if (_id) {
             if (isImageExist) {
@@ -171,7 +163,6 @@ exports.updateProduct = async (req, res) => {
                             failed: "failed to deleted product"
                         })
                     }
-                    console.log(data)
                     await image.mv(`${productDirectory()}/${image.name}`);
                     await fs.removeSync(`${productDirectory()}/${data.img}`)
 
@@ -181,7 +172,6 @@ exports.updateProduct = async (req, res) => {
                     })
                 }
             } else {
-                console.log("ther4e")
                 const data = await product_collection.findOneAndUpdate({
                     _id
                 },
@@ -203,13 +193,11 @@ exports.updateProduct = async (req, res) => {
             }
 
         } else {
-            console.log("ok")
             res.status(200).json({
                 failed: "failed to update product"
             })
         }
     } catch (error) {
-        console.log(error)
         res.status(200).json({
             failed: "failed to update product"
         })

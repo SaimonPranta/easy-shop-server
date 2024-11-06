@@ -17,7 +17,6 @@ const parseDate = (dateString, from) => {
 
     // Format the date to ISO 8601 format 
 
-    console.log("date -->>", date);
     return date
 }
 

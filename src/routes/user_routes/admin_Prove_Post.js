@@ -22,7 +22,6 @@ router.post("/", async (req, res) => {
         query["disable"] = true;
       }
     }
-    console.log("query ==>", query["$or"])
     if (fromDate && toDate) {
       const startDate = new Date(fromDate);
       const endDate = new Date(toDate);
@@ -163,7 +162,6 @@ router.post("/set-config", async (req, res) => {
       success: true,
     });
   } catch (error) {
-    console.log("error ==>>", error)
     res.status(500).json({
       message: "Internal server error",
     });

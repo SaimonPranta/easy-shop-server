@@ -48,7 +48,6 @@ const userCount = async (req, res) => {
         })
 
     } catch (error) {
-        console.log("error", error)
         res.json({
             message: "Internal server error",
             success: false
