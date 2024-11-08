@@ -18,10 +18,12 @@ const balance_transfer = require("./routes/user_routes/balance_transfer");
 const balance_request = require("./routes/user_routes/balance_request");
 const mobile_rechare = require("./routes/user_routes/mobile_recharge");
 const withdraw = require("./routes/user_routes/withdraw");
+const publicProve = require("./routes/user_routes/publicProve");
 const prove = require("./routes/user_routes/prove");
 const adminWithdraw = require("./routes/user_routes/admin_withdraw");
 const adminProve = require("./routes/user_routes/admin_Prove_Post");
 const adminPayments = require("./routes/user_routes/admin_payments");
+const adminSalary = require("./routes/user_routes/admin_salary");
 const generation_list = require("./routes/user_routes/generation_list");
 const adminAuthGard = require("./middleware/adminAuthGard");
 const all_user = require("./routes/admin_routes/all_user");
@@ -140,7 +142,8 @@ app.post("/mobile_rechare", authGard, mobile_rechare);
 app.use("/withdraw", authGard, withdraw);
 app.use("/admin-withdraw", adminAuthGard, adminWithdraw);
 
-// ======Withdraw Route ======
+// ======Withdraw Route ====== 
+app.use("/public-prove",  publicProve);
 app.use("/prove", authGard, prove);
 app.use("/admin-prove", adminAuthGard, adminProve);
 
@@ -220,6 +223,9 @@ app.use("/admin-profile", adminAuthGard, adminProfileRoutes)
 // ====== E-commerce Categories  ======
 app.use("/categories",  userCategories)
 app.use("/admin-categories", adminAuthGard, adminCategories)
+// ====== Salary Categories  ======
+app.use("/categories",  userCategories)
+app.use("/admin-salary", adminAuthGard, adminSalary)
 
 // filter_delete_user()
 

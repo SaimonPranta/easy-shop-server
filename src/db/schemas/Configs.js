@@ -110,6 +110,31 @@ const configsSchema = new mongoose.Schema({
       },
     }),
   }),
+  salary: new mongoose.Schema({
+    salaryNotice: {
+      type: String,
+    },
+    salaryRuleNotice: {
+      type: String,
+    },
+    salaryBonusNotice: {
+      type: String,
+    }, 
+    salaryHistoryTitle: {
+      type: String,
+    },
+    salaryPaymentCondition: new mongoose.Schema({
+      salaryCountDay: {
+        type: Number,
+      },
+      salaryCountReferNumber: {
+        type: Number,
+      },
+      salaryPaymentAmount: {
+        type: Number,
+      },
+    }),
+  }),
   provePost: new mongoose.Schema({
     postAutoApprove: {
       type: Boolean,

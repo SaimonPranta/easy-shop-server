@@ -1,10 +1,10 @@
 const router = require("express").Router();
 const user_collection = require("../../db/schemas/user_schema");
-const bcrypt = require("bcrypt");
-const jwt = require("jsonwebtoken");
 const path = require("path");
-const date_provider = require("../../functions/date_provider");
-const TransactionHistory = require("../../db/schemas/transactionHistory");
+const fs = require("fs");
+const proveHistory = require("../../db/schemas/prove");
+const { proveDirectory } = require("../../constants/storageDirectory");
+const { default: mongoose } = require("mongoose");
 const Configs = require("../../db/schemas/Configs");
 const ProveHistory = require("../../db/schemas/prove");
 
@@ -12,7 +12,7 @@ router.post("/", async (req, res) => {
   try {
     const query = {};
     const { sort } = req.query;
-    const { postType, fromDate, toDate, search } = req.body;
+    const { postType, fromDate, toDate, search } = req.query;
     const limit = 15;
     const page = req.query.page || 1;
     if (postType) {
@@ -52,7 +52,8 @@ router.post("/", async (req, res) => {
     const totalItems = await ProveHistory.countDocuments(query);
 
     const skip = Number(page - 1) * limit;
-
+console.log("query ==>>", query)
+console.log("search ==>>", search)
     const data = await ProveHistory.aggregate([
       {
         $lookup: {
@@ -93,99 +94,7 @@ router.post("/", async (req, res) => {
       data: data,
     });
   } catch (error) {
-    res.json({
-      message: "Internal server error",
-    });
-  }
-});
-router.put("/status", async (req, res) => {
-  try {
-    const { status, id } = req.body;
-    const query = {
-      _id: id,
-    };
-    let updateInfo = {};
-    if (status === "Enable") {
-      updateInfo["disable"] = false;
-    } else if (status === "Disable") {
-      updateInfo["disable"] = true;
-    }
-
-    const transitionInfo = await ProveHistory.findOne({
-      ...query,
-    });
-
-    let data = await ProveHistory.findOneAndUpdate(
-      {
-        ...query,
-      },
-      { ...updateInfo },
-      { new: true }
-    );
-
-    res.json({
-      data: data,
-    });
-  } catch (error) {
-    res.json({
-      message: "Internal server error",
-    });
-  }
-});
-
-router.post("/set-config", async (req, res) => {
-  try {
-    const body = req.body
-    const { postAutoApprove  } =   body;
-    const isConfigExist = await Configs.findOne({});
-    if (!isConfigExist) {
-      await Configs.create({});
-    }
-
-    const updateInfo = {};
-    if (body.hasOwnProperty("postAutoApprove")) {
-      updateInfo["provePost.postAutoApprove"] = postAutoApprove;
-    }
-     
-
-    const updateConfig = await Configs.findOneAndUpdate(
-      {},
-      {
-        ...updateInfo,
-      },
-      { new: true }
-    );
-
-    res.json({
-      message: "Your Config is updated successfully",
-      data: updateConfig,
-      success: true,
-    });
-  } catch (error) {
-    res.status(500).json({
-      message: "Internal server error",
-    });
-  }
-});
-router.delete("/delete", async (req, res) => {
-  try {
-    const { postID } = req.query;
-
-    const postInfo = await ProveHistory.findOneAndDelete({ _id: postID });
-
-    if (postInfo && postInfo.images && postInfo.images.length) {
-      await postInfo.images.forEach(async (img) => {
-        const imagePath = await path.join(proveDirectory(), img);
-        if (fs.existsSync(imagePath)) {
-          await fs.unlinkSync(imagePath);
-        }
-      });
-    }
-
-    res.json({
-      data: postInfo,
-    });
-  } catch (error) {
+    console.log("error ==>>", error)
     res.json({
       message: "Internal server error",
     });
