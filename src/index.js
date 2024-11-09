@@ -14,13 +14,15 @@ const login = require("./routes/user_routes/login");
 const read_user = require("./routes/user_routes/read_user");
 const update_user = require("./routes/user_routes/update_user");
 const password_reset = require("./routes/user_routes/password_reset");
-const balance_transfer = require("./routes/user_routes/balance_transfer");
+const balance_transfer = require("./routes/user_routes/balance_transfer (old) ");
 const balance_request = require("./routes/user_routes/balance_request");
 const mobile_rechare = require("./routes/user_routes/mobile_recharge");
 const withdraw = require("./routes/user_routes/withdraw");
+const SalaryRoutes = require("./routes/user_routes/salary");
 const publicProve = require("./routes/user_routes/publicProve");
 const prove = require("./routes/user_routes/prove");
 const adminWithdraw = require("./routes/user_routes/admin_withdraw");
+const adminBalanceTransfer = require("./routes/user_routes/admin_balance_transfer");
 const adminProve = require("./routes/user_routes/admin_Prove_Post");
 const adminPayments = require("./routes/user_routes/admin_payments");
 const adminSalary = require("./routes/user_routes/admin_salary");
@@ -64,6 +66,10 @@ const helpLineSocial = require('./routes/admin_routes/helpLine');
 const adminNotification = require('./routes/admin_routes/notification');
 const notification = require('./routes/user_routes/notification');
 const dailyTaskRoutes = require("./routes/DailyTask/index");
+const balanceTransfer = require("./routes/user_routes/balance_transfer");
+
+
+
 const { 
     dailyTaskStorageDirectory,
     userTaskStorageDirectory,
@@ -141,6 +147,11 @@ app.post("/mobile_rechare", authGard, mobile_rechare);
 // ======Withdraw Route ======
 app.use("/withdraw", authGard, withdraw);
 app.use("/admin-withdraw", adminAuthGard, adminWithdraw);
+
+
+// ======Balance Transfer Route ======
+app.use("/balance-transfer", authGard, balanceTransfer);
+app.use("/admin-balance-transfer", adminAuthGard, adminBalanceTransfer);
 
 // ======Withdraw Route ====== 
 app.use("/public-prove",  publicProve);
@@ -226,6 +237,7 @@ app.use("/admin-categories", adminAuthGard, adminCategories)
 // ====== Salary Categories  ======
 app.use("/categories",  userCategories)
 app.use("/admin-salary", adminAuthGard, adminSalary)
+app.use("/salary", authGard, SalaryRoutes)
 
 // filter_delete_user()
 

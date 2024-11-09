@@ -110,6 +110,28 @@ const configsSchema = new mongoose.Schema({
       },
     }),
   }),
+  balanceTransfer: new mongoose.Schema({ 
+    transferAmounts: [
+      new mongoose.Schema({
+        balance: {
+          type: Number,
+          require: true,
+        },
+      }),
+    ], 
+    balances: new mongoose.Schema({ 
+      salesBalance: {
+        type: Boolean,
+        require: true,
+        default: false,
+      },
+      taskBalance: {
+        type: Boolean,
+        require: true,
+        default: false,
+      },
+    }),
+  }),
   salary: new mongoose.Schema({
     salaryNotice: {
       type: String,

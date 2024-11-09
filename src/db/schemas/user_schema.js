@@ -36,11 +36,10 @@ const userSchema = new mongoose.Schema({
     type: Number,
     default: 0,
   },
-  salaryBalance: {
-    // Sales Balance
-    type: Number,
-    default: 0,
-  },
+  // salaryBalance: { 
+  //   type: Number,
+  //   default: 0,
+  // },
   taskBalance: {
     // Task Balance
     type: Number,

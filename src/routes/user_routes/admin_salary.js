@@ -8,19 +8,16 @@ const Configs = require("../../db/schemas/Configs");
 const Generations = require("../../db/schemas/generations");
 const Salary = require("../../db/schemas/salary");
 const { default: mongoose } = require("mongoose");
+const generateRandom8DigitNumber = require("../../../src/functions/generateRandom8DigitNumber");
 
 router.post("/", async (req, res) => {
   try {
-    const query = {
-      transactionType: "Payments",
-    };
+    const query = {};
     const { sort } = req.query;
     const { balance, fromDate, toDate, search } = req.body;
     const limit = 10;
     const page = req.query.page || 1;
-    if (balance) {
-      query["balanceType"] = balance;
-    }
+
     if (fromDate && toDate) {
       const startDate = new Date(fromDate);
       const endDate = new Date(toDate);
@@ -58,19 +55,6 @@ router.post("/", async (req, res) => {
       ];
     }
     const totalItems = await TransactionHistory.countDocuments(query);
-    // const totalBalance = await TransactionHistory.aggregate([
-    //     {
-    //         $match: query
-    //     },
-    //     {
-    //         $group: {
-    //             _id: null,
-    //             amount: {
-    //                 $sum: "$amount"
-    //             }
-    //         }
-    //     }
-    // ])
 
     const skip = Number(page - 1) * limit;
 
@@ -84,7 +68,7 @@ router.post("/", async (req, res) => {
     //     path: 'userID',
     //     select: 'firstName lastName phoneNumber'
     // });
-    const data = await TransactionHistory.aggregate([
+    const data = await Salary.aggregate([
       {
         $lookup: {
           from: "user_collectionssses",
@@ -98,12 +82,8 @@ router.post("/", async (req, res) => {
       {
         $project: {
           amount: 1,
+          id: 1,
           createdAt: 1,
-          transactionType: 1,
-          balanceType: 1,
-          charge: 1,
-          netAmount: 1,
-          payments: 1,
           status: 1,
           "userID.firstName": 1,
           "userID.lastName": 1,
@@ -139,350 +119,15 @@ router.put("/status", async (req, res) => {
     const { status, id } = req.body;
     const query = {
       _id: mongoose.Types.ObjectId(id),
-      transactionType: "Payments",
-    };
-    let updateInfo = {};
-
-    const transitionInfo = await TransactionHistory.findOne({
-      ...query,
-    });
-    const userInfo = await user_collection.findOne({
-      _id: transitionInfo.userID,
-    });
-    if (userInfo.isActive) {
-      return res.json({
-        message: "User account is already activate",
-      });
-    }
-
-    if (status === "Approve") {
-      let totalAmount = await TransactionHistory.aggregate([
-        {
-          $match: {
-            userID: transitionInfo.userID,
-            transactionType: "Payments",
-            status: "Approve",
-          },
-        },
-        {
-          $group: {
-            _id: null,
-            totalAmount: { $sum: "$amount" },
-          },
-        },
-      ]);
-
-      totalAmount = totalAmount.length > 0 ? totalAmount[0].totalAmount : 0;
-
-      if (Number(transitionInfo.amount + totalAmount) >= 150) {
-        const activeHostUser = await user_collection.findOneAndUpdate(
-          { _id: transitionInfo.userID },
-          {
-            isActive: true,
-          },
-          { new: true }
-        );
-        let currentReferUser = {};
-
-        for (let index = 0; index < 10; index++) {
-          const currentIndex = index + 1;
-          // referUser
-          if (currentIndex === 1) {
-            const currentUserInfo = await user_collection.findOneAndUpdate(
-              {
-                $or: [
-                  {
-                    _id: activeHostUser.referUser,
-                  },
-                  {
-                    phoneNumber: activeHostUser.referNumber,
-                  },
-                ],
-              },
-              { $inc: { balance: 40, totalIncome: 40 } }
-            );
-            if (!currentUserInfo) {
-              break;
-            }
-            currentReferUser = currentUserInfo._doc;
-            await Generations.create({
-              referByUser: currentReferUser._id,
-              generationNumber: currentIndex,
-              referredUser: activeHostUser._id,
-            });
-          } else if (currentIndex === 2) {
-            const currentUserInfo = await user_collection.findOneAndUpdate(
-              {
-                $or: [
-                  {
-                    _id: currentReferUser.referUser,
-                  },
-                  {
-                    phoneNumber: currentReferUser.referNumber,
-                  },
-                ],
-              },
-              {
-                $inc: { balance: 10, totalIncome: 10 },
-              },
-              {
-                new: true,
-              }
-            );
-            if (!currentUserInfo) {
-              break;
-            }
-
-            currentReferUser = currentUserInfo._doc;
-            await Generations.create({
-              referByUser: currentReferUser._id,
-              generationNumber: currentIndex,
-              referredUser: activeHostUser._id,
-            });
-          } else if (currentIndex === 3) {
-            const currentUserInfo = await user_collection.findOneAndUpdate(
-              {
-                $or: [
-                  {
-                    _id: currentReferUser.referUser,
-                  },
-                  {
-                    phoneNumber: currentReferUser.referNumber,
-                  },
-                ],
-              },
-              {
-                $inc: { balance: 5, totalIncome: 5 },
-              },
-              {
-                new: true,
-              }
-            );
-            if (!currentUserInfo) {
-              break;
-            }
-            currentReferUser = currentUserInfo._doc;
-            await Generations.create({
-              referByUser: currentReferUser._id,
-              generationNumber: currentIndex,
-              referredUser: activeHostUser._id,
-            });
-          } else if (currentIndex === 4) {
-            const currentUserInfo = await user_collection.findOneAndUpdate(
-              {
-                $or: [
-                  {
-                    _id: currentReferUser.referUser,
-                  },
-                  {
-                    phoneNumber: currentReferUser.referNumber,
-                  },
-                ],
-              },
-              {
-                $inc: { balance: 3, totalIncome: 3 },
-              },
-              {
-                new: true,
-              }
-            );
-            if (!currentUserInfo) {
-              break;
-            }
-            currentReferUser = currentUserInfo._doc;
-            await Generations.create({
-              referByUser: currentReferUser._id,
-              generationNumber: currentIndex,
-              referredUser: activeHostUser._id,
-            });
-          } else if (currentIndex === 5) {
-            const currentUserInfo = await user_collection.findOneAndUpdate(
-              {
-                $or: [
-                  {
-                    _id: currentReferUser.referUser,
-                  },
-                  {
-                    phoneNumber: currentReferUser.referNumber,
-                  },
-                ],
-              },
-              {
-                $inc: { balance: 2, totalIncome: 2 },
-              },
-              {
-                new: true,
-              }
-            );
-            if (!currentUserInfo) {
-              break;
-            }
-            currentReferUser = currentUserInfo._doc;
-            await Generations.create({
-              referByUser: currentReferUser._id,
-              generationNumber: currentIndex,
-              referredUser: activeHostUser._id,
-            });
-          } else if (currentIndex === 6) {
-            const currentUserInfo = await user_collection.findOneAndUpdate(
-              {
-                $or: [
-                  {
-                    _id: currentReferUser.referUser,
-                  },
-                  {
-                    phoneNumber: currentReferUser.referNumber,
-                  },
-                ],
-              },
-              {
-                $inc: { balance: 2, totalIncome: 2 },
-              },
-              {
-                new: true,
-              }
-            );
-            if (!currentUserInfo) {
-              break;
-            }
-            currentReferUser = currentUserInfo._doc;
-            await Generations.create({
-              referByUser: currentReferUser._id,
-              generationNumber: currentIndex,
-              referredUser: activeHostUser._id,
-            });
-          } else if (currentIndex === 7) {
-            const currentUserInfo = await user_collection.findOneAndUpdate(
-              {
-                $or: [
-                  {
-                    _id: currentReferUser.referUser,
-                  },
-                  {
-                    phoneNumber: currentReferUser.referNumber,
-                  },
-                ],
-              },
-              {
-                $inc: { balance: 1, totalIncome: 1 },
-              },
-              {
-                new: true,
-              }
-            );
-            if (!currentUserInfo) {
-              break;
-            }
-            currentReferUser = currentUserInfo._doc;
-            await Generations.create({
-              referByUser: currentReferUser._id,
-              generationNumber: currentIndex,
-              referredUser: activeHostUser._id,
-            });
-          } else if (currentIndex === 8) {
-            const currentUserInfo = await user_collection.findOneAndUpdate(
-              {
-                $or: [
-                  {
-                    _id: currentReferUser.referUser,
-                  },
-                  {
-                    phoneNumber: currentReferUser.referNumber,
-                  },
-                ],
-              },
-              {
-                $inc: { balance: 1, totalIncome: 1 },
-              },
-              {
-                new: true,
-              }
-            );
-            if (!currentUserInfo) {
-              break;
-            }
-            currentReferUser = currentUserInfo._doc;
-            await Generations.create({
-              referByUser: currentReferUser._id,
-              generationNumber: currentIndex,
-              referredUser: activeHostUser._id,
-            });
-          } else if (currentIndex === 9) {
-            const currentUserInfo = await user_collection.findOneAndUpdate(
-              {
-                $or: [
-                  {
-                    _id: currentReferUser.referUser,
-                  },
-                  {
-                    phoneNumber: currentReferUser.referNumber,
-                  },
-                ],
-              },
-              {
-                $inc: { balance: 1, totalIncome: 1 },
-              },
-              {
-                new: true,
-              }
-            );
-            if (!currentUserInfo) {
-              break;
-            }
-            currentReferUser = currentUserInfo._doc;
-            await Generations.create({
-              referByUser: currentReferUser._id,
-              generationNumber: currentIndex,
-              referredUser: activeHostUser._id,
-            });
-          } else if (currentIndex === 10) {
-            const currentUserInfo = await user_collection.findOneAndUpdate(
-              {
-                $or: [
-                  {
-                    _id: currentReferUser.referUser,
-                  },
-                  {
-                    phoneNumber: currentReferUser.referNumber,
-                  },
-                ],
-              },
-              {
-                $inc: { balance: 1, totalIncome: 1 },
-              },
-              {
-                new: true,
-              }
-            );
-            if (!currentUserInfo) {
-              break;
-            }
-            currentReferUser = currentUserInfo._doc;
-            await Generations.create({
-              referByUser: currentReferUser._id,
-              generationNumber: currentIndex,
-              referredUser: activeHostUser._id,
-            });
-          }
-        }
-
-        // await Promise.all(
-        // await new Array(10).fill("").map(async (item, index) => {
-        //   try {
-
-        //   } catch (error) {
-        //   }
-        // });
-        // );
-      }
-    }
+    }; 
+ 
     let data = null;
     if (status === "Delete") {
-      data = await TransactionHistory.findOneAndDelete({
+      data = await Salary.findOneAndDelete({
         ...query,
       });
     } else {
-      data = await TransactionHistory.findOneAndUpdate(
+      data = await Salary.findOneAndUpdate(
         {
           ...query,
         },
@@ -577,6 +222,7 @@ router.post("/add-salary", async (req, res) => {
     const updateInfo = {
       userID,
       amount: Number(salaryAmount),
+      id: generateRandom8DigitNumber(),
       createdAt: new Date(salaryDate),
     };
     const salary = await Salary.create(updateInfo);
@@ -584,7 +230,7 @@ router.post("/add-salary", async (req, res) => {
     if (salary) {
       await user_collection.findOneAndUpdate(
         { _id: userID },
-        { $inc: { salaryBalance: Number(salaryAmount) } }
+        { $inc: { balance: Number(salaryAmount) } }
       );
     }
 
