@@ -67,6 +67,8 @@ const adminNotification = require('./routes/admin_routes/notification');
 const notification = require('./routes/user_routes/notification');
 const dailyTaskRoutes = require("./routes/DailyTask/index");
 const balanceTransfer = require("./routes/user_routes/balance_transfer");
+const tutorial = require("./routes/user_routes/tutorial");
+const adminTutorial = require("./routes/user_routes/admin_tutorial");
 
 
 
@@ -238,6 +240,10 @@ app.use("/admin-categories", adminAuthGard, adminCategories)
 app.use("/categories",  userCategories)
 app.use("/admin-salary", adminAuthGard, adminSalary)
 app.use("/salary", authGard, SalaryRoutes)
+
+// ====== Tutorial Categories  ======
+app.use("/tutorial", authGard, tutorial)
+app.use("/admin-tutorial", adminAuthGard, adminTutorial)
 
 // filter_delete_user()
 
