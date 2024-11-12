@@ -57,6 +57,7 @@ const withdrawRequestList = require('./routes/admin_routes/withdrawRequestList')
 const rechargeRequestList = require('./routes/admin_routes/rechargeRequestList');
 const rechargeRequest = require('./routes/admin_routes/rechargeRequest');
 const withdrawRequest = require('./routes/admin_routes/withdrawRequest');
+const adminConfig = require('./routes/user_routes/admin_config');
 const payments = require('./routes/user_routes/payments');
 const profileRoutes = require('./routes/profile/index');
 const adminProfileRoutes = require('./routes/admin_profile/index');
@@ -69,6 +70,8 @@ const dailyTaskRoutes = require("./routes/DailyTask/index");
 const balanceTransfer = require("./routes/user_routes/balance_transfer");
 const tutorial = require("./routes/user_routes/tutorial");
 const adminTutorial = require("./routes/user_routes/admin_tutorial");
+const adminDashboard = require ("./routes/user_routes/admin_dashboard");
+const dashboard = require ("./routes/user_routes/dashboard");
 
 
 
@@ -84,6 +87,7 @@ const {
     ranksDirectory,
     proveDirectory,
     categoriesDirectory,
+    socialDirectory,
 } = require('./constants/storageDirectory');
 // const filter_delete_user = require('./functions/filter_delete_user');
 require("./testGround")
@@ -110,6 +114,7 @@ app.use(express.static(transactionDirectory()))
 app.use(express.static(ranksDirectory()))
 app.use(express.static(proveDirectory()))
 app.use(express.static(categoriesDirectory()))
+app.use(express.static(socialDirectory()))
  
 
 // ====== Root Route ======
@@ -208,7 +213,7 @@ app.post("/blanace_approval", adminAuthGard, balance_approval)
 
 // ======Mobile Recharge Approval Route ======
 app.post("/mobile_recharge_approval", adminAuthGard, mobile_recharge_approval);
-// ======Withdraw Requesst Approval Route ======
+// ======Withdraw Request Approval Route ======
 app.post("/withdraw_request_approval", adminAuthGard, withdraw_request_approval)
 
 // ======Mobile Recharge Decline Route  ======
@@ -244,6 +249,13 @@ app.use("/salary", authGard, SalaryRoutes)
 // ====== Tutorial Categories  ======
 app.use("/tutorial", authGard, tutorial)
 app.use("/admin-tutorial", adminAuthGard, adminTutorial)
+
+// ====== Tutorial Categories  ======
+app.use("/dashboard", dashboard)
+app.use("/admin-dashboard", adminAuthGard, adminDashboard)
+
+// ====== Tutorial Admin Config  ======
+app.use("/admin-config", adminAuthGard, adminConfig);
 
 // filter_delete_user()
 

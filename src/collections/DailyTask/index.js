@@ -120,7 +120,7 @@ exports.createDailyTask = async (req, res) => {
       message: "Internal server error",
     });
   }
-};
+}
 exports.editDailyTask = async (req, res) => {
   try {
     const {

@@ -162,6 +162,16 @@ const configsSchema = new mongoose.Schema({
       type: Boolean,
     },
   }),
+  tutorial: new mongoose.Schema({
+    registration: new mongoose.Schema({
+       videoTitle: {
+        type: String,
+      },
+      videoID: {
+        type: String,
+      },
+    }),
+  }),
 });
 const Configs = new mongoose.model("configs", configsSchema);
 
