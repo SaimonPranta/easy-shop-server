@@ -73,12 +73,157 @@ router.get("/generation", async (req, res) => {
           });
           generationList[`generation_${newIndex}`] = genUserCount;
           totalReferMember += genUserCount;
-        } catch (error) {
-        }
+        } catch (error) {}
       })
     );
     res.json({
       data: { generationList, totalReferMember },
+    });
+  } catch (error) {
+    console.log("error ==>>", error);
+    res.json({
+      message: "Internal server error",
+    });
+  }
+});
+router.post("/generation-list", async (req, res) => {
+  try {
+    const { generation } = await req.query;
+    const { fromDate, toDate } = req.body;
+
+    const id = await req.id;
+    const query = {
+      referByUser: mongoose.Types.ObjectId(id),
+      generationNumber: Number(generation),
+    };
+    console.log("fromDate ==>", fromDate);
+    if (fromDate && toDate) {
+      const startDate = new Date(fromDate);
+      const endDate = new Date(toDate);
+      const startOfDay = new Date(startDate.setHours(0, 0, 0, 0));
+      const endOfDay = new Date(endDate.setHours(23, 59, 59, 999));
+      query["$and"] = [
+        {
+          createdAt: { $lte: endOfDay },
+        },
+        {
+          createdAt: { $gte: startOfDay },
+        },
+      ];
+    }
+    console.log("query ==>>", query);
+    const genList = await Generations.find({
+      ...query,
+    }).populate({
+      path: "referByUser",
+      select:
+        "firstName lastName phoneNumber profilePicture referUser rankID rank joinDate createdAt",
+      populate: [
+        {
+          path: "referUser",
+          select: "firstName lastName phoneNumber profilePicture",
+        },
+        {
+          path: "rankID",
+        },
+      ],
+    });
+    let totalIncome = 0;
+    let totalReferMember = 0;
+    const genInfo = await Generations.aggregate([
+      {
+        $match: {
+          ...query,
+        },
+      },
+      {
+        $group: {
+          _id: null,
+          incomes: { $sum: "$incomes" },
+          count: { $sum: 1 },
+        },
+      },
+      {
+        $project: {
+          _id: 0,
+          incomes: 1,
+          count: 1,
+        },
+      },
+    ]);
+    const info = genInfo[0] || { incomes: 0, count: 0 };
+    totalIncome = totalIncome + info.incomes;
+    totalReferMember = totalReferMember + info.count; 
+    res.json({
+      data: { generationList: genList, totalIncome, totalReferMember },
+    });
+  } catch (error) {
+    console.log("error ==>>", error);
+
+    res.status(500).json({ failed: "failed to load data." });
+  }
+});
+router.post("/generation-history", async (req, res) => {
+  try {
+    const { fromDate, toDate } = req.body;
+    const id = req.id;
+    const generationList = [];
+    let totalIncome = 0;
+    let totalReferMember = 0;
+    let query = {};
+
+    if (fromDate && toDate) {
+      const startDate = new Date(fromDate);
+      const endDate = new Date(toDate);
+      const startOfDay = new Date(startDate.setHours(0, 0, 0, 0));
+      const endOfDay = new Date(endDate.setHours(23, 59, 59, 999));
+      query["$and"] = [
+        {
+          createdAt: { $lte: endOfDay },
+        },
+        {
+          createdAt: { $gte: startOfDay },
+        },
+      ];
+    }
+    await Promise.all(
+      new Array(10).fill("").map(async (item, index) => {
+        try {
+          const newIndex = index + 1;
+          const genInfo = await Generations.aggregate([
+            {
+              $match: {
+                ...query,
+                referByUser: mongoose.Types.ObjectId(id),
+                generationNumber: newIndex,
+              },
+            },
+            {
+              $group: {
+                _id: null,
+                incomes: { $sum: "$incomes" },
+                count: { $sum: 1 },
+              },
+            },
+            {
+              $project: {
+                _id: 0,
+                incomes: 1,
+                count: 1,
+              },
+            },
+          ]);
+          const info = genInfo[0] || { incomes: 0, count: 0 };
+          totalIncome = totalIncome + info.incomes;
+          totalReferMember = totalReferMember + info.count;
+          generationList.push(info);
+        } catch (error) {}
+      })
+    );
+    console.log("generationList ==>>", generationList);
+
+    res.json({
+      data: { generationList, totalIncome, totalReferMember },
     });
   } catch (error) {
     res.json({
@@ -202,7 +347,7 @@ router.post("/generation-team-member-list", async (req, res) => {
       .skip(skip)
       .limit(limit);
     let totalReferUser = 0;
-    
+
     data = await Promise.all(
       data.map(async (user) => {
         try {
@@ -220,7 +365,7 @@ router.post("/generation-team-member-list", async (req, res) => {
           return {};
         }
       })
-    ); 
+    );
     data = await data.sort((a, b) => b.referCount - a.referCount);
     res.json({
       data: data,
@@ -247,7 +392,7 @@ router.get("/refer-list", async (req, res) => {
         path: "referUser",
         select: "firstName lastName profilePicture phoneNumber joinDate rank",
       },
-    }); 
+    });
     res.json({
       data: data,
     });
@@ -257,8 +402,5 @@ router.get("/refer-list", async (req, res) => {
     });
   }
 });
-
-
- 
 
 module.exports = router;

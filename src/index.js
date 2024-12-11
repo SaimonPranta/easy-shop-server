@@ -25,8 +25,7 @@ const adminWithdraw = require("./routes/user_routes/admin_withdraw");
 const adminBalanceTransfer = require("./routes/user_routes/admin_balance_transfer");
 const adminProve = require("./routes/user_routes/admin_Prove_Post");
 const adminPayments = require("./routes/user_routes/admin_payments");
-const adminSalary = require("./routes/user_routes/admin_salary");
-const generation_list = require("./routes/user_routes/generation_list");
+const adminSalary = require("./routes/user_routes/admin_salary"); 
 const adminAuthGard = require("./middleware/adminAuthGard");
 const all_user = require("./routes/admin_routes/all_user");
 const pubLicAllUser = require("./routes/user_routes/all_user");
@@ -169,9 +168,7 @@ app.use("/admin-prove", adminAuthGard, adminProve);
 app.use("/payments", authGard, payments);
 app.use("/admin-payments", adminAuthGard, adminPayments);
 
-// ======Generation User list Route ======
-app.get("/generation", authGard, generation_list);
-
+ 
 // ======All Generation User Route ======
 app.get("/generation_user", authGard, generation_user);
 // ======Admin User Details Read Route ======

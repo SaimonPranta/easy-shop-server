@@ -185,6 +185,7 @@ router.put("/status", async (req, res) => {
 
         for (let index = 0; index < 10; index++) {
           const currentIndex = index + 1;
+          const incomeAmount = 40
           // referUser
           if (currentIndex === 1) {
             const currentUserInfo = await user_collection.findOneAndUpdate(
@@ -198,7 +199,7 @@ router.put("/status", async (req, res) => {
                   },
                 ],
               },
-              { $inc: { balance: 40, totalIncome: 40 } }
+              { $inc: { balance: incomeAmount, totalIncome: incomeAmount } }
             );
             if (!currentUserInfo) {
               break
@@ -208,8 +209,11 @@ router.put("/status", async (req, res) => {
               referByUser: currentReferUser._id,
               generationNumber: currentIndex,
               referredUser: activeHostUser._id,
+              incomes: incomeAmount,
             });
           } else if (currentIndex === 2) {
+          const incomeAmount = 10
+
             const currentUserInfo = await user_collection.findOneAndUpdate(
               {
                 $or: [
@@ -222,7 +226,7 @@ router.put("/status", async (req, res) => {
                 ],
               },
               {
-                $inc: { balance: 10, totalIncome: 10 },
+                $inc: { balance: incomeAmount, totalIncome: incomeAmount },
               },
               {
                 new: true,
@@ -237,8 +241,11 @@ router.put("/status", async (req, res) => {
               referByUser: currentReferUser._id,
               generationNumber: currentIndex,
               referredUser: activeHostUser._id,
+              incomes: incomeAmount, 
             });
           } else if (currentIndex === 3) {
+          const incomeAmount = 5
+
             const currentUserInfo = await user_collection.findOneAndUpdate(
               {
                 $or: [
@@ -251,7 +258,7 @@ router.put("/status", async (req, res) => {
                 ],
               },
               {
-                $inc: { balance: 5, totalIncome: 5 },
+                $inc: { balance: incomeAmount, totalIncome: incomeAmount },
               },
               {
                 new: true,
@@ -265,8 +272,11 @@ router.put("/status", async (req, res) => {
               referByUser: currentReferUser._id,
               generationNumber: currentIndex,
               referredUser: activeHostUser._id,
+              incomes: incomeAmount, 
+
             });
           } else if (currentIndex === 4) {
+            const incomeAmount = 3
             const currentUserInfo = await user_collection.findOneAndUpdate(
               {
                 $or: [
@@ -279,7 +289,7 @@ router.put("/status", async (req, res) => {
                 ],
               },
               {
-                $inc: { balance: 3, totalIncome: 3 },
+                $inc: { balance: incomeAmount, totalIncome: incomeAmount },
               },
               {
                 new: true,
@@ -293,8 +303,11 @@ router.put("/status", async (req, res) => {
               referByUser: currentReferUser._id,
               generationNumber: currentIndex,
               referredUser: activeHostUser._id,
+              incomes: incomeAmount, 
+
             });
           } else if (currentIndex === 5) {
+            const incomeAmount = 2
             const currentUserInfo = await user_collection.findOneAndUpdate(
               {
                 $or: [
@@ -307,7 +320,7 @@ router.put("/status", async (req, res) => {
                 ],
               },
               {
-                $inc: { balance: 2, totalIncome: 2 },
+                $inc: { balance: incomeAmount, totalIncome: incomeAmount },
               },
               {
                 new: true,
@@ -321,8 +334,11 @@ router.put("/status", async (req, res) => {
               referByUser: currentReferUser._id,
               generationNumber: currentIndex,
               referredUser: activeHostUser._id,
+              incomes: incomeAmount, 
+
             });
           } else if (currentIndex === 6) {
+            const incomeAmount = 2
             const currentUserInfo = await user_collection.findOneAndUpdate(
               {
                 $or: [
@@ -335,7 +351,7 @@ router.put("/status", async (req, res) => {
                 ],
               },
               {
-                $inc: { balance: 2, totalIncome: 2 },
+                $inc: { balance: incomeAmount, totalIncome: incomeAmount },
               },
               {
                 new: true,
@@ -349,8 +365,11 @@ router.put("/status", async (req, res) => {
               referByUser: currentReferUser._id,
               generationNumber: currentIndex,
               referredUser: activeHostUser._id,
+              incomes: incomeAmount, 
+
             });
           } else if (currentIndex === 7) {
+            const incomeAmount = 1
             const currentUserInfo = await user_collection.findOneAndUpdate(
               {
                 $or: [
@@ -363,7 +382,7 @@ router.put("/status", async (req, res) => {
                 ],
               },
               {
-                $inc: { balance: 1, totalIncome: 1 },
+                $inc: { balance: incomeAmount, totalIncome: incomeAmount },
               },
               {
                 new: true,
@@ -377,8 +396,11 @@ router.put("/status", async (req, res) => {
               referByUser: currentReferUser._id,
               generationNumber: currentIndex,
               referredUser: activeHostUser._id,
+              incomes: incomeAmount, 
+
             });
           } else if (currentIndex === 8) {
+            const incomeAmount = 1
             const currentUserInfo = await user_collection.findOneAndUpdate(
               {
                 $or: [
@@ -391,7 +413,7 @@ router.put("/status", async (req, res) => {
                 ],
               },
               {
-                $inc: { balance: 1, totalIncome: 1 },
+                $inc: { balance: incomeAmount, totalIncome: incomeAmount },
               },
               {
                 new: true,
@@ -405,8 +427,10 @@ router.put("/status", async (req, res) => {
               referByUser: currentReferUser._id,
               generationNumber: currentIndex,
               referredUser: activeHostUser._id,
+              incomes: incomeAmount, 
             });
           } else if (currentIndex === 9) {
+            const incomeAmount = 1
             const currentUserInfo = await user_collection.findOneAndUpdate(
               {
                 $or: [
@@ -419,7 +443,7 @@ router.put("/status", async (req, res) => {
                 ],
               },
               {
-                $inc: { balance: 1, totalIncome: 1 },
+                $inc: { balance: incomeAmount, totalIncome: incomeAmount },
               },
               {
                 new: true,
@@ -433,8 +457,11 @@ router.put("/status", async (req, res) => {
               referByUser: currentReferUser._id,
               generationNumber: currentIndex,
               referredUser: activeHostUser._id,
+              incomes: incomeAmount, 
+
             });
           } else if (currentIndex === 10) {
+            const incomeAmount = 1
             const currentUserInfo = await user_collection.findOneAndUpdate(
               {
                 $or: [
@@ -447,7 +474,7 @@ router.put("/status", async (req, res) => {
                 ],
               },
               {
-                $inc: { balance: 1, totalIncome: 1 },
+                $inc: { balance: incomeAmount, totalIncome: incomeAmount },
               },
               {
                 new: true,
@@ -461,6 +488,8 @@ router.put("/status", async (req, res) => {
               referByUser: currentReferUser._id,
               generationNumber: currentIndex,
               referredUser: activeHostUser._id,
+              incomes: incomeAmount, 
+
             });
           }
         }

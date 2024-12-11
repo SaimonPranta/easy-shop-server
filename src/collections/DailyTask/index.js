@@ -120,7 +120,7 @@ exports.createDailyTask = async (req, res) => {
       message: "Internal server error",
     });
   }
-}
+};
 exports.editDailyTask = async (req, res) => {
   try {
     const {
@@ -135,7 +135,7 @@ exports.editDailyTask = async (req, res) => {
       imageUpdate,
     } = JSON.parse(req.body.data);
     const files = req.files;
-    const image = files ? files.img : null
+    const image = files ? files.img : null;
 
     if (
       imageUpdate &&
@@ -645,14 +645,16 @@ exports.setUserPoints = async (req, res) => {
         config.dailyTask &&
         Number(config.dailyTask.pointConvertAmount) <= Number(user.pointAmount)
       ) {
-        const currentTaskBalance = Number(user.pointAmount) / 100;
+        const currentTaskBalance =
+          Number(user.pointAmount) /
+          Number(config.dailyTask.pointConvertAmount);
         const currentUser = await user_collection
           .findOneAndUpdate(
             {
               _id: id,
             },
             {
-              taskBalance: currentTaskBalance,
+              $inc: { taskBalance: Number(currentTaskBalance) },
               pointAmount: 0,
             },
             {
@@ -848,7 +850,7 @@ exports.taskApprove = async (req, res) => {
 };
 exports.dailyTaskList = async (req, res) => {
   try {
-  let query = {};
+    let query = {};
     const { sort } = req.query;
     const { balance, fromDate, toDate, search, groupID, tableType } = req.body;
     const limit = 20;

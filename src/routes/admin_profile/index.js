@@ -63,7 +63,6 @@ router.post("/set-ranks/:userID", async (req, res) => {
     const bodyInfo = { ...body };
     delete bodyInfo["_id"];
 
-
     const updateInfo = {
       ...bodyInfo,
       userID: userInfo._id,
@@ -174,6 +173,19 @@ router.get("/all-user", async (req, res) => {
         $match: query,
       },
       {
+        $lookup: {
+          from: "user_collectionssses",
+          localField: "referUser",
+          foreignField: "_id",
+          as: "referUser",
+        },
+      },
+      {
+        $addFields: {
+          referUser: { $arrayElemAt: ["$referUser", 0] }, // Extract the first element of 'referUser'
+        },
+      },
+      {
         $sort: { joinDate: -1 },
       },
       {
@@ -183,8 +195,12 @@ router.get("/all-user", async (req, res) => {
         $limit: limit,
       },
     ]);
-
-
+    // console.log("userList", userList);
+    await userList.forEach(element => {
+      if (element.taskBalance) {
+        console.log("e=====>>", element.firstName)
+      }
+    });
     res.json({ data: userList, total: userCount, page: Number(page) });
   } catch (error) {
     res.json({

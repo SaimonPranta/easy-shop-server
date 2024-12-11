@@ -11,6 +11,10 @@ const generationsSchema = new mongoose.Schema(
       type: Number,
       required: true,
     },
+    incomes: {
+      type: Number,
+      required: true,
+    },
     referredUser: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "user_collectionsss",

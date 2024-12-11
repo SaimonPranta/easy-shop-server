@@ -1,8 +1,8 @@
 const path = require("path");
 
 const storageDirectory = () => {
-    // const storageDir = path.join(__dirname, "../../../../storage.imp/easyshop50.com");
-    const storageDir = path.join(__dirname, "../../../storage.imp/easyshop50.com");
+    const storageDir = path.join(__dirname, "../../../../storage.imp/easyshop50.com");
+    // const storageDir = path.join(__dirname, "../../../storage.imp/easyshop50.com");
     return storageDir
 
 }
