@@ -36,7 +36,7 @@ router.post("/", async (req, res) => {
                 message: "Failed to add social "
             })
         }
-        await image.mv(path.join(__dirname, helpSocialDirectory(), image.name))
+        await image.mv(path.join(helpSocialDirectory() , image.name))
         res.json({
             data: createdInfo
         })
@@ -57,7 +57,7 @@ router.delete("/", async (req, res) => {
             })
         }
 
-        const filePath = path.join(__dirname, helpSocialDirectory(), createdInfo.img)
+        const filePath = path.join(helpSocialDirectory(), createdInfo.img)
         if (fs.existsSync(filePath)) {
             await fs.unlinkSync(filePath)
         }
@@ -67,6 +67,7 @@ router.delete("/", async (req, res) => {
             message: "Social item delete successfully"
         })
     } catch (error) {
+        console.log("error -->>", error)
         res.json({
             message: "Failed to delete social "
         })

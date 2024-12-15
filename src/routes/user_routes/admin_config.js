@@ -4,7 +4,7 @@ const Configs = require("../../db/schemas/Configs");
 router.post("/set-config", async (req, res) => {
   try {
     const body = req.body;
-    const { registration } = req.body;
+    const { registration, headline} = req.body;
     const isConfigExist = await Configs.findOne({});
     if (!isConfigExist) {
       await Configs.create({});
@@ -16,7 +16,10 @@ router.post("/set-config", async (req, res) => {
     if (registration.hasOwnProperty("videoID")) {
       updateInfo["tutorial.registration.videoID"] = registration.videoID;
     }
-
+    if (headline.hasOwnProperty("title")) {
+      updateInfo["headline.title"] = headline.title || "";
+    }
+console.log("updateInfo ==>>", updateInfo)
     const updateConfig = await Configs.findOneAndUpdate(
       {},
       {
@@ -24,6 +27,8 @@ router.post("/set-config", async (req, res) => {
       },
       { new: true }
     );
+console.log("updateConfig ==>>", updateConfig)
+
     res.json({
       message: "Your Config is completed successfully",
       data: updateConfig,

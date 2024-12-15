@@ -110,7 +110,7 @@ const configsSchema = new mongoose.Schema({
       },
     }),
   }),
-  balanceTransfer: new mongoose.Schema({ 
+  balanceTransfer: new mongoose.Schema({
     transferAmounts: [
       new mongoose.Schema({
         balance: {
@@ -118,8 +118,8 @@ const configsSchema = new mongoose.Schema({
           require: true,
         },
       }),
-    ], 
-    balances: new mongoose.Schema({ 
+    ],
+    balances: new mongoose.Schema({
       salesBalance: {
         type: Boolean,
         require: true,
@@ -141,7 +141,7 @@ const configsSchema = new mongoose.Schema({
     },
     salaryBonusNotice: {
       type: String,
-    }, 
+    },
     salaryHistoryTitle: {
       type: String,
     },
@@ -164,13 +164,18 @@ const configsSchema = new mongoose.Schema({
   }),
   tutorial: new mongoose.Schema({
     registration: new mongoose.Schema({
-       videoTitle: {
+      videoTitle: {
         type: String,
       },
       videoID: {
         type: String,
       },
     }),
+  }),
+  headline: new mongoose.Schema({
+    title: {
+      type: String,
+    },
   }),
 });
 const Configs = new mongoose.model("configs", configsSchema);

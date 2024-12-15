@@ -6,15 +6,57 @@ const { profileDirectory } = require("../../constants/storageDirectory");
 const Generations = require("../../db/schemas/generations");
 const { default: mongoose } = require("mongoose");
 
+const getGenInfo = (newIndex, id, query) => {
+  return new Promise(async (resolve, reject) => {
+    try {
+      const genInfo = await Generations.aggregate([
+        {
+          $match: {
+            ...query,
+            referByUser: mongoose.Types.ObjectId(id),
+            generationNumber: newIndex,
+          },
+        },
+        {
+          $group: {
+            _id: null,
+            incomes: { $sum: "$incomes" },
+            count: { $sum: 1 },
+          },
+        },
+        {
+          $project: {
+            _id: 0,
+            incomes: 1,
+            count: 1,
+          },
+        },
+      ]);
+      resolve(genInfo);
+    } catch (error) {
+      reject();
+    }
+  });
+};
+
 router.post("/profile-pic", async (req, res) => {
   try {
     const files = req.files;
     const id = req.id;
 
-    const userInfo = await user_collection
-      .findOne({ _id: id })
-      .select("profilePicture");
+    // const userInfo = await user_collection
+    //   .findOne({ _id: id })
+    //   .select("profilePicture");
 
+      let userInfo = await user_collection
+      .findOne({ _id: id  })
+      .populate([{
+        path: "rankID", 
+      }, {
+        path: "referUser",
+        select: "firstName lastName phoneNumber profilePicture",
+      }]);
+    user.password = null;
     if (!files) {
       return res.json({
         message: "Profile picture are required",
@@ -114,20 +156,24 @@ router.post("/generation-list", async (req, res) => {
     console.log("query ==>>", query);
     const genList = await Generations.find({
       ...query,
-    }).populate({
-      path: "referByUser",
-      select:
-        "firstName lastName phoneNumber profilePicture referUser rankID rank joinDate createdAt",
-      populate: [
-        {
-          path: "referUser",
-          select: "firstName lastName phoneNumber profilePicture",
-        },
-        {
-          path: "rankID",
-        },
-      ],
-    });
+    }).populate([
+      {
+        path: "referredUser",
+        select:
+          "firstName lastName phoneNumber profilePicture referUser rankID rank joinDate createdAt",
+        populate: [
+          {
+            path: "referUser",
+            select:
+              "firstName lastName phoneNumber profilePicture referUser rankID rank joinDate createdAt",
+          },
+          {
+            path: "rankID",
+          },
+        ],
+      },
+    ]);
+    console.log("genList ==>", genList.length);
     let totalIncome = 0;
     let totalReferMember = 0;
     const genInfo = await Generations.aggregate([
@@ -153,7 +199,7 @@ router.post("/generation-list", async (req, res) => {
     ]);
     const info = genInfo[0] || { incomes: 0, count: 0 };
     totalIncome = totalIncome + info.incomes;
-    totalReferMember = totalReferMember + info.count; 
+    totalReferMember = totalReferMember + info.count;
     res.json({
       data: { generationList: genList, totalIncome, totalReferMember },
     });
@@ -170,7 +216,9 @@ router.post("/generation-history", async (req, res) => {
     const generationList = [];
     let totalIncome = 0;
     let totalReferMember = 0;
-    let query = {};
+    let query = {
+      referByUser: mongoose.Types.ObjectId(id),
+    };
 
     if (fromDate && toDate) {
       const startDate = new Date(fromDate);
@@ -186,40 +234,23 @@ router.post("/generation-history", async (req, res) => {
         },
       ];
     }
-    await Promise.all(
-      new Array(10).fill("").map(async (item, index) => {
-        try {
-          const newIndex = index + 1;
-          const genInfo = await Generations.aggregate([
-            {
-              $match: {
-                ...query,
-                referByUser: mongoose.Types.ObjectId(id),
-                generationNumber: newIndex,
-              },
-            },
-            {
-              $group: {
-                _id: null,
-                incomes: { $sum: "$incomes" },
-                count: { $sum: 1 },
-              },
-            },
-            {
-              $project: {
-                _id: 0,
-                incomes: 1,
-                count: 1,
-              },
-            },
-          ]);
-          const info = genInfo[0] || { incomes: 0, count: 0 };
-          totalIncome = totalIncome + info.incomes;
-          totalReferMember = totalReferMember + info.count;
-          generationList.push(info);
-        } catch (error) {}
-      })
-    );
+    console.log("query ------>>>", query["$and"]);
+    for (let index = 0; index < 10; index++) {
+      try {
+        const newIndex = index + 1;
+        const genInfo = await getGenInfo(newIndex, id, query);
+        const info = genInfo[0] || { incomes: 0, count: 0 };
+        totalIncome += info.incomes;
+        totalReferMember += info.count;
+        generationList.push({ ...info, gen: `${newIndex} Generation` });
+      } catch (error) {
+        generationList.push({
+          incomes: 0,
+          count: 0,
+          gen: `${index + 1} Generation`,
+        });
+      }
+    }
     console.log("generationList ==>>", generationList);
 
     res.json({

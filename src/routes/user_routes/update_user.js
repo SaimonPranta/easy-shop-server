@@ -15,7 +15,12 @@ const update_user = async (req, res) => {
                 },
                 {
                     new: true
-                })
+                }).populate([{
+                    path: "rankID", 
+                  }, {
+                    path: "referUser",
+                    select: "firstName lastName phoneNumber",
+                  }]);
             if (updateUser) {
                 updateUser.password = null;
                 res.status(200).json({

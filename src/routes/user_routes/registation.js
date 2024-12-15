@@ -13,14 +13,12 @@ const registation = async (req, res) => {
 
       const refNumberChacking = await user_collection
         .find({ phoneNumber: referNumber })
-        .select({
-          phoneNumber: 1,
-          referNumber: 1,
-          referUser: 1,
-          firstName: 1,
-          lastName: 1,
-          isActive: 1,
-        });
+        .populate([{
+          path: "rankID", 
+        }, {
+          path: "referUser",
+          select: "firstName lastName phoneNumber",
+        }]);
       if (refNumberChacking && refNumberChacking.length > 0) {
         if (refNumberChacking[0].isActive) {
           const phoneNumberChacking = await user_collection
