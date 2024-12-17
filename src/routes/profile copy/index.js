@@ -48,15 +48,14 @@ router.post("/profile-pic", async (req, res) => {
     //   .findOne({ _id: id })
     //   .select("profilePicture");
 
-    let userInfo = await user_collection.findOne({ _id: id }).populate([
-      {
-        path: "rankID",
-      },
-      {
+      let userInfo = await user_collection
+      .findOne({ _id: id  })
+      .populate([{
+        path: "rankID", 
+      }, {
         path: "referUser",
         select: "firstName lastName phoneNumber profilePicture",
-      },
-    ]);
+      }]);
     user.password = null;
     if (!files) {
       return res.json({
@@ -123,6 +122,7 @@ router.get("/generation", async (req, res) => {
       data: { generationList, totalReferMember },
     });
   } catch (error) {
+    console.log("error ==>>", error);
     res.json({
       message: "Internal server error",
     });
@@ -138,6 +138,7 @@ router.post("/generation-list", async (req, res) => {
       referByUser: mongoose.Types.ObjectId(id),
       generationNumber: Number(generation),
     };
+    console.log("fromDate ==>", fromDate);
     if (fromDate && toDate) {
       const startDate = new Date(fromDate);
       const endDate = new Date(toDate);
@@ -152,6 +153,7 @@ router.post("/generation-list", async (req, res) => {
         },
       ];
     }
+    console.log("query ==>>", query);
     const genList = await Generations.find({
       ...query,
     }).populate([
@@ -171,6 +173,7 @@ router.post("/generation-list", async (req, res) => {
         ],
       },
     ]);
+    console.log("genList ==>", genList.length);
     let totalIncome = 0;
     let totalReferMember = 0;
     const genInfo = await Generations.aggregate([
@@ -201,6 +204,8 @@ router.post("/generation-list", async (req, res) => {
       data: { generationList: genList, totalIncome, totalReferMember },
     });
   } catch (error) {
+    console.log("error ==>>", error);
+
     res.status(500).json({ failed: "failed to load data." });
   }
 });
@@ -229,6 +234,7 @@ router.post("/generation-history", async (req, res) => {
         },
       ];
     }
+    console.log("query ------>>>", query["$and"]);
     for (let index = 0; index < 10; index++) {
       try {
         const newIndex = index + 1;
@@ -245,6 +251,7 @@ router.post("/generation-history", async (req, res) => {
         });
       }
     }
+    console.log("generationList ==>>", generationList);
 
     res.json({
       data: { generationList, totalIncome, totalReferMember },
@@ -323,27 +330,10 @@ router.post("/generation-team-member-list", async (req, res) => {
       referByUser: mongoose.Types.ObjectId(userID),
       generationNumber: 1,
     };
-    const limit = req.query.limit || 30;
+    const limit = req.query.limit || 5;
     const page = req.query.page || 1;
     if (balance) {
       query["balanceType"] = balance;
-    }
-
-    if (search) {
-      query["$or"] = [
-        {
-          "referredUser.firstName": new RegExp(search, "i"),
-        },
-        {
-          "referredUser.lastName": new RegExp(search, "i"),
-        },
-        {
-          "referredUser.phoneNumber": new RegExp(search, "i"),
-        },
-        {
-          "referredUser.phoneNumber": new RegExp(search, ""),
-        },
-      ];
     }
     if (fromDate && toDate) {
       const startDate = new Date(fromDate);
@@ -360,20 +350,6 @@ router.post("/generation-team-member-list", async (req, res) => {
       ];
     }
     let totalItems = await Generations.aggregate([
-      {
-        $lookup: {
-          from: "user_collectionssses",
-          localField: "referredUser",
-          foreignField: "_id",
-          as: "referredUser",
-        },
-      },
-      {
-        $unwind: {
-          path: "$referredUser",
-          preserveNullAndEmptyArrays: true,
-        },
-      },
       {
         $match: {
           ...query,
@@ -394,70 +370,26 @@ router.post("/generation-team-member-list", async (req, res) => {
         message: "All Refer user are already loaded",
       });
     }
-    // let data2 = await Generations.aggregate([
-    //   {
-    //     $group: {
-    //       _id: "$referByUser",
-    //       userNumber: {
-    //         $sum: 1
-    //       }
-    //     },
-    //   }
-    // ])
-    console.log("data2 -->>", data2);
-    let data = await Generations.aggregate([
-      {
-        $lookup: {
-          from: "user_collectionssses",
-          localField: "referredUser",
-          foreignField: "_id",
-          as: "referredUser",
-        },
-      },
-      {
-        $unwind: {
-          path: "$referredUser",
-          preserveNullAndEmptyArrays: true,
-        },
-      },
-      {
-        $match: {
-          ...query,
-        },
-      },
-      {
-        $project: {
-          _id: 1,
-          referByUser: 1,
-          generationNumber: 1,
-          createdAt: 1,
-          "referredUser._id": 1,
-          "referredUser.firstName": 1,
-          "referredUser.lastName": 1,
-          "referredUser.profilePicture": 1,
-          "referredUser.phoneNumber": 1,
-        },
-      },
-      {
-        $skip: skip,
-      },
-      {
-        $limit: limit,
-      },
-    ]);
+    let data = await Generations.find(query)
+      .populate({
+        path: "referredUser",
+        select: "firstName lastName profilePicture phoneNumber",
+      })
+      .skip(skip)
+      .limit(limit);
     let totalReferUser = 0;
+
     data = await Promise.all(
       data.map(async (user) => {
         try {
           const length = await Generations.countDocuments({
-            referByUser: mongoose.Types.ObjectId(user.referredUser._id),
+            referByUser: mongoose.Types.ObjectId(user.referredUser),
             generationNumber: 1,
             active: true,
           });
           totalReferUser += length;
           return {
-            ...user,
-            // ...user._doc,
+            ...user._doc,
             referCount: length,
           };
         } catch (error) {
@@ -465,7 +397,6 @@ router.post("/generation-team-member-list", async (req, res) => {
         }
       })
     );
-
     data = await data.sort((a, b) => b.referCount - a.referCount);
     res.json({
       data: data,

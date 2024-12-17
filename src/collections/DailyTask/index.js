@@ -14,6 +14,7 @@ const Configs = require("../../db/schemas/Configs");
 const UserPointHistory = require("../../db/schemas/userPointHistory");
 const user_collection = require("../../db/schemas/user_schema");
 const mongoose = require("mongoose");
+const TransactionHistory = require("../../db/schemas/transactionHistory");
 
 const dailyTaskStorage = path.join(storageDirectory(), "daily_task");
 
@@ -648,6 +649,15 @@ exports.setUserPoints = async (req, res) => {
         const currentTaskBalance =
           Number(user.pointAmount) /
           Number(config.dailyTask.pointConvertAmount);
+
+        await TransactionHistory.create({
+          userID: id,
+          transactionType: "Daily Task Income",
+          balanceType: "Task Balance",
+          amount: Number(currentTaskBalance),
+          netAmount: Number(currentTaskBalance),
+          status: "Approve",
+        });
         const currentUser = await user_collection
           .findOneAndUpdate(
             {
@@ -665,6 +675,7 @@ exports.setUserPoints = async (req, res) => {
         currentPoint = currentUser.pointAmount;
       }
     }
+    console.log("Hello from spin");
 
     res.json({
       message: "Daily task reward added successfully",

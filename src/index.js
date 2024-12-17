@@ -26,6 +26,7 @@ const adminBalanceTransfer = require("./routes/user_routes/admin_balance_transfe
 const adminProve = require("./routes/user_routes/admin_Prove_Post");
 const adminPayments = require("./routes/user_routes/admin_payments");
 const adminSalary = require("./routes/user_routes/admin_salary"); 
+const earnings = require("./routes/user_routes/earnings"); 
 const adminAuthGard = require("./middleware/adminAuthGard");
 const all_user = require("./routes/admin_routes/all_user");
 const pubLicAllUser = require("./routes/user_routes/all_user");
@@ -253,6 +254,9 @@ app.use("/admin-dashboard", adminAuthGard, adminDashboard)
 
 // ====== Tutorial Admin Config  ======
 app.use("/admin-config", adminAuthGard, adminConfig);
+
+// ====== Earning  ======
+app.use("/earnings", authGard, earnings);
 
 // filter_delete_user()
 

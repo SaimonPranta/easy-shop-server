@@ -83,7 +83,7 @@ console.log("search ==>>", search)
         },
       },
       { $match: query },
-      { $sort: { createdAt: -1 } },
+      { $sort: { createdAt: 1 } },
       { $skip: skip },
       { $limit: limit },
     ]);

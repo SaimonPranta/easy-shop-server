@@ -10,7 +10,7 @@ const transactionSchema = new mongoose.Schema(
     transactionType: {
       type: String,
       required: true,
-      enum: ["Withdraw", "Payments", "Transfer to Main Balance"],
+      enum: ["Withdraw", "Payments", "Transfer to Main Balance", "Generation Income", "Daily Task Income"],
     },
     balanceType: {
       type: String,

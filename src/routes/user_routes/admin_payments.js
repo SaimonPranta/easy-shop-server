@@ -205,6 +205,14 @@ router.put("/status", async (req, res) => {
               break
             }
             currentReferUser = currentUserInfo._doc
+            await TransactionHistory.create({
+              userID: currentReferUser._id,
+              transactionType: "Generation Income",
+              balanceType: "Main Balance",
+              amount: incomeAmount,
+              netAmount: incomeAmount,
+              status: "Approve"
+            })
             await Generations.create({
               referByUser: currentReferUser._id,
               generationNumber: currentIndex,
@@ -237,6 +245,15 @@ router.put("/status", async (req, res) => {
             }
 
             currentReferUser = currentUserInfo._doc
+
+            await TransactionHistory.create({
+              userID: currentReferUser._id,
+              transactionType: "Generation Income",
+              balanceType: "Main Balance",
+              amount: incomeAmount,
+              netAmount: incomeAmount,
+              status: "Approve"
+            })
             await Generations.create({
               referByUser: currentReferUser._id,
               generationNumber: currentIndex,
@@ -268,6 +285,15 @@ router.put("/status", async (req, res) => {
               break
             }
             currentReferUser = currentUserInfo._doc
+
+            await TransactionHistory.create({
+              userID: currentReferUser._id,
+              transactionType: "Generation Income",
+              balanceType: "Main Balance",
+              amount: incomeAmount,
+              netAmount: incomeAmount,
+              status: "Approve"
+            })
             await Generations.create({
               referByUser: currentReferUser._id,
               generationNumber: currentIndex,
@@ -299,6 +325,15 @@ router.put("/status", async (req, res) => {
               break
             }
             currentReferUser = currentUserInfo._doc
+
+            await TransactionHistory.create({
+              userID: currentReferUser._id,
+              transactionType: "Generation Income",
+              balanceType: "Main Balance",
+              amount: incomeAmount,
+              netAmount: incomeAmount,
+              status: "Approve"
+            })
             await Generations.create({
               referByUser: currentReferUser._id,
               generationNumber: currentIndex,
@@ -330,6 +365,15 @@ router.put("/status", async (req, res) => {
               break
             }
             currentReferUser = currentUserInfo._doc
+
+            await TransactionHistory.create({
+              userID: currentReferUser._id,
+              transactionType: "Generation Income",
+              balanceType: "Main Balance",
+              amount: incomeAmount,
+              netAmount: incomeAmount,
+              status: "Approve"
+            })
             await Generations.create({
               referByUser: currentReferUser._id,
               generationNumber: currentIndex,
@@ -361,6 +405,15 @@ router.put("/status", async (req, res) => {
               break
             }
             currentReferUser = currentUserInfo._doc
+
+            await TransactionHistory.create({
+              userID: currentReferUser._id,
+              transactionType: "Generation Income",
+              balanceType: "Main Balance",
+              amount: incomeAmount,
+              netAmount: incomeAmount,
+              status: "Approve"
+            })
             await Generations.create({
               referByUser: currentReferUser._id,
               generationNumber: currentIndex,
@@ -392,6 +445,15 @@ router.put("/status", async (req, res) => {
               break
             }
             currentReferUser = currentUserInfo._doc
+
+            await TransactionHistory.create({
+              userID: currentReferUser._id,
+              transactionType: "Generation Income",
+              balanceType: "Main Balance",
+              amount: incomeAmount,
+              netAmount: incomeAmount,
+              status: "Approve"
+            })
             await Generations.create({
               referByUser: currentReferUser._id,
               generationNumber: currentIndex,
@@ -423,6 +485,15 @@ router.put("/status", async (req, res) => {
               break
             }
             currentReferUser = currentUserInfo._doc
+
+            await TransactionHistory.create({
+              userID: currentReferUser._id,
+              transactionType: "Generation Income",
+              balanceType: "Main Balance",
+              amount: incomeAmount,
+              netAmount: incomeAmount,
+              status: "Approve"
+            })
             await Generations.create({
               referByUser: currentReferUser._id,
               generationNumber: currentIndex,
@@ -453,6 +524,15 @@ router.put("/status", async (req, res) => {
               break
             }
             currentReferUser = currentUserInfo._doc
+
+            await TransactionHistory.create({
+              userID: currentReferUser._id,
+              transactionType: "Generation Income",
+              balanceType: "Main Balance",
+              amount: incomeAmount,
+              netAmount: incomeAmount,
+              status: "Approve"
+            })
             await Generations.create({
               referByUser: currentReferUser._id,
               generationNumber: currentIndex,
@@ -484,6 +564,15 @@ router.put("/status", async (req, res) => {
               break
             }
             currentReferUser = currentUserInfo._doc
+
+            await TransactionHistory.create({
+              userID: currentReferUser._id,
+              transactionType: "Generation Income",
+              balanceType: "Main Balance",
+              amount: incomeAmount,
+              netAmount: incomeAmount,
+              status: "Approve"
+            })
             await Generations.create({
               referByUser: currentReferUser._id,
               generationNumber: currentIndex,
