@@ -12,16 +12,12 @@ const userSchema = new mongoose.Schema({
   profilePicture: {
     type: String,
   },
-//   referNumber: {
-//     type: String,
-//     require: true,
-//   },
   referUser: {
     type: mongoose.Schema.Types.ObjectId,
     ref: "user_collectionsss",
     require: true,
   },
- 
+
   balance: {
     // Main Balance
     type: Number,
@@ -36,7 +32,16 @@ const userSchema = new mongoose.Schema({
     type: Number,
     default: 0,
   },
-  // salaryBalance: { 
+  blueTickInfo: {
+    blurTick: {
+      type: Boolean,
+      default: false,
+    },
+    date: {
+      type: Date, 
+    }
+  },
+  // salaryBalance: {
   //   type: Number,
   //   default: 0,
   // },
@@ -75,7 +80,7 @@ const userSchema = new mongoose.Schema({
   },
   rankID: {
     type: mongoose.Schema.Types.ObjectId,
-    ref: "rank", 
+    ref: "rank",
   },
   // generation_1: {
   //   type: Array,

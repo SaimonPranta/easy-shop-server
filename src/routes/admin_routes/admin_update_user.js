@@ -15,7 +15,9 @@ const admin_update_user = async (req, res) => {
             req.body.lastName ? userObj["lastName"] = await req.body.lastName : null
             req.body.rank ? userObj["rank"] = await req.body.rank : null
             req.body.balance ? userObj["balance"] = await Math.floor(req.body.balance) : null
-            req.body.shoppingBalance ? userObj["shoppingBalance"] = await Math.floor(req.body.shoppingBalance) : null
+            req.body.taskBalance ? userObj["taskBalance"] = await Math.floor(req.body.taskBalance) : null
+            req.body.salesBalance ? userObj["salesBalance"] = await Math.floor(req.body.salesBalance) : null
+            req.body.pointAmount ? userObj["pointAmount"] = await Math.floor(req.body.pointAmount) : null
             hashingPassword ? userObj["password"] = await hashingPassword : null
 
             const updateUser = await user_collection.findOneAndUpdate({ _id: id },

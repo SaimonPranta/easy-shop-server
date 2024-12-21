@@ -125,7 +125,7 @@ router.get("/get-ranks", async (req, res) => {
 
 router.get("/all-user", async (req, res) => {
   try {
-    const { fromDate, toDate, userType, page, search } = req.query;
+    const { fromDate, toDate, userType, blueTick, page, search } = req.query;
 
     let query = {};
     if (userType) {
@@ -133,6 +133,15 @@ router.get("/all-user", async (req, res) => {
         query["isActive"] = true;
       } else if (userType === "Inactive") {
         query["isActive"] = false;
+      }
+    }
+    console.log("blueTick -->", blueTick)
+    if (blueTick) { 
+      if (blueTick === "Blue Tick User") {
+        query["blueTickInfo.blurTick"] = true;
+      } else if (blueTick === "Unblue Tick User") {
+        query["blueTickInfo.blurTick"] = false;
+
       }
     }
     if (fromDate && toDate) {
@@ -196,12 +205,40 @@ router.get("/all-user", async (req, res) => {
       },
     ]);
     // console.log("userList", userList);
-    await userList.forEach(element => {
+    await userList.forEach((element) => {
       if (element.taskBalance) {
-        console.log("e=====>>", element.firstName)
+        console.log("e=====>>", element.firstName);
       }
     });
     res.json({ data: userList, total: userCount, page: Number(page) });
+  } catch (error) {
+    res.json({
+      message: "Internal server error",
+    });
+  }
+});
+
+router.post("/blue-tick", async (req, res) => {
+  try {
+    const { userID, status } = req.body;
+    let updateInfo = {};
+    if (status === "add") {
+      updateInfo = { "blueTickInfo.blurTick": true, "blueTickInfo.date": new Date() };
+    } else if (status === "remove") {
+      updateInfo = { "blueTickInfo.blurTick": false };
+    }
+    const data = await user_collection.findOneAndUpdate(
+      { _id: userID },
+      { ...updateInfo }
+    );
+    if (!data) {
+      return res.json({
+        message: "Failed to update blue tick"
+      })
+    }
+    res.json({
+      data: true
+    });
   } catch (error) {
     res.json({
       message: "Internal server error",
