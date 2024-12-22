@@ -81,37 +81,7 @@ const userSchema = new mongoose.Schema({
   rankID: {
     type: mongoose.Schema.Types.ObjectId,
     ref: "rank",
-  },
-  // generation_1: {
-  //   type: Array,
-  // },
-  // generation_2: {
-  //   type: Array,
-  // },
-  // generation_3: {
-  //   type: Array,
-  // },
-  // generation_4: {
-  //   type: Array,
-  // },
-  // generation_5: {
-  //   type: Array,
-  // },
-  // generation_6: {
-  //   type: Array,
-  // },
-  // generation_7: {
-  //   type: Array,
-  // },
-  // generation_8: {
-  //   type: Array,
-  // },
-  // generation_9: {
-  //   type: Array,
-  // },
-  // generation_10: {
-  //   type: Array,
-  // },
+  }, 
   balanceTransperInfo: {
     type: Array,
   },

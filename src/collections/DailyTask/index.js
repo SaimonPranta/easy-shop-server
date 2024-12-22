@@ -743,7 +743,87 @@ exports.spinInfo = async (req, res) => {
 };
 exports.userList = async (req, res) => {
   try {
+    let todayUserWork = 0;
+    const { fromDate, toDate, search } = req.body;
+    let query = {};
+
+    if (fromDate && toDate) {
+      const startDate = new Date(fromDate);
+      const endDate = new Date(toDate);
+      const startOfDay = new Date(startDate.setHours(0, 0, 0, 0));
+      const endOfDay = new Date(endDate.setHours(23, 59, 59, 999));
+      query["$and"] = [
+        {
+          createdAt: { $lte: endOfDay },
+        },
+        {
+          createdAt: { $gte: startOfDay },
+        },
+      ];
+    }
+    if (search) {
+      query["$or"] = [
+        {
+          fullName: new RegExp(search, "i"),
+        },
+        {
+          "userID.phoneNumber": new RegExp(search, "i"),
+        },
+      ];
+    }
+    console.log("req.body ->", req.body);
+    console.log("query ->", query);
     const spinPointHistory = await UserTaskHIstory.aggregate([
+      {
+        $lookup: {
+          localField: "userID",
+          foreignField: "_id",
+          from: "user_collectionssses",
+          as: "userID",
+        },
+      },
+      {
+        $unwind: {
+          path: "$userID",
+          preserveNullAndEmptyArrays: true,
+        },
+      },
+      {
+        $group: {
+          _id: "$userID",
+          fullName: {
+            $first: {
+              $concat: ["$userID.firstName", " ", "$userID.lastName"],
+            },
+          },
+          userID: {
+            $first: "$userID",
+          },
+          createdAt: { $first: "$createdAt" },
+        },
+      },
+      { $match: query },
+      {
+        $sort: {
+          createdAt: 1,
+        },
+      },
+    ]);
+    console.log("spinPointHistory ==>", spinPointHistory);
+
+    const today = new Date();
+    const startOfDay = new Date(today.setHours(0, 0, 0, 0));
+    const endOfDay = new Date(today.setHours(23, 59, 59, 999));
+
+    const todayWorkUserNumber = await UserTaskHIstory.aggregate([
+      {
+        $match: {
+          $and: [
+            { createdAt: { $gte: startOfDay } },
+            { createdAt: { $lte: endOfDay } },
+          ],
+        },
+      },
       {
         $lookup: {
           localField: "userID",
@@ -764,6 +844,7 @@ exports.userList = async (req, res) => {
           userID: {
             $first: "$userID",
           },
+          createdAt: { $first: "$createdAt" },
         },
       },
       {
@@ -773,12 +854,16 @@ exports.userList = async (req, res) => {
       },
     ]);
 
+    todayUserWork = todayWorkUserNumber.length;
+
     res.json({
       message: "Daily task reward added successfully",
       success: true,
       data: spinPointHistory,
+      todayUserWork: todayUserWork,
     });
   } catch (error) {
+    console.log("error ==>", error);
     res.status(500).json({
       message: "Internal server error",
     });
@@ -787,7 +872,7 @@ exports.userList = async (req, res) => {
 exports.adminGetTask = async (req, res) => {
   try {
     const { userID } = req.query;
-
+    let todayPoint = 0;
     const spinPointHistory = await UserTaskHIstory.aggregate([
       {
         $match: {
@@ -828,10 +913,45 @@ exports.adminGetTask = async (req, res) => {
         },
       },
     ]);
+
+    const startDate = new Date();
+    const endDate = new Date();
+    const startOfDay = new Date(startDate.setHours(0, 0, 0, 0));
+    const endOfDay = new Date(endDate.setHours(23, 59, 59, 999));
+    console.log(" _-->>", {
+      startOfDay,
+      endOfDay,
+    });
+    const getUserPoints = await UserPointHistory.aggregate([
+      {
+        $match: {
+          userID: mongoose.Types.ObjectId(userID),
+          source: "Daily Task",
+          $and: [
+            { createdAt: { $gte: startOfDay } },
+            { createdAt: { $lte: endOfDay } },
+          ],
+        },
+      },
+      {
+        $group: {
+          _id: null,
+          pointAmount: { $sum: "$pointAmount" },
+        },
+      },
+    ]);
+    if (
+      getUserPoints.length &&
+      getUserPoints[0] &&
+      getUserPoints[0].pointAmount
+    ) {
+      todayPoint = getUserPoints[0].pointAmount;
+    }
     res.json({
       message: "Daily task reward added successfully",
       success: true,
       data: spinPointHistory,
+      todayPoint: todayPoint,
     });
   } catch (error) {
     res.status(500).json({
@@ -993,6 +1113,26 @@ exports.dailySelectTask = async (req, res) => {
     );
     res.json({ data: updateTask });
   } catch (error) {
+    res.json({
+      message: "Internal server error",
+    });
+  }
+};
+exports.dailyDeleteTask = async (req, res) => {
+  try {
+    const { taskID, taskGroupID } = req.body;
+    const updateTask = await DailyTasks.findOneAndDelete({
+      _id: taskID,
+    });
+    if (updateTask && updateTask.img) {
+      const filePath = path.join(dailyTaskStorage, updateTask.img)
+      if (fs.existsSync(filePath)) {
+        await fs.unlinkSync(filePath)
+      }
+    }
+    res.json({ data: updateTask });
+  } catch (error) {
+    console.log("error ===?>", error)
     res.json({
       message: "Internal server error",
     });

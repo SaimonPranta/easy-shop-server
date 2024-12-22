@@ -42,8 +42,7 @@ router.get("/", async (req, res) => {
         }
         return true;
       })
-    );
-    console.log("data 3 ==>", data);
+    ); 
 
 
     res.json({
