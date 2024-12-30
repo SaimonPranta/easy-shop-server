@@ -10,6 +10,48 @@ const Salary = require("../../db/schemas/salary");
 const { default: mongoose } = require("mongoose");
 const generateRandom8DigitNumber = require("../../../src/functions/generateRandom8DigitNumber");
 
+router.get("/init-balance", async (req, res) => {
+  try {
+    const balance = {
+      totalUser: 0,
+      totalSalaryBalance: 0,
+    };
+    const startDate = new Date();
+    const startOfDay = new Date(startDate.setHours(0, 0, 0, 0));
+    const endOfDay = new Date(startDate.setHours(23, 59, 59, 999));
+
+    const query = {
+      transactionType: "Payments",
+    };
+    const todayQuery = {
+      createdAt: { $lte: endOfDay },
+      createdAt: { $gte: startOfDay },
+    };
+
+    balance.totalUser = await Salary.countDocuments();
+
+    let totalSalaryBalance = await Salary.aggregate([ 
+      {
+        $group: {
+          _id: null,
+          total: { $sum: "$amount" },
+        },
+      },
+    ]);
+    if (totalSalaryBalance.length) {
+      balance.totalSalaryBalance = totalSalaryBalance[0].total;
+    }
+
+    res.json({
+      data: balance,
+    });
+  } catch (error) {
+    console.log("error ==>", error);
+    res.json({
+      message: "Internal server error",
+    });
+  }
+});
 router.post("/", async (req, res) => {
   try {
     const query = {};
@@ -58,16 +100,6 @@ router.post("/", async (req, res) => {
 
     const skip = Number(page - 1) * limit;
 
-    // if (skip >= totalItems) {
-    //     return res.json({
-    //         message: "All item are already loaded",
-    //     })
-    // }
-
-    // const data = await TransactionHistory.find(query).skip(skip).limit(limit).sort({ createdAt: -1 }).populate({
-    //     path: 'userID',
-    //     select: 'firstName lastName phoneNumber'
-    // });
     const data = await Salary.aggregate([
       {
         $lookup: {
@@ -119,8 +151,8 @@ router.put("/status", async (req, res) => {
     const { status, id } = req.body;
     const query = {
       _id: mongoose.Types.ObjectId(id),
-    }; 
- 
+    };
+
     let data = null;
     if (status === "Delete") {
       data = await Salary.findOneAndDelete({

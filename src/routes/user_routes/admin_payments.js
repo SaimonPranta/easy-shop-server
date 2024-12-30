@@ -7,7 +7,186 @@ const TransactionHistory = require("../../db/schemas/transactionHistory");
 const Configs = require("../../db/schemas/Configs");
 const Generations = require("../../db/schemas/generations");
 const { default: mongoose } = require("mongoose");
+const generateRandom8DigitNumber = require("../../functions/generateRandom8DigitNumber");
+const Salary = require("../../db/schemas/salary");
 
+router.get("/init-balance", async (req, res) => {
+  try {
+    const balance = {
+      todayApprovePaymentRequest: 0,
+      todayPendingPaymentRequest: 0,
+      totalTotalPaymentRequest: 0,
+      totalApprovePaymentRequest: 0,
+      totalPendingPaymentRequest: 0,
+      totalPaymentRequest: 0,
+      todayApprovePaymentBalance: 0,
+      todayPendingPaymentBalance: 0,
+      totalTotalPaymentBalance: 0,
+      totalApprovePaymentBalance: 0,
+      totalPendingPaymentBalance: 0,
+      totalPaymentBalance: 0,
+    };
+    const startDate = new Date();
+    const startOfDay = new Date(startDate.setHours(0, 0, 0, 0));
+    const endOfDay = new Date(startDate.setHours(23, 59, 59, 999));
+
+    const query = {
+      transactionType: "Payments",
+    };
+    const todayQuery = {
+      createdAt: { $lte: endOfDay },
+      createdAt: { $gte: startOfDay },
+    };
+
+    balance.todayApprovePaymentRequest =
+      await TransactionHistory.countDocuments({
+        ...query,
+        ...todayQuery,
+        status: "Approve",
+      });
+    balance.todayPendingPaymentRequest =
+      await TransactionHistory.countDocuments({
+        ...query,
+        ...todayQuery,
+        status: "Pending",
+      });
+    balance.totalTotalPaymentRequest = await TransactionHistory.countDocuments({
+      ...query,
+      ...todayQuery,
+    });
+    balance.totalApprovePaymentRequest =
+      await TransactionHistory.countDocuments({
+        ...query,
+        status: "Approve",
+      });
+    balance.totalPendingPaymentRequest =
+      await TransactionHistory.countDocuments({
+        ...query,
+        status: "Pending",
+      });
+    balance.totalPaymentRequest = await TransactionHistory.countDocuments({
+      ...query,
+    });
+
+    let todayApprovePaymentBalance = await TransactionHistory.aggregate([
+      {
+        $match: {
+          ...query,
+          ...todayQuery,
+          status: "Approve",
+        },
+      },
+      {
+        $group: {
+          _id: null,
+          total: { $sum: "$amount" },
+        },
+      },
+    ]);
+    if (todayApprovePaymentBalance.length) {
+      balance.todayApprovePaymentBalance = todayApprovePaymentBalance[0].total;
+    }
+    let todayPendingPaymentBalance = await TransactionHistory.aggregate([
+      {
+        $match: {
+          ...query,
+          ...todayQuery,
+          status: "Pending",
+        },
+      },
+      {
+        $group: {
+          _id: null,
+          total: { $sum: "$amount" },
+        },
+      },
+    ]);
+    if (todayPendingPaymentBalance.length) {
+      balance.todayPendingPaymentBalance = todayPendingPaymentBalance[0].total;
+    }
+    let totalTotalPaymentBalance = await TransactionHistory.aggregate([
+      {
+        $match: {
+          ...query,
+          ...todayQuery,
+        },
+      },
+      {
+        $group: {
+          _id: null,
+          total: { $sum: "$amount" },
+        },
+      },
+    ]);
+    if (totalTotalPaymentBalance.length) {
+      balance.totalTotalPaymentBalance = totalTotalPaymentBalance[0].total;
+    }
+    let totalApprovePaymentBalance = await TransactionHistory.aggregate([
+      {
+        $match: {
+          ...query,
+          status: "Approve",
+        },
+      },
+      {
+        $group: {
+          _id: null,
+          total: { $sum: "$amount" },
+        },
+      },
+    ]);
+    if (totalApprovePaymentBalance.length) {
+      balance.totalApprovePaymentBalance = totalApprovePaymentBalance[0].total;
+    }
+    let totalPendingPaymentBalance = await TransactionHistory.aggregate([
+      {
+        $match: {
+          ...query,
+          status: "Pending",
+        },
+      },
+      {
+        $group: {
+          _id: null,
+          total: { $sum: "$amount" },
+        },
+      },
+    ]);
+    if (totalPendingPaymentBalance.length) {
+      balance.totalPendingPaymentBalance = totalPendingPaymentBalance[0].total;
+    }
+    let totalPaymentBalance = await TransactionHistory.aggregate([
+      {
+        $match: {
+          ...query,
+        },
+      },
+      {
+        $group: {
+          _id: null,
+          total: { $sum: "$amount" },
+        },
+      },
+    ]);
+    if (totalPaymentBalance.length) {
+      balance.totalPaymentBalance = totalPaymentBalance[0].total;
+    }
+    console.log("---->", {
+      startOfDay,
+      endOfDay,
+    });
+    console.log("balance.todayTotalPaymentRequest ==>", balance);
+
+    res.json({
+      data: balance,
+    });
+  } catch (error) {
+    console.log("error ==>", error);
+    res.json({
+      message: "Internal server error",
+    });
+  }
+});
 router.post("/", async (req, res) => {
   try {
     const query = {
@@ -140,6 +319,7 @@ router.put("/status", async (req, res) => {
       _id: mongoose.Types.ObjectId(id),
       transactionType: "Payments",
     };
+    const configInfo = await Configs.findOne({});
     let updateInfo = {};
 
     const transitionInfo = await TransactionHistory.findOne({
@@ -148,13 +328,13 @@ router.put("/status", async (req, res) => {
     const userInfo = await user_collection.findOne({
       _id: transitionInfo.userID,
     });
-    if ( userInfo.isActive) {
+    if (userInfo.isActive) {
       return res.json({
         message: "User account is already activate",
       });
     }
 
-      if (status === "Approve") {
+    if (status === "Approve") {
       let totalAmount = await TransactionHistory.aggregate([
         {
           $match: {
@@ -185,7 +365,7 @@ router.put("/status", async (req, res) => {
 
         for (let index = 0; index < 10; index++) {
           const currentIndex = index + 1;
-          const incomeAmount = 40
+          const incomeAmount = 40;
           // referUser
           if (currentIndex === 1) {
             const currentUserInfo = await user_collection.findOneAndUpdate(
@@ -202,17 +382,17 @@ router.put("/status", async (req, res) => {
               { $inc: { balance: incomeAmount, totalIncome: incomeAmount } }
             );
             if (!currentUserInfo) {
-              break
+              break;
             }
-            currentReferUser = currentUserInfo._doc
+            currentReferUser = currentUserInfo._doc;
             await TransactionHistory.create({
               userID: currentReferUser._id,
               transactionType: "Generation Income",
               balanceType: "Main Balance",
               amount: incomeAmount,
               netAmount: incomeAmount,
-              status: "Approve"
-            })
+              status: "Approve",
+            });
             await Generations.create({
               referByUser: currentReferUser._id,
               generationNumber: currentIndex,
@@ -220,7 +400,7 @@ router.put("/status", async (req, res) => {
               incomes: incomeAmount,
             });
           } else if (currentIndex === 2) {
-          const incomeAmount = 10
+            const incomeAmount = 10;
 
             const currentUserInfo = await user_collection.findOneAndUpdate(
               {
@@ -241,10 +421,10 @@ router.put("/status", async (req, res) => {
               }
             );
             if (!currentUserInfo) {
-              break
+              break;
             }
 
-            currentReferUser = currentUserInfo._doc
+            currentReferUser = currentUserInfo._doc;
 
             await TransactionHistory.create({
               userID: currentReferUser._id,
@@ -252,16 +432,16 @@ router.put("/status", async (req, res) => {
               balanceType: "Main Balance",
               amount: incomeAmount,
               netAmount: incomeAmount,
-              status: "Approve"
-            })
+              status: "Approve",
+            });
             await Generations.create({
               referByUser: currentReferUser._id,
               generationNumber: currentIndex,
               referredUser: activeHostUser._id,
-              incomes: incomeAmount, 
+              incomes: incomeAmount,
             });
           } else if (currentIndex === 3) {
-          const incomeAmount = 5
+            const incomeAmount = 5;
 
             const currentUserInfo = await user_collection.findOneAndUpdate(
               {
@@ -282,9 +462,9 @@ router.put("/status", async (req, res) => {
               }
             );
             if (!currentUserInfo) {
-              break
+              break;
             }
-            currentReferUser = currentUserInfo._doc
+            currentReferUser = currentUserInfo._doc;
 
             await TransactionHistory.create({
               userID: currentReferUser._id,
@@ -292,17 +472,16 @@ router.put("/status", async (req, res) => {
               balanceType: "Main Balance",
               amount: incomeAmount,
               netAmount: incomeAmount,
-              status: "Approve"
-            })
+              status: "Approve",
+            });
             await Generations.create({
               referByUser: currentReferUser._id,
               generationNumber: currentIndex,
               referredUser: activeHostUser._id,
-              incomes: incomeAmount, 
-
+              incomes: incomeAmount,
             });
           } else if (currentIndex === 4) {
-            const incomeAmount = 3
+            const incomeAmount = 3;
             const currentUserInfo = await user_collection.findOneAndUpdate(
               {
                 $or: [
@@ -322,9 +501,9 @@ router.put("/status", async (req, res) => {
               }
             );
             if (!currentUserInfo) {
-              break
+              break;
             }
-            currentReferUser = currentUserInfo._doc
+            currentReferUser = currentUserInfo._doc;
 
             await TransactionHistory.create({
               userID: currentReferUser._id,
@@ -332,17 +511,16 @@ router.put("/status", async (req, res) => {
               balanceType: "Main Balance",
               amount: incomeAmount,
               netAmount: incomeAmount,
-              status: "Approve"
-            })
+              status: "Approve",
+            });
             await Generations.create({
               referByUser: currentReferUser._id,
               generationNumber: currentIndex,
               referredUser: activeHostUser._id,
-              incomes: incomeAmount, 
-
+              incomes: incomeAmount,
             });
           } else if (currentIndex === 5) {
-            const incomeAmount = 2
+            const incomeAmount = 2;
             const currentUserInfo = await user_collection.findOneAndUpdate(
               {
                 $or: [
@@ -362,9 +540,9 @@ router.put("/status", async (req, res) => {
               }
             );
             if (!currentUserInfo) {
-              break
+              break;
             }
-            currentReferUser = currentUserInfo._doc
+            currentReferUser = currentUserInfo._doc;
 
             await TransactionHistory.create({
               userID: currentReferUser._id,
@@ -372,17 +550,16 @@ router.put("/status", async (req, res) => {
               balanceType: "Main Balance",
               amount: incomeAmount,
               netAmount: incomeAmount,
-              status: "Approve"
-            })
+              status: "Approve",
+            });
             await Generations.create({
               referByUser: currentReferUser._id,
               generationNumber: currentIndex,
               referredUser: activeHostUser._id,
-              incomes: incomeAmount, 
-
+              incomes: incomeAmount,
             });
           } else if (currentIndex === 6) {
-            const incomeAmount = 2
+            const incomeAmount = 2;
             const currentUserInfo = await user_collection.findOneAndUpdate(
               {
                 $or: [
@@ -402,9 +579,9 @@ router.put("/status", async (req, res) => {
               }
             );
             if (!currentUserInfo) {
-              break
+              break;
             }
-            currentReferUser = currentUserInfo._doc
+            currentReferUser = currentUserInfo._doc;
 
             await TransactionHistory.create({
               userID: currentReferUser._id,
@@ -412,17 +589,16 @@ router.put("/status", async (req, res) => {
               balanceType: "Main Balance",
               amount: incomeAmount,
               netAmount: incomeAmount,
-              status: "Approve"
-            })
+              status: "Approve",
+            });
             await Generations.create({
               referByUser: currentReferUser._id,
               generationNumber: currentIndex,
               referredUser: activeHostUser._id,
-              incomes: incomeAmount, 
-
+              incomes: incomeAmount,
             });
           } else if (currentIndex === 7) {
-            const incomeAmount = 1
+            const incomeAmount = 1;
             const currentUserInfo = await user_collection.findOneAndUpdate(
               {
                 $or: [
@@ -442,9 +618,9 @@ router.put("/status", async (req, res) => {
               }
             );
             if (!currentUserInfo) {
-              break
+              break;
             }
-            currentReferUser = currentUserInfo._doc
+            currentReferUser = currentUserInfo._doc;
 
             await TransactionHistory.create({
               userID: currentReferUser._id,
@@ -452,17 +628,16 @@ router.put("/status", async (req, res) => {
               balanceType: "Main Balance",
               amount: incomeAmount,
               netAmount: incomeAmount,
-              status: "Approve"
-            })
+              status: "Approve",
+            });
             await Generations.create({
               referByUser: currentReferUser._id,
               generationNumber: currentIndex,
               referredUser: activeHostUser._id,
-              incomes: incomeAmount, 
-
+              incomes: incomeAmount,
             });
           } else if (currentIndex === 8) {
-            const incomeAmount = 1
+            const incomeAmount = 1;
             const currentUserInfo = await user_collection.findOneAndUpdate(
               {
                 $or: [
@@ -482,9 +657,9 @@ router.put("/status", async (req, res) => {
               }
             );
             if (!currentUserInfo) {
-              break
+              break;
             }
-            currentReferUser = currentUserInfo._doc
+            currentReferUser = currentUserInfo._doc;
 
             await TransactionHistory.create({
               userID: currentReferUser._id,
@@ -492,16 +667,16 @@ router.put("/status", async (req, res) => {
               balanceType: "Main Balance",
               amount: incomeAmount,
               netAmount: incomeAmount,
-              status: "Approve"
-            })
+              status: "Approve",
+            });
             await Generations.create({
               referByUser: currentReferUser._id,
               generationNumber: currentIndex,
               referredUser: activeHostUser._id,
-              incomes: incomeAmount, 
+              incomes: incomeAmount,
             });
           } else if (currentIndex === 9) {
-            const incomeAmount = 1
+            const incomeAmount = 1;
             const currentUserInfo = await user_collection.findOneAndUpdate(
               {
                 $or: [
@@ -521,9 +696,9 @@ router.put("/status", async (req, res) => {
               }
             );
             if (!currentUserInfo) {
-              break
+              break;
             }
-            currentReferUser = currentUserInfo._doc
+            currentReferUser = currentUserInfo._doc;
 
             await TransactionHistory.create({
               userID: currentReferUser._id,
@@ -531,17 +706,16 @@ router.put("/status", async (req, res) => {
               balanceType: "Main Balance",
               amount: incomeAmount,
               netAmount: incomeAmount,
-              status: "Approve"
-            })
+              status: "Approve",
+            });
             await Generations.create({
               referByUser: currentReferUser._id,
               generationNumber: currentIndex,
               referredUser: activeHostUser._id,
-              incomes: incomeAmount, 
-
+              incomes: incomeAmount,
             });
           } else if (currentIndex === 10) {
-            const incomeAmount = 1
+            const incomeAmount = 1;
             const currentUserInfo = await user_collection.findOneAndUpdate(
               {
                 $or: [
@@ -561,9 +735,9 @@ router.put("/status", async (req, res) => {
               }
             );
             if (!currentUserInfo) {
-              break
+              break;
             }
-            currentReferUser = currentUserInfo._doc
+            currentReferUser = currentUserInfo._doc;
 
             await TransactionHistory.create({
               userID: currentReferUser._id,
@@ -571,15 +745,56 @@ router.put("/status", async (req, res) => {
               balanceType: "Main Balance",
               amount: incomeAmount,
               netAmount: incomeAmount,
-              status: "Approve"
-            })
+              status: "Approve",
+            });
             await Generations.create({
               referByUser: currentReferUser._id,
               generationNumber: currentIndex,
               referredUser: activeHostUser._id,
-              incomes: incomeAmount, 
-
+              incomes: incomeAmount,
             });
+          }
+        }
+
+        const salaryCountDay =
+          configInfo.salary.salaryPaymentCondition.salaryCountDay;
+        const salaryCountReferNumber =
+          configInfo.salary.salaryPaymentCondition.salaryCountReferNumber;
+        const salaryPaymentAmount =
+          configInfo.salary.salaryPaymentCondition.salaryPaymentAmount;
+        const startDate = new Date();
+        const startOfDay = new Date(startDate.setHours(0, 0, 0, 0));
+        let endOfDay = new Date(startDate.setHours(23, 59, 59, 999));
+        endOfDay.setDate(endOfDay.getDate() - salaryCountDay);
+        endOfDay = new Date(endOfDay);
+        console.log("endOfDay ==>", endOfDay);
+        const referCount = await Generations.countDocuments({
+          referByUser: activeHostUser.referUser,
+          generationNumber: 1,
+          $and: [
+            {
+              createdAt: { $gte: startOfDay },
+            },
+            {
+              createdAt: { $lte: endOfDay },
+            },
+          ],
+        });
+        if (referCount >= salaryCountReferNumber) {
+          // salaryPaymentAmount
+          const updateInfo = {
+            userID: activeHostUser.referUser,
+            amount: Number(salaryPaymentAmount),
+            id: generateRandom8DigitNumber(),
+            createdAt: new Date(),
+          };
+          const salary = await Salary.create(updateInfo);
+      
+          if (salary) {
+            await user_collection.findOneAndUpdate(
+              { _id: activeHostUser.referUser },
+              { $inc: { balance: Number(salaryPaymentAmount) } }
+            );
           }
         }
 

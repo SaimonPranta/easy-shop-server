@@ -43,6 +43,11 @@ const configsSchema = new mongoose.Schema({
       require: true,
       default: 0,
     },
+    maximumWithdrawAmount: {
+      type: Number,
+      require: true,
+      default: 0,
+    },
     withdrawAmounts: [
       new mongoose.Schema({
         balance: {
