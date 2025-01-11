@@ -125,7 +125,16 @@ router.get("/get-ranks", async (req, res) => {
 
 router.get("/all-user", async (req, res) => {
   try {
-    const { fromDate, toDate, userType, blueTick, page, search } = req.query;
+    const {
+      fromDate,
+      toDate,
+      userType,
+      blueTick,
+      dailyTask,
+      accountBlock,
+      page,
+      search,
+    } = req.query;
 
     let query = {};
     if (userType) {
@@ -135,15 +144,27 @@ router.get("/all-user", async (req, res) => {
         query["isActive"] = false;
       }
     }
-    console.log("blueTick -->", blueTick)
-    if (blueTick) { 
+    if (blueTick) {
       if (blueTick === "Blue Tick User") {
         query["blueTickInfo.blurTick"] = true;
       } else if (blueTick === "Unblue Tick User") {
         query["blueTickInfo.blurTick"] = false;
-
       }
-    }
+    } 
+    if (dailyTask) {
+      if (dailyTask === "Block Daily Task") {
+        query["dailyTask.block"] = true;
+      } else if (dailyTask === "Unblock Daily Task") {
+        query["dailyTask.block"] = { $ne: true };
+      }
+    } 
+    if (accountBlock) {
+      if (accountBlock === "Block User") {
+        query["block.isBlock"] = true;
+      } else if (accountBlock === "Unblock User") {
+        query["block.isBlock"] = { $ne: true };
+      }
+    } 
     if (fromDate && toDate) {
       const startDate = new Date(fromDate);
       const endDate = new Date(toDate);
@@ -203,13 +224,8 @@ router.get("/all-user", async (req, res) => {
       {
         $limit: limit,
       },
-    ]);
-    // console.log("userList", userList);
-    await userList.forEach((element) => {
-      if (element.taskBalance) {
-        console.log("e=====>>", element.firstName);
-      }
-    });
+    ]); 
+    
     res.json({ data: userList, total: userCount, page: Number(page) });
   } catch (error) {
     res.json({
@@ -223,7 +239,10 @@ router.post("/blue-tick", async (req, res) => {
     const { userID, status } = req.body;
     let updateInfo = {};
     if (status === "add") {
-      updateInfo = { "blueTickInfo.blurTick": true, "blueTickInfo.date": new Date() };
+      updateInfo = {
+        "blueTickInfo.blurTick": true,
+        "blueTickInfo.date": new Date(),
+      };
     } else if (status === "remove") {
       updateInfo = { "blueTickInfo.blurTick": false };
     }
@@ -233,11 +252,65 @@ router.post("/blue-tick", async (req, res) => {
     );
     if (!data) {
       return res.json({
-        message: "Failed to update blue tick"
-      })
+        message: "Failed to update blue tick",
+      });
     }
     res.json({
-      data: true
+      data: true,
+    });
+  } catch (error) {
+    res.json({
+      message: "Internal server error",
+    });
+  }
+});
+router.post("/daily-task", async (req, res) => {
+  try {
+    const { userID, status } = req.body;
+    let updateInfo = {};
+    if (status === "add") {
+      updateInfo = { "dailyTask.block": true, "dailyTask.date": new Date() };
+    } else if (status === "remove") {
+      updateInfo = { "dailyTask.block": false };
+    }
+    const data = await user_collection.findOneAndUpdate(
+      { _id: userID },
+      { ...updateInfo }
+    );
+    if (!data) {
+      return res.json({
+        message: "Failed to update blue tick",
+      });
+    }
+    res.json({
+      data: true,
+    });
+  } catch (error) {
+    res.json({
+      message: "Internal server error",
+    });
+  }
+});
+router.post("/account-block", async (req, res) => {
+  try {
+    const { userID, status } = req.body;
+    let updateInfo = {};
+    if (status === "add") {
+      updateInfo = { "block.isBlock": true, "block.date": new Date() };
+    } else if (status === "remove") {
+      updateInfo = { "block.isBlock": false };
+    }
+    const data = await user_collection.findOneAndUpdate(
+      { _id: userID },
+      { ...updateInfo }
+    );
+    if (!data) {
+      return res.json({
+        message: "Failed to update blue tick",
+      });
+    }
+    res.json({
+      data: true,
     });
   } catch (error) {
     res.json({

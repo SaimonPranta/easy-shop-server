@@ -41,6 +41,24 @@ const userSchema = new mongoose.Schema({
       type: Date, 
     }
   },
+  dailyTask: {
+    block: {
+      type: Boolean,
+      default: false,
+    }, 
+    date: {
+      type: Date, 
+    }
+  },
+  block: {
+    isBlock: {
+      type: Boolean,
+      default: false,
+    }, 
+    date: {
+      type: Date, 
+    }
+  },
   // salaryBalance: {
   //   type: Number,
   //   default: 0,
@@ -91,6 +109,7 @@ const userSchema = new mongoose.Schema({
   mobileRechareInfo: {
     type: Array,
   },
+
   // withdrawInfo: {
   //     type: Array
   // }

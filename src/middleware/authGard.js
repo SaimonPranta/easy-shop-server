@@ -3,12 +3,14 @@ const jwt = require("jsonwebtoken");
 
 
 const authGard = async (req, res, next) => {
+    console.log("Hello")
     try {
  
         const unparseToken = req.headers.authorization
         const token = unparseToken ? unparseToken.split(" ")[1] : "" ; 
  
         const decoded = jwt.verify(token, process.env.JWT_SECRET_KEY); 
+       
         if (decoded && decoded.phoneNumber) {
             req.phoneNumber = decoded.phoneNumber
             req.id = decoded.id
@@ -18,6 +20,7 @@ const authGard = async (req, res, next) => {
             res.status(401).json({ error: "Unauthorized  attempt, please try out latter." })
         }
     } catch (error) {
+        console.log("error --->>", error)
         res.status(401).json({ error: "Unauthorized  attempt, please try out latter." })
     }
 }
